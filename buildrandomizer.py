@@ -1,4 +1,4 @@
-from grp.grp import *
+from BuildLibs.grp import *
 
 filepath = 'C:/Program Files (x86)/Steam/steamapps/common/Ion Fury/fury.grp'
 

@@ -1,0 +1,14 @@
+name: GitHub Actions
+on: [push]
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: cd ${{ github.workspace }}
+      - run: pip3 install tweepy
+      - run: python -m compileall -q .
+      - run: python3 tests.py
+      - run: echo "🍏 This job's status is ${{ job.status }}."
