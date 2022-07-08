@@ -4,7 +4,7 @@ from mmap import mmap, ACCESS_READ
 gamesList = {
     'd834055f0c9a60f8f23163b67d086546': 'Ion Fury',
     '22b6938fe767e5cc57d1fe13080cd522': 'Duke Nukem 3D', # Atomic Edition
-    #'9d200b5fb4ace8797e7f8638c4f96af2': 'Shadow Warrior' # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
+    '9d200b5fb4ace8797e7f8638c4f96af2': 'Shadow Warrior' # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
 }
 
 gamesMapSettings = {}
@@ -120,5 +120,63 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
 )
 
 # https://forums.duke4.net/topic/11406-shadow-warrior-scriptset-for-mapster32/
-GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7)
+GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
+swappableItems = {
+    1802: 'medpak.kvx',
+    1803: 'medkit.kvx',
+    1797: 'uzi.kvx',
+    1817: 'grenade.kvx',
+    764: 'gunbarl.kvx',
+    765: 'camera.kvx',
+    1831: '40mmbox.kvx',
+    1842: 'mines.kvx',
+    1794: 'shotgun.kvx',
+    1818: 'rocket.kvx',
+    1823: 'shtgammo.kvx',
+    1800: 'rcktammo.kvx',
+    1813: 'tools.KVX',
+    1799: 'uziclip.kvx',
+    3031: 'nitevis.kvx',
+    1811: 'railgun.kvx',
+    1812: 'railpak.kvx',
+    3030: 'armor.kvx',
+    1793: 'star.kvx',
+    1819: 'heat.kvx',
+    1792: 'coin.kvx',
+    1824: 'heart.kvx',
+    1825: 'heart2.kvx',
+    1807: 'uziside.kvx',
+    1809: 'bomb.kvx',
+    1808: 'smoke.kvx',
+    1805: 'flash.kvx',
+    #1814: 'gorohead.kvx',
+    1804: 'shadow.kvx',
+    1829: 'caltrop.kvx',
+    1810: 'cookie.kvx',
+    1766: 'techkey.kvx',
+    1765: 'oldkey.kvx',
+    # 2520: 'flag1.kvx',
+    # 2521: 'flag2.kvx',
+    # 2522: 'flag3.kvx',
+    # 1767: 'keycard.kvx',
+    # 1846: 'oldlock.kvx',
+    # 1847: 'oldlock2.kvx',
+    # 1850: 'kcrdlck1.kvx',
+    # 1851: 'kcrdlck2.kvx',
+    # 1852: 'tchklck1.kvx',
+    # 1853: 'tchklck2.kvx',
+    # 1854: 'tchklck3.kvx',
+    # 1769: 'oldkey.kvx',
+    # 1773: 'oldkey.kvx',
+    # 1777: 'oldkey.kvx',
+    # 1770: 'techkey.kvx',
+    # 1774: 'techkey.kvx',
+    # 1778: 'techkey.kvx',
+    # 1771: 'keycard.kvx',
+    # 1775: 'keycard.kvx',
+    # 1779: 'keycard.kvx',
+    817: 'mine.kvx',
+    818: 'mine2.kvx',
+    819: 'mine3.kvx'
+})
 # Keys (picnums 1765-1779)
