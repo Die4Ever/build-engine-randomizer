@@ -9,6 +9,7 @@ class GrpFile:
     def __init__(self, filepath):
         self.filepath = filepath
         print('__init__', filepath)
+        self.files = {}
         self.filesize = os.path.getsize(filepath)
         with open(filepath, 'rb') as f:
             self.sig = f.read(12)
@@ -17,9 +18,11 @@ class GrpFile:
         if self.sig[:4] == b'PK\x03\x04':
             print('is a zip file')
             self.type = 'zip'
+            self.GetFilesInfoZip()
         elif self.sig[:12] == b'KenSilverman':
             print('is a GRP file')
             self.type = 'grp'
+            self.GetFilesInfoGrp()
         else:
             raise Exception(filepath + ' is an unknown type')
         
@@ -33,13 +36,12 @@ class GrpFile:
         trace( '__exit__', self.__dict__)
         pass
 
-    def getfileZip(self, name):
+    def GetFilesInfoZip(self):
         with ZipFile(self.filepath, 'r') as zip:
-            with zip.open(name) as file:
-                return file.read()
-        raise Exception('file not found in GRP/ZIP', requestedName)
+                for f in zip.infolist():
+                    self.files[f.filename] = { 'size': f.size }
 
-    def getfileGrp(self, requestedName):
+    def GetFilesInfoGrp(self):
         with open(self.filepath, 'rb') as f:
             f.seek(12)
             data = f.read(4)
@@ -51,13 +53,35 @@ class GrpFile:
                 name = data[:12].strip(b'\x00').decode('ascii')
                 (size,) = unpack('<I', data[12:16])
                 trace(name, size)
-                if name == requestedName:
-                    f.seek(offset, 0)
-                    return f.read(size)
+                self.files[name] = {
+                    'size': size,
+                    'offset': offset
+                }
                 offset += size
-        raise Exception('file not found in GRP', requestedName, numFiles)
+    
+    def getfileZip(self, name):
+        if name not in self.files:
+            raise Exception('file not found in GRP/ZIP', name, len(self.files))
+        
+        with ZipFile(self.filepath, 'r') as zip:
+            with zip.open(name) as file:
+                return file.read()
 
+    def getfileGrp(self, name):
+        if name not in self.files:
+            raise Exception('file not found in GRP', name, len(self.files))
 
+        with open(self.filepath, 'rb') as f:
+            f.seek(self.files[name]['offset'])
+            return f.read(self.files[name]['size'])
+
+    def GetAllFilesEndsWith(self, postfix):
+        matches = []
+        postfix = postfix.lower()
+        for f in self.files.keys():
+            if f.lower().endswith(postfix):
+                matches.append(f)
+        return matches
 
     def getfile(self, name):
         if self.type == 'zip':
@@ -68,9 +92,9 @@ class GrpFile:
     def getmap(self, name):
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
-def randomize(grppath, maps, seed):
+def randomize(grppath, seed):
     with GrpFile(grppath) as g:
-        for mapname in maps:
+        for mapname in g.GetAllFilesEndsWith('.map'):
             map = g.getmap(mapname)
             map.Randomize(seed)
             gamedir = os.path.dirname(grppath)
