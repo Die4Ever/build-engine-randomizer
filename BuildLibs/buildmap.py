@@ -18,8 +18,8 @@ class MapFile:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
             raise NotImplemented('MAP Format Version 6 is not yet implemented')
 
-        if self.version != self.gameSettings.mapVersion:
-            raise AssertionError('expected map version '+str(self.gameSettings.mapVersion)+', but got '+str(self.version))
+        if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
+            raise AssertionError('unexpected map version '+str(self.version))
 
         self.sprite_format = ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
             'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',

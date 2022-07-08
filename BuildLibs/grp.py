@@ -39,7 +39,7 @@ class GrpFile:
     def GetFilesInfoZip(self):
         with ZipFile(self.filepath, 'r') as zip:
                 for f in zip.infolist():
-                    self.files[f.filename] = { 'size': f.size }
+                    self.files[f.filename] = { 'size': f.file_size }
 
     def GetFilesInfoGrp(self):
         with open(self.filepath, 'rb') as f:

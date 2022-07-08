@@ -9,10 +9,11 @@ gamesList = {
 gamesMapSettings = {}
 
 class GameMapSettings:
-    def __init__(self, gameName, mapVersion, swappableItems, swappableEnemies):
+    def __init__(self, gameName, minMapVersion, maxMapVersion, swappableItems, swappableEnemies):
         global gamesMapSettings
         self.gameName = gameName
-        self.mapVersion = mapVersion
+        self.minMapVersion = minMapVersion
+        self.maxMapVersion = maxMapVersion
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
         gamesMapSettings[gameName] = self
@@ -33,7 +34,7 @@ def GetGameMapSettings(gameName) -> GameMapSettings:
 # define ([\w_]+) (\d+)
 # $2: '$1',
 
-GameMapSettings('Ion Fury', mapVersion=9,
+GameMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
     swappableItems = {
         209: 'I_BATON',
         210: 'I_LOVERBOY',
@@ -79,7 +80,7 @@ GameMapSettings('Ion Fury', mapVersion=9,
     swappableEnemies = {}
 )
 
-GameMapSettings('Duke Nukem 3D', mapVersion=7,
+GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
     swappableItems = {
         21: 'FIRSTGUNSPRITE',
         22: 'CHAINGUNSPRITE',
