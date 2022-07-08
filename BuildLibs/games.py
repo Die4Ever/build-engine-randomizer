@@ -120,6 +120,9 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
 )
 
 # https://forums.duke4.net/topic/11406-shadow-warrior-scriptset-for-mapster32/
+# using find and replace regex on duke3d.def from the above link
+# voxel "([^"]+)"\s+\{\s+tile\s+(\d+)\s+\}
+# $2: '$1',
 GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
 swappableItems = {
     1802: 'medpak.kvx',

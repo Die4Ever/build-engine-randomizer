@@ -43,16 +43,15 @@ class MapFile:
         rng = random.Random(crc32('map randomize', self.name, seed))
         toSwap = []
         counters = {}
+        
         for i in range(self.num_sprites):
             sprite = self.GetSprite(i)
+
             if sprite['picnum'] not in counters:
                 counters[sprite['picnum']] = 1
             else:
                 counters[sprite['picnum']] += 1
-        debug(counters, '\n')
-        
-        for i in range(self.num_sprites):
-            sprite = self.GetSprite(i)
+            
             cstat = CStat(sprite['cstat'])
             if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
                 continue
@@ -65,6 +64,8 @@ class MapFile:
             #    warning('unexpected cstat?', sprite['cstat'], sprite)
                 #continue
             toSwap.append(i)
+        
+        debug(counters, '\n')
         self.SwapAllSprites(rng, toSwap)
         trace('\n')
         
