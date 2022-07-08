@@ -9,6 +9,8 @@ if sys.version_info[0] == 3 and sys.version_info[1] < 6:
 from struct import unpack, pack
 import binascii
 from collections import namedtuple
+import random
+import pathlib
 
 def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
     format = endianness

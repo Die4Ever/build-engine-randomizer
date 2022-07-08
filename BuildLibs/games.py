@@ -2,19 +2,38 @@ from hashlib import md5
 from mmap import mmap, ACCESS_READ
 
 gamesList = {
-    'd834055f0c9a60f8f23163b67d086546': 'Ion Fury'
+    'd834055f0c9a60f8f23163b67d086546': 'Ion Fury',
+    '22b6938fe767e5cc57d1fe13080cd522': 'Duke Nukem 3D' # Atomic Edition
 }
 
 gamesMapSettings = {}
 
 class GameMapSettings:
     def __init__(self, gameName, mapVersion, swappableItems, swappableEnemies):
+        global gamesMapSettings
         self.gameName = gameName
         self.mapVersion = mapVersion
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
+        gamesMapSettings[gameName] = self
 
-gamesMapSettings['Ion Fury'] = GameMapSettings('Ion Fury', mapVersion=9,
+def GetGame(grppath):
+    with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
+        md5sum = md5(file).hexdigest()
+        print(grppath, md5sum, 'detected game: ', gamesList.get(md5sum))
+        # TODO support for unknown games with default settings
+        return gamesList[md5sum]
+    return None
+
+def GetGameMapSettings(gameName) -> GameMapSettings:
+    global gamesMapSettings
+    return gamesMapSettings[gameName]
+
+# build these GameMapSettings using this regex find/replace
+# define ([\w_]+) (\d+)
+# $2: '$1',
+
+GameMapSettings('Ion Fury', mapVersion=9,
     swappableItems = {
         209: 'I_BATON',
         210: 'I_LOVERBOY',
@@ -60,13 +79,40 @@ gamesMapSettings['Ion Fury'] = GameMapSettings('Ion Fury', mapVersion=9,
     swappableEnemies = {}
 )
 
-def GetGame(grppath):
-    with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
-        md5sum = md5(file).hexdigest()
-        print(grppath, md5sum, 'detected game: ', gamesList.get(md5sum))
-        # TODO support for unknown games with default settings
-        return gamesList[md5sum]
-    return None
-
-def GetGameMapSettings(gameName) -> GameMapSettings:
-    return gamesMapSettings[gameName]
+GameMapSettings('Duke Nukem 3D', mapVersion=7,
+    swappableItems = {
+        21: 'FIRSTGUNSPRITE',
+        22: 'CHAINGUNSPRITE',
+        23: 'RPGSPRITE',
+        24: 'FREEZESPRITE',
+        25: 'SHRINKERSPRITE',
+        26: 'HEAVYHBOMB',
+        27: 'TRIPBOMBSPRITE',
+        28: 'SHOTGUNSPRITE',
+        29: 'DEVISTATORSPRITE',
+        30: 'HEALTHBOX',
+        31: 'AMMOBOX',
+        40: 'AMMO',
+        41: 'BATTERYAMMO',
+        42: 'DEVISTATORAMMO',
+        44: 'RPGAMMO',
+        45: 'GROWAMMO',
+        46: 'CRYSTALAMMO',
+        47: 'HBOMBAMMO',
+        48: 'AMMOLOTS',
+        49: 'SHOTGUNAMMO',
+        51: 'COLA',
+        52: 'SIXPAK',
+        53: 'FIRSTAID',
+        54: 'SHIELD',
+        55: 'STEROIDS',
+        56: 'AIRTANK',
+        57: 'JETPACK',
+        # 60: 'ACCESSCARD',
+        61: 'BOOTS',
+        100: 'ATOMICHEALTH',
+        #142: 'NUKEBUTTON',
+        1348: 'HOLODUKE'
+    },
+    swappableEnemies = {}
+)

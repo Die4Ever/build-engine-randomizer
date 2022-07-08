@@ -1,5 +1,4 @@
 from struct import *
-import random
 from BuildLibs import *
 from BuildLibs import games
 
@@ -19,7 +18,8 @@ class MapFile:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
             raise NotImplemented('MAP Format Version 6 is not yet implemented')
 
-        assert self.version == self.gameSettings.mapVersion, 'expected map version'
+        if self.version != self.gameSettings.mapVersion:
+            raise AssertionError('expected map version '+str(self.gameSettings.mapVersion)+', but got '+str(self.version))
 
         self.sprite_format = ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
             'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
@@ -42,16 +42,26 @@ class MapFile:
     def Randomize(self, seed):
         rng = random.Random(crc32('map randomize', self.name, seed))
         toSwap = []
+        counters = {}
+        for i in range(self.num_sprites):
+            sprite = self.GetSprite(i)
+            if sprite['picnum'] not in counters:
+                counters[sprite['picnum']] = 1
+            else:
+                counters[sprite['picnum']] += 1
+        debug(counters, '\n')
+        
         for i in range(self.num_sprites):
             sprite = self.GetSprite(i)
             cstat = DecodeCstat(sprite['cstat'])
-            if sprite['picnum'] not in self.gameSettings.swappableItems:
+            if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
                 continue
-            if (not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+            if (self.game_name != 'Duke Nukem 3D' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+                trace('skipping sprite with cstat:',cstat, sprite)
                 continue
             if sprite['cstat'] != 1:
                 warning('unexpected cstat?', sprite['cstat'], sprite)
-                continue
+                #continue
             toSwap.append(i)
         self.SwapAllSprites(rng, toSwap)
         

@@ -33,11 +33,48 @@ class GrpFile:
         trace( '__exit__', self.__dict__)
         pass
 
-    def getfile(self, name):
+    def getfileZip(self, name):
         with ZipFile(self.filepath, 'r') as zip:
             with zip.open(name) as file:
                 return file.read()
+        raise Exception('file not found in GRP/ZIP', requestedName)
+
+    def getfileGrp(self, requestedName):
+        with open(self.filepath, 'rb') as f:
+            f.seek(12)
+            data = f.read(4)
+            (numFiles,) = unpack('<I', data)
+            trace('numFiles:', numFiles)
+            offset = 16 + 16*numFiles
+            for i in range(numFiles):
+                data = f.read(16)
+                name = data[:12].strip(b'\x00').decode('ascii')
+                (size,) = unpack('<I', data[12:16])
+                trace(name, size)
+                if name == requestedName:
+                    f.seek(offset, 0)
+                    return f.read(size)
+                offset += size
+        raise Exception('file not found in GRP', requestedName, numFiles)
+
+
+
+    def getfile(self, name):
+        if self.type == 'zip':
+            return self.getfileZip(name)
+        else:
+            return self.getfileGrp(name)
 
     def getmap(self, name):
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
+def randomize(grppath, maps, seed):
+    with GrpFile(grppath) as g:
+        for mapname in maps:
+            map = g.getmap(mapname)
+            map.Randomize(seed)
+            gamedir = os.path.dirname(grppath)
+            mapout = os.path.join(gamedir, mapname)
+            pathlib.Path(os.path.dirname(mapout)).mkdir(parents=True, exist_ok=True)
+            with open(mapout, 'wb') as f:
+                f.write(map.data)
