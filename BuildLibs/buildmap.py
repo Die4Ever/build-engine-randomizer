@@ -2,6 +2,15 @@ from struct import *
 from BuildLibs import *
 from BuildLibs import games
 
+class CStat:
+    def __init__(self, cstat):
+        self.blocking = bool(cstat & 1)
+        self.facing = cstat & 0x30
+        self.onesided = cstat & 0x40
+        self.blockingHitscan = bool(cstat & 0x800)
+        self.invisible = bool(cstat & 0x8000)
+
+
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
     def __init__(self, gameName, name, data: bytearray):
@@ -40,8 +49,8 @@ class MapFile:
         self.data = data
         
     def Randomize(self, seed):
-        rng = random.Random(crc32('map randomize', self.name, seed))
-        toSwap = []
+        items = []
+        enemies = []
         counters = {}
         
         for i in range(self.num_sprites):
@@ -53,21 +62,32 @@ class MapFile:
                 counters[sprite['picnum']] += 1
             
             cstat = CStat(sprite['cstat'])
-            if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
-                continue
-            elif (not self.gameSettings.swappableItems) and sprite['picnum'] < 10:
-                continue
-            if (self.game_name == 'Ion Fury' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
-                trace('skipping sprite with cstat:',cstat, sprite)
-                continue
-            #if sprite['cstat'] != 1:
-            #    warning('unexpected cstat?', sprite['cstat'], sprite)
-                #continue
-            toSwap.append(i)
+            if self.IsItem(sprite, cstat):
+                items.append(i)
+            if self.IsEnemy(sprite, cstat):
+                enemies.append(i)
         
         debug(counters, '\n')
-        self.SwapAllSprites(rng, toSwap)
+        rng = random.Random(crc32('map randomize items', self.name, seed))
+        self.SwapAllSprites(rng, items)
         trace('\n')
+
+        rng = random.Random(crc32('map randomize enemies', self.name, seed))
+        self.SwapAllSprites(rng, enemies)
+        trace('\n')
+    
+    def IsItem(self, sprite: Dict, cstat: CStat) -> bool:
+        if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
+                return False
+        elif (not self.gameSettings.swappableItems) and sprite['picnum'] < 10:
+            return False
+        #elif (self.game_name == 'Ion Fury' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+        elif cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+            return False
+        return True
+    
+    def IsEnemy(self, sprite: Dict, cstat: CStat) -> bool:
+        return False
         
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
@@ -110,13 +130,4 @@ class MapFile:
 
         self.WriteSprite(a, idxa)
         self.WriteSprite(b, idxb)
-
-
-class CStat:
-    def __init__(self, cstat):
-        self.blocking = bool(cstat & 1)
-        self.facing = cstat & 0x30
-        self.onesided = cstat & 0x40
-        self.blockingHitscan = bool(cstat & 0x800)
-        self.invisible = bool(cstat & 0x8000)
 
