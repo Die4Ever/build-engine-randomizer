@@ -1,6 +1,6 @@
 import os
 from zipfile import ZipFile
-from BuildLibs.map import *
+from BuildLibs.buildmap import *
 
 class GrpFile:
     # https://moddingwiki.shikadi.net/wiki/GRP_Format
