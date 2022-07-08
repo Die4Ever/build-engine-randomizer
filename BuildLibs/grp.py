@@ -35,5 +35,5 @@ class GrpFile:
                 return file.read()
 
     def getmap(self, name):
-        return MapFile(name, self.getfile(name))
+        return MapFile(name, bytearray(self.getfile(name)))
 

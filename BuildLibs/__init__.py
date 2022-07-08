@@ -1,15 +1,16 @@
 import sys
+from typing import Dict
 
 if sys.version_info[0] < 3:
     raise ImportError('Python < 3 is unsupported.')
 if sys.version_info[0] == 3 and sys.version_info[1] < 6:
     raise ImportError('Python < 3.6 is unsupported.')
 
-from struct import unpack
+from struct import unpack, pack
 import binascii
 from collections import namedtuple
 
-def fancy_unpack(endianness: str, mappings: tuple, data: bytes):
+def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
     format = endianness
     layout = []
     for k in range(len(mappings)>>1):
@@ -29,10 +30,19 @@ def fancy_unpack(endianness: str, mappings: tuple, data: bytes):
         else:
             dict[mappings[k*2]] = a
         
-    return dict#namedtuple("fancy_unpack", dict.keys())(*dict.values())
+    return dict
 
-def fancy_pack(endianness: str, mappings: tuple, data: bytes):
-    pass
+def fancy_pack(endianness: str, mappings: tuple, dict: Dict) -> bytearray:
+    format = endianness
+    values = []
+    for k in range(len(mappings)>>1):
+        format += mappings[k*2+1]
+        v = dict[mappings[k*2]]
+        if type(v) == list:
+            values += v
+        else:
+            values.append(v)
+    return pack(format, *values)
 
 def crc32(*args):
     s = ' '.join(map(str, args))

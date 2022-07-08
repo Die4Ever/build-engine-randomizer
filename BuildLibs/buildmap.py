@@ -4,7 +4,7 @@ from BuildLibs import *
 
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
-    def __init__(self, name, data: bytes):
+    def __init__(self, name, data: bytearray):
         print(name, len(data))
         self.name = name
         (self.version, self.startx, self.starty, self.startz, self.startangle, self.startsect, self.numsects) = unpack('<iiiihhH', data[:22])
@@ -29,8 +29,6 @@ class MapFile:
 
         print(self.__dict__)
         self.data = data
-        #for i in range(self.num_sprites):
-        #    print(self.GetSprite(i))
         
     def Randomize(self, seed):
         rng = random.Random(crc32('map randomize', self.name, seed))
@@ -39,8 +37,6 @@ class MapFile:
             if a == b:
                 continue
             self.SwapSprites(a, b)
-            break # TODO: remove this
-        pass
     
     def GetSprite(self, num):
         assert num >= 0
@@ -56,14 +52,24 @@ class MapFile:
         return sprite
 
     def WriteSprite(self, sprite, num):
-        pass
+        assert num >= 0
+        assert num < self.num_sprites
+        start = self.sprites_start + num*self.sprite_size
+        newdata = fancy_pack('<',
+            ('pos', 'iii', 'cstat', 'h', 'gfxstuff', 'hbBBB', 'texcoords', 'BBbb',
+            'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
+            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h'),
+            sprite
+        )
+        i = start
+        for b in newdata:
+            self.data[i] = b
+            i+=1
     
     def SwapSprites(self, idxa, idxb):
         print('SwapSprites', idxa, idxb)
         a = self.GetSprite(idxa)
         b = self.GetSprite(idxb)
-        print(a)
-        print(b)
 
         swapdictkey(a, b, 'pos')
         swapdictkey(a, b, 'sectnum')
@@ -71,9 +77,3 @@ class MapFile:
 
         self.WriteSprite(a, idxa)
         self.WriteSprite(b, idxb)
-
-        #a = self.GetSprite(idxa)
-        #b = self.GetSprite(idxb)
-        print(a)
-        print(b)
-
