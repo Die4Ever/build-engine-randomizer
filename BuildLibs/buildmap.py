@@ -1,12 +1,15 @@
 from struct import *
 import random
 from BuildLibs import *
+from BuildLibs import games
 
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
-    def __init__(self, name, data: bytearray):
-        print(name, len(data))
+    def __init__(self, gameName, name, data: bytearray):
+        print('\n', name, len(data))
         self.name = name
+        self.game_name = gameName
+        self.gameSettings = games.GetGameMapSettings(gameName)
         (self.version, self.startx, self.starty, self.startz, self.startangle, self.startsect, self.numsects) = unpack('<iiiihhH', data[:22])
         self.sector_size = 40
         self.wall_size = 32
@@ -15,6 +18,12 @@ class MapFile:
         if self.version == 6:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
             raise NotImplemented('MAP Format Version 6 is not yet implemented')
+
+        assert self.version == self.gameSettings.mapVersion, 'expected map version'
+
+        self.sprite_format = ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
+            'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
+            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h')
 
         self.sectors_start = 22
         self.sectors_length = self.numsects * self.sector_size
@@ -27,13 +36,30 @@ class MapFile:
         (self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
         self.sprites_length = self.num_sprites * self.sprite_size
 
-        print(self.__dict__)
+        debug(self.__dict__, '\n')
         self.data = data
         
     def Randomize(self, seed):
         rng = random.Random(crc32('map randomize', self.name, seed))
-        for a in range(self.num_sprites):
-            b = rng.randrange(0, self.num_sprites)
+        toSwap = []
+        for i in range(self.num_sprites):
+            sprite = self.GetSprite(i)
+            cstat = DecodeCstat(sprite['cstat'])
+            if sprite['picnum'] not in self.gameSettings.swappableItems:
+                continue
+            if (not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+                continue
+            if sprite['cstat'] != 1:
+                warning('unexpected cstat?', sprite['cstat'], sprite)
+                continue
+            toSwap.append(i)
+        self.SwapAllSprites(rng, toSwap)
+        
+    def SwapAllSprites(self, rng, toSwap):
+        for a in range(len(toSwap)):
+            a = toSwap[a]
+            b = rng.randrange(0, len(toSwap))
+            b = toSwap[b]
             if a == b:
                 continue
             self.SwapSprites(a, b)
@@ -43,10 +69,7 @@ class MapFile:
         assert num < self.num_sprites
         start = self.sprites_start + num*self.sprite_size
         sprite = fancy_unpack(
-            '<',
-            ('pos', 'iii', 'cstat', 'h', 'gfxstuff', 'hbBBB', 'texcoords', 'BBbb',
-            'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
-            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h'),
+            '<', self.sprite_format,
             self.data[start:start+self.sprite_size]
         )
         return sprite
@@ -55,21 +78,17 @@ class MapFile:
         assert num >= 0
         assert num < self.num_sprites
         start = self.sprites_start + num*self.sprite_size
-        newdata = fancy_pack('<',
-            ('pos', 'iii', 'cstat', 'h', 'gfxstuff', 'hbBBB', 'texcoords', 'BBbb',
-            'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
-            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h'),
-            sprite
-        )
+        newdata = fancy_pack('<', self.sprite_format, sprite)
         i = start
         for b in newdata:
             self.data[i] = b
             i+=1
     
     def SwapSprites(self, idxa, idxb):
-        print('SwapSprites', idxa, idxb)
+        debug('SwapSprites', idxa, idxb)
         a = self.GetSprite(idxa)
         b = self.GetSprite(idxb)
+        trace(a, b, '\n')
 
         swapdictkey(a, b, 'pos')
         swapdictkey(a, b, 'sectnum')
@@ -77,3 +96,14 @@ class MapFile:
 
         self.WriteSprite(a, idxa)
         self.WriteSprite(b, idxb)
+
+
+def DecodeCstat(cstat):
+    dict = {
+        'blocking': bool(cstat & 1),
+        'facing': cstat & 0x30,
+        'onesided': cstat & 0x40,
+        'blockingHitscan': bool(cstat & 0x800),
+        'invisible': bool(cstat & 0x8000)
+    }
+    return namedtuple("Cstat", dict.keys())(*dict.values())

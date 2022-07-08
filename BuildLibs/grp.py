@@ -1,5 +1,6 @@
 import os
 from zipfile import ZipFile
+from BuildLibs import games
 from BuildLibs.buildmap import *
 
 class GrpFile:
@@ -21,12 +22,15 @@ class GrpFile:
             self.type = 'grp'
         else:
             raise Exception(filepath + ' is an unknown type')
+        
+        self.game = games.GetGame(filepath)
 
     def __enter__(self, *args):
-        print('__enter__', *args)
+        trace( '__enter__', *args, self.__dict__)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        trace( '__exit__', self.__dict__)
         pass
 
     def getfile(self, name):
@@ -35,5 +39,5 @@ class GrpFile:
                 return file.read()
 
     def getmap(self, name):
-        return MapFile(name, bytearray(self.getfile(name)))
+        return MapFile(self.game, name, bytearray(self.getfile(name)))
 

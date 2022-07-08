@@ -50,3 +50,25 @@ def crc32(*args):
 
 def swapdictkey(a, b, key):
     a[key], b[key] = b[key], a[key]
+
+verbose = 1
+debug = print
+trace = print
+warning = print
+
+def setVerbose(v: int):
+    global debug, trace
+    verbose = v
+    if verbose:
+        debug = print
+        trace = print
+    else:
+        debug = lambda *a: None # do-nothing function
+        trace = debug
+    
+    if verbose >= 2:
+        trace = print
+    else:
+        trace = lambda *a: None # do-nothing function
+
+setVerbose(verbose)
