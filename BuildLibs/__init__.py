@@ -65,12 +65,12 @@ def setVerbose(v: int):
         debug = print
         trace = print
     else:
-        debug = lambda *a: None # do-nothing function
+        debug = lambda *a, **b: None # do-nothing function
         trace = debug
     
     if verbose >= 2:
         trace = print
     else:
-        trace = lambda *a: None # do-nothing function
+        trace = lambda *a, **b: None # do-nothing function
 
 setVerbose(verbose)

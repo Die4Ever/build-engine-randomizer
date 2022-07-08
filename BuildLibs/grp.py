@@ -27,6 +27,9 @@ class GrpFile:
             raise Exception(filepath + ' is an unknown type')
         
         self.game = games.GetGame(filepath)
+        if not self.game:
+            print(repr(self.GetAllFilesEndsWith('.con')))
+            raise Exception('unidentified game')
 
     def __enter__(self, *args):
         trace( '__enter__', *args, self.__dict__)

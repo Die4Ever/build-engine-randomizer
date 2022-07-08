@@ -3,13 +3,14 @@ from mmap import mmap, ACCESS_READ
 
 gamesList = {
     'd834055f0c9a60f8f23163b67d086546': 'Ion Fury',
-    '22b6938fe767e5cc57d1fe13080cd522': 'Duke Nukem 3D' # Atomic Edition
+    '22b6938fe767e5cc57d1fe13080cd522': 'Duke Nukem 3D', # Atomic Edition
+    #'9d200b5fb4ace8797e7f8638c4f96af2': 'Shadow Warrior' # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
 }
 
 gamesMapSettings = {}
 
 class GameMapSettings:
-    def __init__(self, gameName, minMapVersion, maxMapVersion, swappableItems, swappableEnemies):
+    def __init__(self, gameName, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}):
         global gamesMapSettings
         self.gameName = gameName
         self.minMapVersion = minMapVersion
@@ -23,8 +24,8 @@ def GetGame(grppath):
         md5sum = md5(file).hexdigest()
         print(grppath, md5sum, 'detected game: ', gamesList.get(md5sum))
         # TODO support for unknown games with default settings
-        return gamesList[md5sum]
-    return None
+        return gamesList.get(md5sum)
+    raise Exception('error in GetGame '+grppath)
 
 def GetGameMapSettings(gameName) -> GameMapSettings:
     global gamesMapSettings
@@ -117,3 +118,7 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
     },
     swappableEnemies = {}
 )
+
+# https://forums.duke4.net/topic/11406-shadow-warrior-scriptset-for-mapster32/
+GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7)
+# Keys (picnums 1765-1779)

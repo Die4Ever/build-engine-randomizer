@@ -53,17 +53,20 @@ class MapFile:
         
         for i in range(self.num_sprites):
             sprite = self.GetSprite(i)
-            cstat = DecodeCstat(sprite['cstat'])
+            cstat = CStat(sprite['cstat'])
             if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
                 continue
-            if (self.game_name != 'Duke Nukem 3D' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
+            elif (not self.gameSettings.swappableItems) and sprite['picnum'] < 10:
+                continue
+            if (self.game_name == 'Ion Fury' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
                 trace('skipping sprite with cstat:',cstat, sprite)
                 continue
-            if sprite['cstat'] != 1:
-                warning('unexpected cstat?', sprite['cstat'], sprite)
+            #if sprite['cstat'] != 1:
+            #    warning('unexpected cstat?', sprite['cstat'], sprite)
                 #continue
             toSwap.append(i)
         self.SwapAllSprites(rng, toSwap)
+        trace('\n')
         
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
@@ -95,7 +98,7 @@ class MapFile:
             i+=1
     
     def SwapSprites(self, idxa, idxb):
-        debug('SwapSprites', idxa, idxb)
+        trace('SwapSprites', idxa, idxb, end=', ')
         a = self.GetSprite(idxa)
         b = self.GetSprite(idxb)
         trace(a, b, '\n')
@@ -108,12 +111,11 @@ class MapFile:
         self.WriteSprite(b, idxb)
 
 
-def DecodeCstat(cstat):
-    dict = {
-        'blocking': bool(cstat & 1),
-        'facing': cstat & 0x30,
-        'onesided': cstat & 0x40,
-        'blockingHitscan': bool(cstat & 0x800),
-        'invisible': bool(cstat & 0x8000)
-    }
-    return namedtuple("Cstat", dict.keys())(*dict.values())
+class CStat:
+    def __init__(self, cstat):
+        self.blocking = bool(cstat & 1)
+        self.facing = cstat & 0x30
+        self.onesided = cstat & 0x40
+        self.blockingHitscan = bool(cstat & 0x800)
+        self.invisible = bool(cstat & 0x8000)
+
