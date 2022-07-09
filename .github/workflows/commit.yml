@@ -9,7 +9,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
+
       - run: pip3 install pyinstaller tk
+
       - run: python -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
@@ -31,7 +33,10 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
+
+      - run: apt-get install python3-tk
       - run: pip3 install pyinstaller tk
+
       - run: python -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
