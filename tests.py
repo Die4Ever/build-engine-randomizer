@@ -47,10 +47,10 @@ original_order = [
 
 class BaseTestCase(unittest.TestCase):
     def subTest(self, msg=case._subtest_msg_sentinel, **params):
-        print('\nstarting subTest', msg)
+        print('\n----------------------------------\nstarting subTest', msg, '\n----------------------------------')
         return super().subTest(msg, **params)
 
-    def test_extract_zipgrp(self):
+    def test_1_extract_zipgrp(self):
         grp: GrpFile = None
         with self.subTest('ExtractAll'):
             grp = GrpFile(grppath)
@@ -65,22 +65,51 @@ class BaseTestCase(unittest.TestCase):
             grp = GrpFile(testing_grp)
             self.assertEqual(grp.game.type, 'Duke Nukem 3D')
 
+    def test_rando(self):
+        with self.subTest('Open GRP File'):
+            grp: GrpFile = GrpFile(testing_grp)
+
         oldmd5s = {}
         with self.subTest('MD5 Original Maps'):
             maps = grp.GetAllFilesEndsWith('.map')
             oldmd5s = self.Md5Maps(temp, maps)
 
-        with self.subTest('Randomize Maps'):
+        with self.subTest('Randomize GRP Maps'):
             grp.Randomize(int('0451'))
 
         newmd5s = {}
-        with self.subTest('MD5 Randomized Maps'):
+        with self.subTest('MD5 GRP Randomized Maps'):
             maps = grp.GetAllFilesEndsWith('.map')
             newmd5s = self.Md5Maps(temp, maps)
 
-        with self.subTest('Compare MD5s After Randomizing'):
+        with self.subTest('Compare MD5s After Randomizing, ZIP vs GRP'):
             for k in oldmd5s.keys():
                 self.assertNotEqual(oldmd5s[k], newmd5s[k], k)
+
+        with self.subTest('Randomize ZIP Maps Seed 2052'):
+            grp = GrpFile(grppath)
+            grp.Randomize(int('2052'), temp)
+
+        md5s2052 = {}
+        with self.subTest('MD5 ZIP Randomized Maps Seed 2052'):
+            maps = grp.GetAllFilesEndsWith('.map')
+            md5s2052 = self.Md5Maps(temp, maps)
+
+        with self.subTest('Compare MD5s After Randomizing Seed 2052'):
+            for k in newmd5s.keys():
+                self.assertNotEqual(newmd5s[k], md5s2052[k], k)
+
+        with self.subTest('Randomize ZIP Maps Seed 0451'):
+            grp = GrpFile(grppath)
+            grp.Randomize(int('0451'), temp)
+
+        zipmd5s = {}
+        with self.subTest('MD5 ZIP Randomized Maps Seed 0451'):
+            maps = grp.GetAllFilesEndsWith('.map')
+            zipmd5s = self.Md5Maps(temp, maps)
+
+        with self.subTest('Compare MD5s Of GRP vs ZIP Randomized Maps Same Seed'):
+            self.assertDictEqual(newmd5s, zipmd5s)
 
 
     def Md5Maps(self, basepath: str, filenames: list) -> dict:

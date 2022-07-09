@@ -95,12 +95,12 @@ class GrpFile:
     def getmap(self, name):
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
-    def Randomize(self, seed):
+    def Randomize(self, seed, basepath=''):
         for mapname in self.GetAllFilesEndsWith('.map'):
             map = self.getmap(mapname)
             map.Randomize(seed)
             gamedir = os.path.dirname(self.filepath)
-            mapout = os.path.join(gamedir, mapname)
+            mapout = os.path.join(gamedir, basepath, mapname)
             pathlib.Path(os.path.dirname(mapout)).mkdir(parents=True, exist_ok=True)
             with open(mapout, 'wb') as f:
                 f.write(map.data)
