@@ -97,12 +97,15 @@ class GameMapSettings:
     def __repr__(self):
         return repr(self.__dict__)
 
-def GetGame(grppath):
+    def copy(self) -> 'GameMapSettings':
+        return GameMapSettings(self.gameName, self.minMapVersion, self.maxMapVersion, self.swappableItems.copy(), self.swappableEnemies.copy())
+
+def GetGame(grppath) -> Game:
     global gamesList
     size = os.path.getsize(grppath)
     with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
         crc:int = binascii.crc32(file)
-        g = gamesList.get(crc)
+        g:Game = gamesList.get(crc)
         if g:
             print('matched game:', repr(g))
             return g
@@ -115,7 +118,8 @@ def GetGame(grppath):
 
 def GetGameMapSettings(game: Game) -> GameMapSettings:
     global gamesMapSettings
-    return gamesMapSettings[game.type]
+    g:GameMapSettings = gamesMapSettings[game.type]
+    return g.copy()
 
 # build these GameMapSettings using this regex find/replace
 # define ([\w_]+) (\d+)

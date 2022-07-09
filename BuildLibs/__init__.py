@@ -53,6 +53,9 @@ def crc32(*args):
 def swapdictkey(a, b, key):
     a[key], b[key] = b[key], a[key]
 
+def swapobjkey(a, b, key):
+    a.__dict__[key], b.__dict__[key] = b.__dict__[key], a.__dict__[key]
+
 verbose = 1
 debug = print
 trace = print

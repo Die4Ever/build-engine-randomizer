@@ -25,7 +25,7 @@ class RandoSettings:
         self.win.destroy()
         self.win=None
 
-    def isWindowOpen(self):
+    def isWindowOpen(self) -> bool:
         return self.win!=None
 
     def resize(self,event):

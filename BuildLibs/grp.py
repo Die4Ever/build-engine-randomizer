@@ -31,20 +31,12 @@ class GrpFile:
             print(repr(self.GetAllFilesEndsWith('.con')))
             raise Exception('unidentified game')
 
-    def __enter__(self, *args):
-        trace( '__enter__', *args, self.__dict__)
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        trace( '__exit__', self.__dict__)
-        pass
-
-    def GetFilesInfoZip(self):
+    def GetFilesInfoZip(self) -> None:
         with ZipFile(self.filepath, 'r') as zip:
-                for f in zip.infolist():
-                    self.files[f.filename] = { 'size': f.file_size }
+            for f in zip.infolist():
+                self.files[f.filename] = { 'size': f.file_size }
 
-    def GetFilesInfoGrp(self):
+    def GetFilesInfoGrp(self) -> None:
         with open(self.filepath, 'rb') as f:
             f.seek(12)
             data = f.read(4)
@@ -62,7 +54,7 @@ class GrpFile:
                 }
                 offset += size
 
-    def getfileZip(self, name):
+    def getfileZip(self, name) -> bytes:
         if name not in self.files:
             raise Exception('file not found in GRP/ZIP', name, len(self.files))
 
@@ -70,7 +62,7 @@ class GrpFile:
             with zip.open(name) as file:
                 return file.read()
 
-    def getfileGrp(self, name):
+    def getfileGrp(self, name) -> bytes:
         if name not in self.files:
             raise Exception('file not found in GRP', name, len(self.files))
 
@@ -86,16 +78,16 @@ class GrpFile:
                 matches.append(f)
         return matches
 
-    def getfile(self, name):
+    def getfile(self, name) -> bytes:
         if self.type == 'zip':
             return self.getfileZip(name)
         else:
             return self.getfileGrp(name)
 
-    def getmap(self, name):
+    def getmap(self, name) -> MapFile:
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
-    def Randomize(self, seed, basepath=''):
+    def Randomize(self, seed, basepath='') -> None:
         for mapname in self.GetAllFilesEndsWith('.map'):
             map = self.getmap(mapname)
             map.Randomize(seed)
@@ -105,7 +97,7 @@ class GrpFile:
             with open(mapout, 'wb') as f:
                 f.write(map.data)
 
-    def ExtractAll(self, outpath):
+    def ExtractAll(self, outpath) -> None:
         pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
         for name in self.files.keys():
             data = self.getfile(name)
@@ -114,7 +106,7 @@ class GrpFile:
                 o.write(data)
 
 
-def CreateGrpFile(frompath: str, outpath: str, filenames: list):
+def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
     outfile = open(outpath, 'wb')
     outfile.write(b'KenSilverman')
     outfile.write(pack('<I', len(filenames)))

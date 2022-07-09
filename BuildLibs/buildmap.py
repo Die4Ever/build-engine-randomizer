@@ -12,6 +12,20 @@ class CStat:
         self.invisible = bool(cstat & 0x8000)
 
 
+class Sprite:
+    def __init__(self, d):
+        self.__dict__ = d
+
+    def copy(self) -> 'Sprite':
+        d = self.__dict__.copy()
+        for k in d.keys():
+            if type(d[k]) != int:
+                d[k] = d[k].copy()
+        return Sprite(d)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
     def __init__(self, gameName, name, data: bytearray):
@@ -46,7 +60,7 @@ class MapFile:
         (num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
         self.sprites_length = num_sprites * self.sprite_size
 
-        debug(self.__dict__, '\n')
+        trace(self.__dict__, '\n')
         self.data = data
 
         self.items = []
@@ -54,7 +68,7 @@ class MapFile:
         self.other_sprites = []
         for i in range(num_sprites):
             sprite = self.GetSprite(i)
-            cstat = CStat(sprite['cstat'])
+            cstat = CStat(sprite.cstat)
             if self.IsItem(sprite, cstat):
                 self.items.append(sprite)
             elif self.IsEnemy(sprite, cstat):
@@ -63,9 +77,7 @@ class MapFile:
                 self.other_sprites.append(sprite)
 
     def Randomize(self, seed):
-        debug('items', len(self.items))
-        debug('enemies', len(self.enemies))
-        debug('other_sprites', len(self.other_sprites))
+        debug('items', len(self.items), 'enemies', len(self.enemies), 'other_sprites', len(self.other_sprites), sep=', ')
 
         rng = random.Random(crc32('map dupe items', self.name, seed))
         self.DupeSprites(rng, self.items, 0.65, 1)
@@ -88,45 +100,36 @@ class MapFile:
         trace('\n')
 
         self.WriteSprites()
-        debug('items', len(self.items))
-        debug('enemies', len(self.enemies))
-        debug('other_sprites', len(self.other_sprites))
+        debug('items', len(self.items), 'enemies', len(self.enemies), 'other_sprites', len(self.other_sprites), sep=', ')
 
-    def IsItem(self, sprite: Dict, cstat: CStat) -> bool:
-        if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
+    def IsItem(self, sprite:Sprite, cstat: CStat) -> bool:
+        if self.gameSettings.swappableItems and sprite.picnum not in self.gameSettings.swappableItems:
                 return False
-        elif (not self.gameSettings.swappableItems) and sprite['picnum'] < 10:
+        elif (not self.gameSettings.swappableItems) and sprite.picnum < 10:
             return False
         #elif (self.game_name == 'Ion Fury' and not cstat.blocking) or cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
         elif cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
             return False
         return True
 
-    def IsEnemy(self, sprite: Dict, cstat: CStat) -> bool:
-        return sprite['picnum'] in self.gameSettings.swappableEnemies and cstat.invisible==False
+    def IsEnemy(self, sprite:Sprite, cstat: CStat) -> bool:
+        return sprite.picnum in self.gameSettings.swappableEnemies and cstat.invisible==False
 
-    def SwapSprites(self, a: dict, b: dict):
+    def SwapSprites(self, a:Sprite, b:Sprite):
         trace(a, b, '\n')
 
-        swapdictkey(a, b, 'pos')
-        swapdictkey(a, b, 'sectnum')
-        swapdictkey(a, b, 'angle')
+        swapobjkey(a, b, 'pos')
+        swapobjkey(a, b, 'sectnum')
+        swapobjkey(a, b, 'angle')
 
-    def DupeSprite(self, rng: random.Random, sprite: dict, spacing: float):
+    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float) -> Sprite:
         sprite = sprite.copy()
-        for k in sprite.keys():
-            if type(sprite[k]) != int:
-                sprite[k] = sprite[k].copy()
         x = rng.choice([-300, -200, 200, 300])
         y = rng.choice([-300, -200, 200, 300])
-        sprite['pos'][0] += x * spacing
-        sprite['pos'][1] += y * spacing
+        sprite.pos[0] += x * spacing
+        sprite.pos[1] += y * spacing
         # TODO: check walls? and floors?
         return sprite
-
-    def RemoveSprite(self, sprite):
-        sprite = self.items[-1]
-        self.items = self.items[:-1]
 
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
@@ -169,7 +172,7 @@ class MapFile:
         for i in range(len(sprites)):
             self.WriteSprite(sprites[i], i)
 
-    def GetSprite(self, num):
+    def GetSprite(self, num) -> Sprite:
         assert num >= 0
         start = self.sprites_start + num*self.sprite_size
         assert start + self.sprite_size <= len(self.data)
@@ -177,13 +180,13 @@ class MapFile:
             '<', self.sprite_format,
             self.data[start:start+self.sprite_size]
         )
-        return sprite
+        return Sprite(sprite)
 
-    def WriteSprite(self, sprite, num):
+    def WriteSprite(self, sprite:Sprite, num):
         assert num >= 0
         start = self.sprites_start + num*self.sprite_size
         assert start + self.sprite_size <= len(self.data)
-        newdata = fancy_pack('<', self.sprite_format, sprite)
+        newdata = fancy_pack('<', self.sprite_format, sprite.__dict__)
         i = start
         for b in newdata:
             self.data[i] = b
