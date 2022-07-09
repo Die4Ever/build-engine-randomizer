@@ -1,7 +1,8 @@
-name: GitHub Actions
+name: CI
 on: [push]
+
 jobs:
-  Windows:
+  Windows-Release:
     runs-on: windows-latest
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
@@ -20,5 +21,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-            name: "build-engine-randomizer"
-            path: dist/build-engine-randomizer.exe
+          name: build-engine-randomizer
+          path: dist/build-engine-randomizer.exe
