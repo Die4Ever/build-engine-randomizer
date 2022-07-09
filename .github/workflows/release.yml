@@ -98,7 +98,7 @@ jobs:
         run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-macos
       - run: ls -lah dist
 
-      - run: rm -f dist/build-engine-randomizer-macos.app
+      - run: rm -rf dist/build-engine-randomizer-macos.app
       - run: dist/build-engine-randomizer-macos --version
 
       - name: Upload artifacts
