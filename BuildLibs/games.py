@@ -79,6 +79,9 @@ Game('Duke!ZONE II', 'Duke!ZONE II', 3186656, '1E9516F1') # { "Duke!ZONE II", (i
 Game('Duke Nukem\'s Penthouse Paradise', 'Duke Nukem\'s Penthouse Paradise', 2112419, '7CD82A3B') # { "Duke Nukem's Penthouse Paradise", (int32_t) 0x7CD82A3B,  2112419, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "ppakgame.con", NULL}, // original .zip release
 Game('Duke Nukem\'s Penthouse Paradise', 'Duke Nukem\'s Penthouse Paradise', 4247491, 'CF928A58') # { "Duke Nukem's Penthouse Paradise", (int32_t) 0xCF928A58,  4247491, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "PPAKGAME.CON", NULL}, // ZOOM Platform repacked .grp
 
+# zipped for tests
+Game('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
+
 gamesMapSettings = {}
 
 class GameMapSettings:

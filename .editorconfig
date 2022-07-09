@@ -7,4 +7,4 @@ vc_generate_documentation_comments = doxygen_slash_star
 end_of_line = lf
 
 [*.yml]
-indent_size =  = 2
+indent_size = 2

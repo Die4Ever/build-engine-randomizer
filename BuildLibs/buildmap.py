@@ -47,12 +47,12 @@ class MapFile:
 
         debug(self.__dict__, '\n')
         self.data = data
-        
+
     def Randomize(self, seed):
         items = []
         enemies = []
         counters = {}
-        
+
         for i in range(self.num_sprites):
             sprite = self.GetSprite(i)
 
@@ -60,13 +60,13 @@ class MapFile:
                 counters[sprite['picnum']] = 1
             else:
                 counters[sprite['picnum']] += 1
-            
+
             cstat = CStat(sprite['cstat'])
             if self.IsItem(sprite, cstat):
                 items.append(i)
             if self.IsEnemy(sprite, cstat):
                 enemies.append(i)
-        
+
         debug(counters, '\n')
         rng = random.Random(crc32('map randomize items', self.name, seed))
         self.SwapAllSprites(rng, items)
@@ -75,7 +75,7 @@ class MapFile:
         rng = random.Random(crc32('map randomize enemies', self.name, seed))
         self.SwapAllSprites(rng, enemies)
         trace('\n')
-    
+
     def IsItem(self, sprite: Dict, cstat: CStat) -> bool:
         if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
                 return False
@@ -85,10 +85,10 @@ class MapFile:
         elif cstat.blockingHitscan or cstat.invisible or cstat.onesided or cstat.facing != 0:
             return False
         return True
-    
+
     def IsEnemy(self, sprite: Dict, cstat: CStat) -> bool:
         return False
-        
+
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
             a = toSwap[a]
@@ -97,7 +97,7 @@ class MapFile:
             if a == b:
                 continue
             self.SwapSprites(a, b)
-    
+
     def GetSprite(self, num):
         assert num >= 0
         assert num < self.num_sprites
@@ -117,7 +117,7 @@ class MapFile:
         for b in newdata:
             self.data[i] = b
             i+=1
-    
+
     def SwapSprites(self, idxa, idxb):
         trace('SwapSprites', idxa, idxb, end=', ')
         a = self.GetSprite(idxa)

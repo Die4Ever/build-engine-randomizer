@@ -78,7 +78,7 @@ class GrpFile:
             f.seek(self.files[name]['offset'])
             return f.read(self.files[name]['size'])
 
-    def GetAllFilesEndsWith(self, postfix):
+    def GetAllFilesEndsWith(self, postfix) -> list:
         matches = []
         postfix = postfix.lower()
         for f in self.files.keys():
@@ -105,7 +105,28 @@ class GrpFile:
             with open(mapout, 'wb') as f:
                 f.write(map.data)
 
+    def ExtractAll(self, outpath):
+        pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
+        for name in self.files.keys():
+            data = self.getfile(name)
+            trace(name, len(data))
+            with open(outpath + name, 'wb') as o:
+                o.write(data)
 
-def randomize(grppath, seed):
-    grp = GrpFile(grppath)
-    grp.Randomize(seed)
+
+def CreateGrpFile(frompath: str, outpath: str, filenames: list):
+    outfile = open(outpath, 'wb')
+    outfile.write(b'KenSilverman')
+    outfile.write(pack('<I', len(filenames)))
+
+    datas = []
+    for name in filenames:
+        with open(frompath + name, 'rb') as f:
+            d = f.read()
+            datas.append(d)
+            outfile.write(pack('<12sI', name.encode('ascii'), len(d)))
+
+    for d in datas:
+        outfile.write(d)
+
+    outfile.close()
