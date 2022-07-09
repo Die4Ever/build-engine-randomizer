@@ -12,7 +12,7 @@ jobs:
 
       - run: pip3 install pyinstaller tk
 
-      - run: python -m compileall -q .
+      - run: python3 -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
@@ -37,7 +37,7 @@ jobs:
       - run: sudo apt-get install -y python3-tk
       - run: pip3 install pyinstaller tk
 
-      - run: python -m compileall -q .
+      - run: python3 -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
@@ -62,7 +62,7 @@ jobs:
 
       - run: pip3 install pyinstaller tk
 
-      - run: python -m compileall -q .
+      - run: python3 -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
