@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
-      - run: apt-get install python3-tk
+      - run: sudo apt-get install python3-tk
       - run: pip3 install pyinstaller tk
 
       - run: python -m compileall -q .
