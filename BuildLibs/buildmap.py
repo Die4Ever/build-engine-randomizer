@@ -1,3 +1,4 @@
+import json
 from struct import *
 from BuildLibs import *
 from BuildLibs import games
@@ -42,61 +43,54 @@ class MapFile:
         self.walls_length = self.num_walls * self.wall_size
         num_sprites_start = self.walls_start + self.walls_length
         self.sprites_start = num_sprites_start + 2
-        (self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
-        self.sprites_length = self.num_sprites * self.sprite_size
+        (num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
+        self.sprites_length = num_sprites * self.sprite_size
 
         debug(self.__dict__, '\n')
         self.data = data
 
-    def Randomize(self, seed):
-        items = []
-        enemies = []
-        counters = {}
-
-        for i in range(self.num_sprites):
+        self.items = []
+        self.enemies = []
+        self.other_sprites = []
+        for i in range(num_sprites):
             sprite = self.GetSprite(i)
-
-            if sprite['picnum'] not in counters:
-                counters[sprite['picnum']] = 1
-            else:
-                counters[sprite['picnum']] += 1
-
             cstat = CStat(sprite['cstat'])
             if self.IsItem(sprite, cstat):
-                items.append(i)
-            if self.IsEnemy(sprite, cstat):
-                enemies.append(i)
+                self.items.append(sprite)
+            elif self.IsEnemy(sprite, cstat):
+                self.enemies.append(sprite)
+            else:
+                self.other_sprites.append(sprite)
 
-        debug(counters, '\n')
-        debug('items', len(items))
-        debug('enemies', len(enemies))
+    def Randomize(self, seed):
+        debug('items', len(self.items))
+        debug('enemies', len(self.enemies))
+        debug('other_sprites', len(self.other_sprites))
 
         rng = random.Random(crc32('map dupe items', self.name, seed))
-        for i in items.copy():
-            if rng.random() > 0.5:
-                continue
-            sprite = self.GetSprite(i)
-            items.append(self.num_sprites)
-            self.DupeSprite(rng, sprite)
+        self.DupeSprites(rng, self.items, 0.65, 1)
 
         rng = random.Random(crc32('map shuffle items', self.name, seed))
-        self.SwapAllSprites(rng, items)
-        trace('\n')
-
-        rng = random.Random(crc32('map enemies', self.name, seed))
-        self.SwapAllSprites(rng, enemies)
-        trace('\n')
+        self.SwapAllSprites(rng, self.items)
 
         rng = random.Random(crc32('map reduce items', self.name, seed))
-        for i in items:
-            if rng.random() > 0.5:
-                continue
-            self.RemoveSprite(i)
-            if self.num_sprites in items:
-                end = items.index(self.num_sprites)
-                items[end] = i
+        self.ReduceSprites(rng, self.items, 0.45)
+        trace('\n')
 
-        self.WriteNumSprites()
+        rng = random.Random(crc32('map dupe enemies', self.name, seed))
+        self.DupeSprites(rng, self.enemies, 0.85, 3)
+
+        rng = random.Random(crc32('map shuffle enemies', self.name, seed))
+        self.SwapAllSprites(rng, self.enemies)
+
+        rng = random.Random(crc32('map reduce enemies', self.name, seed))
+        self.ReduceSprites(rng, self.enemies, 0.25)
+        trace('\n')
+
+        self.WriteSprites()
+        debug('items', len(self.items))
+        debug('enemies', len(self.enemies))
+        debug('other_sprites', len(self.other_sprites))
 
     def IsItem(self, sprite: Dict, cstat: CStat) -> bool:
         if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
@@ -109,59 +103,76 @@ class MapFile:
         return True
 
     def IsEnemy(self, sprite: Dict, cstat: CStat) -> bool:
-        return False
+        return sprite['picnum'] in self.gameSettings.swappableEnemies and cstat.invisible==False
 
-    def SwapSprites(self, idxa, idxb):
-        trace('SwapSprites', idxa, idxb, end=', ')
-        a = self.GetSprite(idxa)
-        b = self.GetSprite(idxb)
+    def SwapSprites(self, a: dict, b: dict):
         trace(a, b, '\n')
 
         swapdictkey(a, b, 'pos')
         swapdictkey(a, b, 'sectnum')
         swapdictkey(a, b, 'angle')
 
-        self.WriteSprite(a, idxa)
-        self.WriteSprite(b, idxb)
-
-    def DupeSprite(self, rng, sprite):
-        self.num_sprites += 1
-        # grow by more than we need, WriteNumSprites will adjust the data size anyways
-        while len(self.data) < self.sprites_start + self.num_sprites * self.sprite_size:
-            self.data = bytearray().join((self.data, b'\x00' * self.sprite_size * 100))
-
-        sprite['pos'][0] += rng.randrange(-300, 301)
-        sprite['pos'][1] += rng.randrange(-300, 301)
+    def DupeSprite(self, rng: random.Random, sprite: dict, spacing: float):
+        sprite = sprite.copy()
+        for k in sprite.keys():
+            if type(sprite[k]) != int:
+                sprite[k] = sprite[k].copy()
+        x = rng.choice([-300, -200, 200, 300])
+        y = rng.choice([-300, -200, 200, 300])
+        sprite['pos'][0] += x * spacing
+        sprite['pos'][1] += y * spacing
         # TODO: check walls? and floors?
-        self.WriteSprite(sprite, self.num_sprites - 1)
+        return sprite
 
-    def RemoveSprite(self, i):
-        end = self.GetSprite(self.num_sprites-1)
-        self.WriteSprite(end, i)
-        self.num_sprites -= 1
-        # shrink the data in WriteNumSprites
+    def RemoveSprite(self, sprite):
+        sprite = self.items[-1]
+        self.items = self.items[:-1]
 
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
-            a = toSwap[a]
             b = rng.randrange(0, len(toSwap))
-            b = toSwap[b]
             if a == b:
                 continue
+            a = toSwap[a]
+            b = toSwap[b]
             self.SwapSprites(a, b)
 
-    def WriteNumSprites(self):
-        self.data = self.data[:self.sprites_start + self.num_sprites * self.sprite_size]
-        newdata = pack('<H', self.num_sprites)
+    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float):
+        for sprite in items.copy():
+            if rng.random() > rate:
+                continue
+            newsprite = self.DupeSprite(rng, sprite, spacing)
+            items.append(newsprite)
+
+    def ReduceSprites(self, rng: random.Random, items: list, rate: float):
+        for i in range(len(items)-1, -1, -1):
+            if rng.random() > rate:
+                continue
+            items[i] = items[-1]
+            items.pop()
+
+    def WriteSprites(self):
+        sprites = self.items + self.enemies + self.other_sprites
+        new_len = self.sprites_start + len(sprites) * self.sprite_size
+        if len(self.data) < new_len:
+            diff = new_len - len(self.data)
+            self.data = bytearray().join((self.data, b'\x00' * diff))
+        elif len(self.data) > new_len:
+            self.data = self.data[:new_len]
+
+        newdata = pack('<H', len(sprites))
         i = self.walls_start + self.walls_length
         for b in newdata:
             self.data[i] = b
             i+=1
 
+        for i in range(len(sprites)):
+            self.WriteSprite(sprites[i], i)
+
     def GetSprite(self, num):
         assert num >= 0
-        assert num < self.num_sprites
         start = self.sprites_start + num*self.sprite_size
+        assert start + self.sprite_size <= len(self.data)
         sprite = fancy_unpack(
             '<', self.sprite_format,
             self.data[start:start+self.sprite_size]
@@ -170,8 +181,8 @@ class MapFile:
 
     def WriteSprite(self, sprite, num):
         assert num >= 0
-        assert num < self.num_sprites
         start = self.sprites_start + num*self.sprite_size
+        assert start + self.sprite_size <= len(self.data)
         newdata = fancy_pack('<', self.sprite_format, sprite)
         i = start
         for b in newdata:
