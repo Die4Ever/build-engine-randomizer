@@ -1,4 +1,5 @@
 from BuildLibs.grp import *
+import BuildLibs.gui
 import cProfile, pstats
 import unittest
 

@@ -13,7 +13,7 @@ class GrpFile:
         self.filesize = os.path.getsize(filepath)
         with open(filepath, 'rb') as f:
             self.sig = f.read(12)
-        
+
         print(self.sig)
         if self.sig[:4] == b'PK\x03\x04':
             print('is a zip file')
@@ -25,7 +25,7 @@ class GrpFile:
             self.GetFilesInfoGrp()
         else:
             raise Exception(filepath + ' is an unknown type')
-        
+
         self.game = games.GetGame(filepath)
         if not self.game:
             print(repr(self.GetAllFilesEndsWith('.con')))
@@ -61,11 +61,11 @@ class GrpFile:
                     'offset': offset
                 }
                 offset += size
-    
+
     def getfileZip(self, name):
         if name not in self.files:
             raise Exception('file not found in GRP/ZIP', name, len(self.files))
-        
+
         with ZipFile(self.filepath, 'r') as zip:
             with zip.open(name) as file:
                 return file.read()
@@ -95,13 +95,17 @@ class GrpFile:
     def getmap(self, name):
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
-def randomize(grppath, seed):
-    with GrpFile(grppath) as g:
-        for mapname in g.GetAllFilesEndsWith('.map'):
-            map = g.getmap(mapname)
+    def Randomize(self, seed):
+        for mapname in self.GetAllFilesEndsWith('.map'):
+            map = self.getmap(mapname)
             map.Randomize(seed)
-            gamedir = os.path.dirname(grppath)
+            gamedir = os.path.dirname(self.filepath)
             mapout = os.path.join(gamedir, mapname)
             pathlib.Path(os.path.dirname(mapout)).mkdir(parents=True, exist_ok=True)
             with open(mapout, 'wb') as f:
                 f.write(map.data)
+
+
+def randomize(grppath, seed):
+    grp = GrpFile(grppath)
+    grp.Randomize(seed)

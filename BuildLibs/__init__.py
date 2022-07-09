@@ -15,10 +15,10 @@ import pathlib
 def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
     format = endianness
     layout = []
-    for k in range(len(mappings)>>1):
+    for k in range(len(mappings) // 2):
         format += mappings[k*2+1]
         layout.append(len(mappings[k*2+1]))
-    
+
     t = unpack(format, data)
     dict = {}
     i = 0
@@ -31,13 +31,13 @@ def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
             dict[mappings[k*2]] = a[0]
         else:
             dict[mappings[k*2]] = a
-        
+
     return dict
 
 def fancy_pack(endianness: str, mappings: tuple, dict: Dict) -> bytearray:
     format = endianness
     values = []
-    for k in range(len(mappings)>>1):
+    for k in range(len(mappings) // 2):
         format += mappings[k*2+1]
         v = dict[mappings[k*2]]
         if type(v) == list:
@@ -67,7 +67,7 @@ def setVerbose(v: int):
     else:
         debug = lambda *a, **b: None # do-nothing function
         trace = debug
-    
+
     if verbose >= 2:
         trace = print
     else:

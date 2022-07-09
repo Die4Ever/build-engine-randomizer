@@ -19,6 +19,9 @@ class Game():
         self.sha1 = sha1.lower()
         gamesList[self.crc] = self
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 # https://wiki.eduke32.com/wiki/Frequently_Asked_Questions
 # ^(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)$
 # Game('$1', '', $2, '$4', '$5', '$6') # $1
@@ -87,6 +90,9 @@ class GameMapSettings:
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
         gamesMapSettings[gameName] = self
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
 def GetGame(grppath):
     global gamesList
