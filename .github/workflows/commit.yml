@@ -1,0 +1,47 @@
+name: Commit
+on: [push]
+
+jobs:
+  Windows-Commit:
+    runs-on: windows-latest
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: cd ${{ github.workspace }}
+      - run: pip3 install pyinstaller
+      - run: python -m compileall -q .
+      - run: python3 tests.py
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Build
+        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
+      - run: dir dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-engine-randomizer
+          path: dist/build-engine-randomizer.exe
+
+  Linux-Commit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: cd ${{ github.workspace }}
+      - run: pip3 install pyinstaller
+      - run: python -m compileall -q .
+      - run: python3 tests.py
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Build
+        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-linux
+      - run: ls -lah dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-engine-randomizer-linux
+          path: dist/build-engine-randomizer-linux
