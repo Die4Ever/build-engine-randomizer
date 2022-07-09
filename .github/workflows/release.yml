@@ -11,7 +11,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
+
       - run: pip3 install pyinstaller tk
+
       - run: python -m compileall -q .
       - run: python3 tests.py
       - run: echo "🍏 This job's status is ${{ job.status }}."
@@ -35,4 +37,75 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/build-engine-randomizer.exe
           asset_name: build-engine-randomizer.exe
+          asset_content_type: application/octet-stream
+
+  Linux-Release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: cd ${{ github.workspace }}
+
+      - run: sudo apt-get install -y python3-tk
+      - run: pip3 install pyinstaller tk
+
+      - run: python -m compileall -q .
+      - run: python3 tests.py
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Build
+        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-linux
+      - run: ls -lah dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-engine-randomizer-linux
+          path: dist/build-engine-randomizer-linux
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/build-engine-randomizer-linux
+          asset_name: build-engine-randomizer-linux
+          asset_content_type: application/octet-stream
+
+  MacOS-Release:
+    runs-on: macos-latest
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: cd ${{ github.workspace }}
+
+      - run: pip3 install pyinstaller tk
+
+      - run: python -m compileall -q .
+      - run: python3 tests.py
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Build
+        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-macos
+      - run: ls -lah dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-engine-randomizer-macos
+          path: dist/build-engine-randomizer-macos
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/build-engine-randomizer-macos
+          asset_name: build-engine-randomizer-macos
           asset_content_type: application/octet-stream
