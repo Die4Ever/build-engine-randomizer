@@ -1,11 +1,67 @@
-from hashlib import md5
+import binascii
+import os
+from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 
-gamesList = {
-    'd834055f0c9a60f8f23163b67d086546': 'Ion Fury',
-    '22b6938fe767e5cc57d1fe13080cd522': 'Duke Nukem 3D', # Atomic Edition
-    '9d200b5fb4ace8797e7f8638c4f96af2': 'Shadow Warrior' # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
-}
+from BuildLibs import crc32
+
+gamesList = {}
+
+class Game():
+    def __init__(self, name, type, size:int=0, crc:str='', md5:str='', sha1:str=''):
+        global gamesList
+        self.name = name
+        self.type = type
+        self.md5 = md5.lower()
+        self.crc = 0
+        if crc:
+            self.crc = int(crc, 16)
+        self.sha1 = sha1.lower()
+        gamesList[self.crc] = self
+
+# https://wiki.eduke32.com/wiki/Frequently_Asked_Questions
+# ^(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)$
+# Game('$1', '', $2, '$4', '$5', '$6') # $1
+# (\d),(\d)
+# $1$2
+
+Game('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1') # Steam version
+Game('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425') # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
+
+#Game('DUKE.RTS v0.99',                    'Duke Nukem 3D',            175567, '6148685E', '7ECAF2753AA9CC924F746B3D0F36E7C2', 'A9356036AEA01583C85B71410F066285AFE3AF2B') # DUKE.RTS v0.99
+Game('Shareware DUKE3D.GRP v0.99',         'Duke Nukem 3D',           9690241, '02F18900', '56B35E575EBA7F16C0E19628BD6BD934', 'A6341C16BC1170B43BE7F28B5A91C080F9CE3409') # Shareware DUKE3D.GRP v0.99
+Game('Shareware DUKE3D.GRP v1.0',          'Duke Nukem 3D',          10429258, 'A28AA589', '1E57CF6272E8BE0E746666700CC0EE96', '7D2FDF1E9F1BBCE327650B3AECDAF78E6BBD6211') # Shareware DUKE3D.GRP v1.0
+Game('Shareware DUKE3D.GRP v1.1',          'Duke Nukem 3D',          10442980, '912E1E8D', '9B0683A74C8BF36BF85631616385BEC8', '5166D6E4DBBA2B8ABB2FDA48257F0FCBDBF17626') # Shareware DUKE3D.GRP v1.1
+Game('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806') # Shareware DUKE3D.GRP v1.3D
+Game('Shareware DUKE3D.GRP v1.5 Mac',      'Duke Nukem 3D',          10444391, 'C5F71561', 'B9CAC374477E09459A313CEA457971EA', 'F035E9F0615E3DB23D2DB4C90232D8A95B5B9585') # Shareware DUKE3D.GRP v1.5 Mac
+Game('DUKE3D.GRP v1.3D',                   'Duke Nukem 3D',          26524524, 'BBC9CE44', '981125CB9237C19AA0237109958D2B50', '3D508EAF3360605B0204301C259BD898717CF468') # DUKE3D.GRP v1.3D
+#Game('DUKE.RTS v1.0/1.1/1.3D/1.4/1.5',    'Duke Nukem 3D',            188954, '504086C1', '9D29F9673BBDB56068ACF7645C13749C', '738C7F5FD0C8B57EE2E87AE7A97BF8E21A821D07') # DUKE.RTS v1.0/1.1/1.3D/1.4/1.5
+Game('DUKE3D.GRP v1.4 (Plutonium Pak)',    'Duke Nukem 3D',          44348015, 'F514A6AC', 'C904FFB6A4F3C6080DD1DAC31218B25A', '61E70F883DF9552395406BF3D64F887F3C709438') # DUKE3D.GRP v1.4 (Plutonium Pak)
+Game('DUKE3D.GRP v1.5 (Atomic Edition)',   'Duke Nukem 3D',          44356548, 'FD3DCFF1', '22B6938FE767E5CC57D1FE13080CD522', '4FDEF8559E2D35B1727FE92F021DF9C148CF696C') # DUKE3D.GRP v1.5 (Atomic Edition)
+Game('DUKE!ZON.GRP v1.3D',                 'Duke! ZONE II',          26135388, '82C1B47F', 'C960FE3CC6920369EB43A8B00AC4E4EE', '169E9E2BEAB2E9FF6E0660FA3CE93C85B4B56884') # DUKE!ZON.GRP v1.3D
+#Game('DZ-GAME.CON v1.3D',                 'Duke! ZONE II',             99967, 'F3DCF89D', '65C72C2550049D7456D5F983E0051E7B', '8D05E4646DFBD201877036F5379534D06E6A6DDC') # DZ-GAME.CON v1.3D
+#Game('DZ-DEFS.CON v1.3D',                 'Duke! ZONE II',             28959, 'F2FE1424', '45DDEB920FF7AF450CD6A19CDFF6EE7E', '7BA88D2B12F5F193DA96822E59E5B7EE9DABFD5C') # DZ-DEFS.CON v1.3D
+#Game('DZ-USER.CON v1.3D',                 'Duke! ZONE II',             36237, '93401EA4', 'A81793173C384F025768ED853A060F3A', '1E37C7EB9EAB03C938B18B3712DAEF97BA9B9B13') # DZ-USER.CON v1.3D
+Game('DUKE!ZON.GRP v1.4',                  'Duke! ZONE II',          44100411, '7FB6117C', '031C271C689DD76F9E40241B10B8EBA9', '86A58754A2F2D95271B389FA2B8FAC9AA34CCFCE') # DUKE!ZON.GRP v1.4
+#Game('DZ-GAME.CON v1.4',                  'Duke! ZONE II',            151198, '5C0E6CC7', '8EF020D2F63C0EE1CC391F00FEEE895D', 'D6DC4C24EC5986C7AC8FB3F4DA85D97E06D72F2E') # DZ-GAME.CON v1.4
+#Game('DZ-DEFS.CON v1.4',                  'Duke! ZONE II',             36038, '85847E24', '8C7A4622A71F580B57954CA129B0474B', 'D23A2E9CC0FF30B02911AC9D7EC49D55CE856EE0') # DZ-DEFS.CON v1.4
+#Game('DZ-USER.CON v1.4',                  'Duke! ZONE II',             45037, '739BE376', '1862C4CD17B6C95942B75F72CEAC7AEA', '31E39D7BB9E7E77E468CC67684F41AA58238179A') # DZ-USER.CON v1.4
+Game('DUKEDC13.SSI v1.3D',                 'Duke it out in D.C.',     7926624, 'A9242158', 'D085D538A6BF40EBB041D964787A5D20', '66A96327EC514710D3526D87259CF5C0ABBBB841') # DUKEDC13.SSI v1.3D
+Game('DUKEDCPP.SSI v1.4',                  'Duke it out in D.C.',     8225517, 'B79D997F', 'F0BFA5B956C8E3DBCBA1042118C1F456', '30D6AA2A44E936D09D6B423CFAB7C0595E2376F9') # DUKEDCPP.SSI v1.4
+Game('DUKEDC.GRP (Atomic Edition)',        'Duke it out in D.C.',     8410183, 'A8CF80DA', '8AB2E7328DB4153E4158C850DE82D7C0', '1B66C3AD9A65556044946DD1CA97A839FCFEDC3B') # DUKEDC.GRP (Atomic Edition)
+Game('NWINTER.GRP',                        'Duke: Nuclear Winter',   16169365, 'F1CAE8E4', '1250F83DCC3588293F0CE5C6FC701B43', 'A6728F621F121F9DB02EE67C39EFDBB5EEA95711') # NWINTER.GRP
+Game('VACA13.SSI v1.3D',                   'Unknown',                23559381, '4A2DBB62', '974616FC968D188C984E4F9A60F3C4BE', '2B7779AB211FB21CD2D7DEF93E2B9BBF948E406F') # VACA13.SSI v1.3D
+Game('VACAPP.SSI v1.4',                    'Unknown',                22551333, '2F4FCCEE', '540AFD010435450D73FA3463437FCFC9', '58FD872BE376957D63D9F5C3BD169D5FCDF28664') # VACAPP.SSI v1.4
+Game('VACA15.SSI v1.5',                    'Unknown',                22521880, 'B62B42FD', '22C8CD6235FC2B7ECEFEFC2442570D68', '84945D64E246E91840A872F332494D8509B66DD9') # VACA15.SSI v1.5
+Game('VACATION.GRP (Atomic Edition)',      'Duke Unknown',           22213819, '18F01C5B', '1C105CED73B776C172593764E9D0D93E', '65B8B787616ED637F86CFCAA90DE24C8E65B3DCC') # VACATION.GRP (Atomic Edition)
+Game('NAPALM.GRP',                         'Napalm',                 44365728, '3DE1589A', 'D926E362839949AA6EBA5BDF35A5F2D6', '9C42E7268A45D57E4B7961E6F1D3414D9DE12323') # NAPALM.GRP
+#Game('NAPALM.RTS',                        'Napalm',                   564926, '12505172', 'D571897B4E3D43B3757A98C856869ED7', 'C90B050192030FFBD0137C03A4181CB1705B95D3') # NAPALM.RTS
+#Game('NAPALM.CON (GAME.CON)',             'Napalm',                   142803, '75EF92BD', 'CCBBB146C094F490242FD922293DD5F9', '46F3AE2B37983660835F220AECEEA6060C89F2A7') # NAPALM.CON (GAME.CON)
+Game('NAM.GRP',                            'NAM',                    43448927, '75C1F07B', '6C910A5438E230F85804353AC54D77B9', '2FD12F94246FBD3014223B76301B812EE8341D05') # NAM.GRP
+#Game('NAM.RTS',                           'NAM',                      564926, '12505172', 'D571897B4E3D43B3757A98C856869ED7', 'C90B050192030FFBD0137C03A4181CB1705B95D3') # NAM.RTS
+#Game('NAM.CON (GAME.CON)',                'NAM',                      142803, '75EF92BD', 'CCBBB146C094F490242FD922293DD5F9', '46F3AE2B37983660835F220AECEEA6060C89F2A7') # NAM.CON (GAME.CON)
+Game('WW2GI.GRP',                          'WWII GI',                77939508, '907B82BF', '27E927BEBA43447DB3951EAADEDB4709', 'FD0208A55EAEF3937C126E1FFF474FB4DFBDA6F5') # WW2GI.GRP
+#Game('WW2GI.RTS',                         'WWII GI',                  259214, '79D16760', '759F66C9F3C70AEDCAE29473AADE9966', 'CE352EF4C22F85869FDCB060A64EBC263ACEA6B0') # WW2GI.RTS
 
 gamesMapSettings = {}
 
@@ -20,16 +76,22 @@ class GameMapSettings:
         gamesMapSettings[gameName] = self
 
 def GetGame(grppath):
+    global gamesList
+    size = os.path.getsize(grppath)
     with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
-        md5sum = md5(file).hexdigest()
-        print(grppath, md5sum, 'detected game: ', gamesList.get(md5sum))
+        crc:int = binascii.crc32(file)
+        if crc in gamesList:
+            return gamesList[crc]
+        md5sum:str = md5(file).hexdigest()
+        sha:str = sha1(file).hexdigest()
+        raise Exception('error in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha)
         # TODO support for unknown games with default settings
-        return gamesList.get(md5sum)
-    raise Exception('error in GetGame '+grppath)
+        #return None
+    raise Exception('error in GetGame', grppath)
 
-def GetGameMapSettings(gameName) -> GameMapSettings:
+def GetGameMapSettings(game: Game) -> GameMapSettings:
     global gamesMapSettings
-    return gamesMapSettings[gameName]
+    return gamesMapSettings[game.type]
 
 # build these GameMapSettings using this regex find/replace
 # define ([\w_]+) (\d+)
