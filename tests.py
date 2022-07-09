@@ -7,6 +7,7 @@ from unittest import case
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 
+#unittest.TestLoader.sortTestMethodsUsing = None
 temp = 'temp/'
 grppath: str = 'duke3d-shareware.grp.zip'
 testing_grp = 'temp/testing.grp'
@@ -89,16 +90,6 @@ class BaseTestCase(unittest.TestCase):
             md5s[f] = t
         print(repr(md5s))
         return md5s
-
-
-    def RandomizeMap(self, filename):
-        oldmd5s = {}
-        with self.subTest('MD5 Old Map ' + filename):
-            oldmd5 = self.Md5File(temp + filename)
-            print(filename, oldmd5)
-
-        with self.subTest('Randomize Map ' + filename):
-            pass
 
     def Md5File(self, filename):
         with open(filename) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:

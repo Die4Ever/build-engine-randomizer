@@ -10,6 +10,7 @@ class RandoSettings:
         self.width=500
         self.height=500
         self.initWindow()
+        self.randoButton["state"]='disabled'
         self.update()
         grppath = chooseFile(self.win)
         if grppath == '':
@@ -17,6 +18,7 @@ class RandoSettings:
             return
         self.grp: GrpFile = GrpFile(grppath)
         self.win.title(self.grp.game.type + ' Randomizer - ' + self.grp.game.name)
+        self.randoButton["state"]='normal'
         self.win.mainloop()
 
     def closeWindow(self):
@@ -38,8 +40,8 @@ class RandoSettings:
             seed = random.randint(1, 999999)
         self.grp.Randomize(seed)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
-        #self.closeWindow()
         self.randoButton["state"]='normal'
+        self.closeWindow()
 
     def initWindow(self):
         self.win = Tk()

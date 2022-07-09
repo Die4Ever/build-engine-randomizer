@@ -68,13 +68,35 @@ class MapFile:
                 enemies.append(i)
 
         debug(counters, '\n')
-        rng = random.Random(crc32('map randomize items', self.name, seed))
+        debug('items', len(items))
+        debug('enemies', len(enemies))
+
+        rng = random.Random(crc32('map dupe items', self.name, seed))
+        for i in items.copy():
+            if rng.random() > 0.5:
+                continue
+            sprite = self.GetSprite(i)
+            items.append(self.num_sprites)
+            self.DupeSprite(rng, sprite)
+
+        rng = random.Random(crc32('map shuffle items', self.name, seed))
         self.SwapAllSprites(rng, items)
         trace('\n')
 
-        rng = random.Random(crc32('map randomize enemies', self.name, seed))
+        rng = random.Random(crc32('map enemies', self.name, seed))
         self.SwapAllSprites(rng, enemies)
         trace('\n')
+
+        rng = random.Random(crc32('map reduce items', self.name, seed))
+        for i in items:
+            if rng.random() > 0.5:
+                continue
+            self.RemoveSprite(i)
+            if self.num_sprites in items:
+                end = items.index(self.num_sprites)
+                items[end] = i
+
+        self.WriteNumSprites()
 
     def IsItem(self, sprite: Dict, cstat: CStat) -> bool:
         if self.gameSettings.swappableItems and sprite['picnum'] not in self.gameSettings.swappableItems:
@@ -89,6 +111,36 @@ class MapFile:
     def IsEnemy(self, sprite: Dict, cstat: CStat) -> bool:
         return False
 
+    def SwapSprites(self, idxa, idxb):
+        trace('SwapSprites', idxa, idxb, end=', ')
+        a = self.GetSprite(idxa)
+        b = self.GetSprite(idxb)
+        trace(a, b, '\n')
+
+        swapdictkey(a, b, 'pos')
+        swapdictkey(a, b, 'sectnum')
+        swapdictkey(a, b, 'angle')
+
+        self.WriteSprite(a, idxa)
+        self.WriteSprite(b, idxb)
+
+    def DupeSprite(self, rng, sprite):
+        self.num_sprites += 1
+        # grow by more than we need, WriteNumSprites will adjust the data size anyways
+        while len(self.data) < self.sprites_start + self.num_sprites * self.sprite_size:
+            self.data = bytearray().join((self.data, b'\x00' * self.sprite_size * 100))
+
+        sprite['pos'][0] += rng.randrange(-300, 301)
+        sprite['pos'][1] += rng.randrange(-300, 301)
+        # TODO: check walls? and floors?
+        self.WriteSprite(sprite, self.num_sprites - 1)
+
+    def RemoveSprite(self, i):
+        end = self.GetSprite(self.num_sprites-1)
+        self.WriteSprite(end, i)
+        self.num_sprites -= 1
+        # shrink the data in WriteNumSprites
+
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
             a = toSwap[a]
@@ -97,6 +149,14 @@ class MapFile:
             if a == b:
                 continue
             self.SwapSprites(a, b)
+
+    def WriteNumSprites(self):
+        self.data = self.data[:self.sprites_start + self.num_sprites * self.sprite_size]
+        newdata = pack('<H', self.num_sprites)
+        i = self.walls_start + self.walls_length
+        for b in newdata:
+            self.data[i] = b
+            i+=1
 
     def GetSprite(self, num):
         assert num >= 0
@@ -117,17 +177,3 @@ class MapFile:
         for b in newdata:
             self.data[i] = b
             i+=1
-
-    def SwapSprites(self, idxa, idxb):
-        trace('SwapSprites', idxa, idxb, end=', ')
-        a = self.GetSprite(idxa)
-        b = self.GetSprite(idxb)
-        trace(a, b, '\n')
-
-        swapdictkey(a, b, 'pos')
-        swapdictkey(a, b, 'sectnum')
-        swapdictkey(a, b, 'angle')
-
-        self.WriteSprite(a, idxa)
-        self.WriteSprite(b, idxb)
-
