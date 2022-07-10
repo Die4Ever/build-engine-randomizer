@@ -36,12 +36,12 @@ class RandoSettings:
                 warning('no file selected!')
                 self.closeWindow()
                 return True
+            self.grppath = grppath
             self.grp: GrpFile = GrpFile(grppath)
             self.win.title(self.grp.game.type + ' ' + GetVersion() + ' Randomizer - ' + self.grp.game.name)
             self.randoButton["state"]='normal'
         except Exception as e:
-            messagebox.showerror('Error Opening File', str(e) +'\n\n' + traceback.format_exc())
-            print('Error Opening File', grppath, '\n', str(e),'\n\n', traceback.format_exc())
+            error('Error Opening File', grppath, e)
             self.closeWindow()
             raise
         return True
@@ -63,7 +63,7 @@ class RandoSettings:
             self.update()
             self._Randomize()
         except Exception as e:
-            messagebox.showerror('Error Randomizing', str(e) +'\n\n' + traceback.format_exc())
+            error('Error Randomizing', self.grppath, e)
             if self.isWindowOpen():
                 self.randoButton["state"]='normal'
             raise
@@ -97,3 +97,9 @@ def chooseFile(root):
     filetype = (("GRP File","*.grp"),("all files","*.*"))
     target = filedialog.askopenfilename(title="Choose a GRP file",filetypes=filetype)
     return target
+
+def error(title, msg, e=None):
+    if e:
+        msg += '\n' + str(e) + '\n\n' + traceback.format_exc()
+    print(title, '\n', msg)
+    messagebox.showerror('Error Opening File', msg)
