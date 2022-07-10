@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
-      - run: pip3 install pyinstaller tk
+      - run: pip3 install pyinstaller tk idlelib
 
       - run: python3 -m compileall -q .
       - run: python3 tests.py
@@ -37,7 +37,7 @@ jobs:
       - run: cd ${{ github.workspace }}
 
       - run: sudo apt-get install -y python3-tk
-      - run: pip3 install pyinstaller tk
+      - run: pip3 install pyinstaller tk idlelib
 
       - run: python3 -m compileall -q .
       - run: python3 tests.py
@@ -65,7 +65,7 @@ jobs:
       - run: cd ${{ github.workspace }}
 
       - run: brew install python-tk
-      - run: pip3 install pyinstaller tk
+      - run: pip3 install pyinstaller tk idlelib
 
       - run: python3 -m compileall -q .
       - run: python3 tests.py
