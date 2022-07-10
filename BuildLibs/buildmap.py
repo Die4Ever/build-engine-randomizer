@@ -1,4 +1,3 @@
-import json
 from struct import *
 from BuildLibs import *
 from BuildLibs import games
@@ -191,3 +190,6 @@ class MapFile:
         for b in newdata:
             self.data[i] = b
             i+=1
+
+    def GetData(self) -> bytearray:
+        return self.data

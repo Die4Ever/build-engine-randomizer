@@ -3,9 +3,11 @@ import os
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 
-from BuildLibs import crc32
+from BuildLibs import copyobj, crc32
 
 gamesList = {}
+gamesMapSettings = {}
+gamesConSettings = {}
 
 class Game():
     def __init__(self, name, type, size:int=0, crc:str='', md5:str='', sha1:str=''):
@@ -21,6 +23,67 @@ class Game():
 
     def __repr__(self):
         return repr(self.__dict__)
+
+class GameMapSettings:
+    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}):
+        global gamesMapSettings
+        self.gameName = gameName
+        self.minMapVersion = minMapVersion
+        self.maxMapVersion = maxMapVersion
+        self.swappableItems = swappableItems
+        self.swappableEnemies = swappableEnemies
+        if gameName:
+            gamesMapSettings[gameName] = self
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+    def copy(self) -> 'GameMapSettings':
+        return copyobj(self)
+
+class GameConSettings:
+    def __init__(self, gameName=None, conFiles={}):
+        self.gameName = gameName
+        self.conFiles = conFiles
+        if gameName:
+            gamesConSettings[gameName] = self
+
+    def copy(self) -> 'GameConSettings':
+        return copyobj(self)
+
+def GetGame(grppath) -> Game:
+    global gamesList
+    size = os.path.getsize(grppath)
+    with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
+        crc:int = binascii.crc32(file)
+        g:Game = gamesList.get(crc)
+        if g:
+            print('matched game:', repr(g))
+            return g
+        md5sum:str = md5(file).hexdigest()
+        sha:str = sha1(file).hexdigest()
+        print('error in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha, sep=', ')
+        # TODO support for unknown games with default settings
+        return None
+    raise Exception('error in GetGame', grppath)
+
+def GetGameMapSettings(game: Game) -> GameMapSettings:
+    global gamesMapSettings
+    g:GameMapSettings = gamesMapSettings[game.type]
+    return g.copy()
+
+def GetGameConSettings(game: Game) -> GameConSettings:
+    global gamesConSettings
+    g:GameConSettings = gamesConSettings.get(game.type, GameConSettings())
+    return g.copy()
+
+
+
+
+
+##########################################################################################
+##############################          GAME HASHES         ##############################
+##########################################################################################
 
 # https://wiki.eduke32.com/wiki/Frequently_Asked_Questions
 # ^(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)$
@@ -82,44 +145,6 @@ Game('Duke Nukem\'s Penthouse Paradise', 'Duke Nukem\'s Penthouse Paradise', 424
 # zipped for tests
 Game('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
 
-gamesMapSettings = {}
-
-class GameMapSettings:
-    def __init__(self, gameName, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}):
-        global gamesMapSettings
-        self.gameName = gameName
-        self.minMapVersion = minMapVersion
-        self.maxMapVersion = maxMapVersion
-        self.swappableItems = swappableItems
-        self.swappableEnemies = swappableEnemies
-        gamesMapSettings[gameName] = self
-
-    def __repr__(self):
-        return repr(self.__dict__)
-
-    def copy(self) -> 'GameMapSettings':
-        return GameMapSettings(self.gameName, self.minMapVersion, self.maxMapVersion, self.swappableItems.copy(), self.swappableEnemies.copy())
-
-def GetGame(grppath) -> Game:
-    global gamesList
-    size = os.path.getsize(grppath)
-    with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
-        crc:int = binascii.crc32(file)
-        g:Game = gamesList.get(crc)
-        if g:
-            print('matched game:', repr(g))
-            return g
-        md5sum:str = md5(file).hexdigest()
-        sha:str = sha1(file).hexdigest()
-        raise Exception('error in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha)
-        # TODO support for unknown games with default settings
-        #return None
-    raise Exception('error in GetGame', grppath)
-
-def GetGameMapSettings(game: Game) -> GameMapSettings:
-    global gamesMapSettings
-    g:GameMapSettings = gamesMapSettings[game.type]
-    return g.copy()
 
 # build these GameMapSettings using this regex find/replace
 # define ([\w_]+) (\d+)
@@ -319,3 +344,15 @@ swappableItems = {
     819: 'mine3.kvx'
 })
 # Keys (picnums 1765-1779)
+
+GameConSettings('Ion Fury', conFiles = {
+    'scripts/customize.con': [
+        '.*HEALTH', '.*MAXAMMO', '.*_DMG', '.*AMOUNT'
+    ]
+})
+
+GameConSettings('Duke Nukem 3D', conFiles = {
+    'USER.CON': [
+        'SWEARFREQUENCY', '.*HEALTH', '.*AMMO', '.*STRENGTH', '.*AMMOAMOUNT', '.*_AMOUNT'
+    ]
+})

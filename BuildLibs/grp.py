@@ -2,6 +2,7 @@ import os
 from zipfile import ZipFile
 from BuildLibs import games
 from BuildLibs.buildmap import *
+from BuildLibs.confile import ConFile
 
 class GrpFile:
     # https://moddingwiki.shikadi.net/wiki/GRP_Format
@@ -26,10 +27,19 @@ class GrpFile:
         else:
             raise Exception(filepath + ' is an unknown type')
 
+        cons = self.GetAllFilesEndsWith('.con')
         self.game = games.GetGame(filepath)
         if not self.game:
-            print(repr(self.GetAllFilesEndsWith('.con')))
+            print(repr(cons))
             raise Exception('unidentified game')
+
+        self.conSettings = games.GetGameConSettings(self.game)
+        if not self.conSettings:
+            raise Exception('missing GameConSettings')
+        if not self.conSettings.conFiles:
+            for con in cons:
+                self.ExtractFile('temp/', con)
+
 
     def GetFilesInfoZip(self) -> None:
         with ZipFile(self.filepath, 'r') as zip:
@@ -88,22 +98,36 @@ class GrpFile:
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
     def Randomize(self, seed, basepath='') -> None:
+        gamedir = os.path.dirname(self.filepath)
         for mapname in self.GetAllFilesEndsWith('.map'):
-            map = self.getmap(mapname)
+            map:MapFile = self.getmap(mapname)
             map.Randomize(seed)
-            gamedir = os.path.dirname(self.filepath)
-            mapout = os.path.join(gamedir, basepath, mapname)
-            pathlib.Path(os.path.dirname(mapout)).mkdir(parents=True, exist_ok=True)
-            with open(mapout, 'wb') as f:
-                f.write(map.data)
+            out = os.path.join(gamedir, basepath, mapname)
+            pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+            with open(out, 'wb') as f:
+                f.write(map.GetData())
+
+        for (conName,conSettings) in self.conSettings.conFiles.items():
+            data = self.getfile(conName)
+            text = data.decode('ansi')
+            con:ConFile = ConFile(self.game, conSettings, conName, text)
+            con.Randomize(seed)
+            out = os.path.join(gamedir, basepath, conName)
+            pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+            with open(out, 'w') as f:
+                f.write(con.GetText())
+
+
+    def ExtractFile(self, outpath, name) -> None:
+        pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
+        data = self.getfile(name)
+        trace(name, len(data))
+        with open(outpath + name, 'wb') as o:
+            o.write(data)
 
     def ExtractAll(self, outpath) -> None:
-        pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
         for name in self.files.keys():
-            data = self.getfile(name)
-            trace(name, len(data))
-            with open(outpath + name, 'wb') as o:
-                o.write(data)
+            self.ExtractFile(outpath, name)
 
 
 def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:

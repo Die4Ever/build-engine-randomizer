@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import font
 from tkinter import messagebox
+import traceback
 from BuildLibs.grp import *
 
 class RandoSettings:
@@ -10,16 +11,9 @@ class RandoSettings:
         self.width=500
         self.height=500
         self.initWindow()
-        self.randoButton["state"]='disabled'
-        self.update()
-        grppath = chooseFile(self.win)
-        if grppath == '':
-            warning('no file selected!')
-            return
-        self.grp: GrpFile = GrpFile(grppath)
-        self.win.title(self.grp.game.type + ' Randomizer - ' + self.grp.game.name)
-        self.randoButton["state"]='normal'
-        self.win.mainloop()
+        self.ChooseFile()
+        if self.win:
+            self.win.mainloop()
 
     def closeWindow(self):
         self.win.destroy()
@@ -32,22 +26,54 @@ class RandoSettings:
         if event.widget == self.win:
             pass
 
-    def Randomize(self):
-        self.randoButton["state"]='disabled'
-        self.update()
+    def _ChooseFile(self):
+        grppath = ''
+        try:
+            self.randoButton["state"]='disabled'
+            self.update()
+            grppath = chooseFile(self.win)
+            if grppath == '':
+                warning('no file selected!')
+                self.closeWindow()
+                return True
+            self.grp: GrpFile = GrpFile(grppath)
+            self.win.title(self.grp.game.type + ' ' + GetVersion() + ' Randomizer - ' + self.grp.game.name)
+            self.randoButton["state"]='normal'
+        except Exception as e:
+            messagebox.showerror('Error Opening File', str(e) +'\n\n' + traceback.format_exc())
+            print('Error Opening File', grppath, '\n', str(e),'\n\n', traceback.format_exc())
+            self.closeWindow()
+            raise
+        return True
+
+    def ChooseFile(self):
+        self._ChooseFile()
+
+    def _Randomize(self):
         seed = self.seedEntry.get()
         if seed == '':
             seed = random.randint(1, 999999)
         self.grp.Randomize(seed)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
-        self.randoButton["state"]='normal'
         self.closeWindow()
+
+    def Randomize(self):
+        try:
+            self.randoButton["state"]='disabled'
+            self.update()
+            self._Randomize()
+        except Exception as e:
+            messagebox.showerror('Error Randomizing', str(e) +'\n\n' + traceback.format_exc())
+            if self.isWindowOpen():
+                self.randoButton["state"]='normal'
+            raise
+
 
     def initWindow(self):
         self.win = Tk()
         self.win.protocol("WM_DELETE_WINDOW",self.closeWindow)
         self.win.bind("<Configure>",self.resize)
-        self.win.title("Build Engine Randomizer Settings")
+        self.win.title('Build Engine Randomizer '+GetVersion()+' Settings')
         self.win.geometry(str(self.width)+"x"+str(self.height))
         #self.win.config()
         self.font = font.Font(size=14)

@@ -12,7 +12,7 @@ if args.verbose:
     setVerbose(2)
 
 if args.version:
-    print('0.0')
+    print(GetVersion())
     sys.exit(0)
 
 BuildLibs.gui.main()

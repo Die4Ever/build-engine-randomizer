@@ -12,6 +12,9 @@ from collections import namedtuple
 import random
 import pathlib
 
+def GetVersion() -> str:
+    return 'v0.1 Alpha'
+
 def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
     format = endianness
     layout = []
@@ -55,6 +58,16 @@ def swapdictkey(a, b, key):
 
 def swapobjkey(a, b, key):
     a.__dict__[key], b.__dict__[key] = b.__dict__[key], a.__dict__[key]
+
+# 1-level deep copy, usually enough
+def copyobj(obj):
+    d = obj.__dict__.copy()
+    for k in d.keys():
+        if type(d[k]) not in [int, str, type(None)]:
+            d[k] = d[k].copy()
+    obj = type(obj)()
+    obj.__dict__ = d
+    return obj
 
 verbose = 1
 debug = print

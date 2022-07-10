@@ -135,5 +135,6 @@ try:
     #cProfile.run("runtests()", sort="cumtime")
     runtests()
 finally:
-    if os.path.isdir(temp):
-        shutil.rmtree(temp)
+#     if os.path.isdir(temp):
+#         shutil.rmtree(temp)
+    pass
