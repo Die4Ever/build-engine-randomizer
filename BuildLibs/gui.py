@@ -36,10 +36,15 @@ class RandoSettings:
                 warning('no file selected!')
                 self.closeWindow()
                 return True
+
             self.grppath = grppath
+            self.win.title('Loading '+grppath+'...')
+            self.update()
             self.grp: GrpFile = GrpFile(grppath)
+
             self.win.title(self.grp.game.type + ' ' + GetVersion() + ' Randomizer - ' + self.grp.game.name)
             self.randoButton["state"]='normal'
+            self.update()
         except Exception as e:
             error('Error Opening File', grppath, e)
             self.closeWindow()
@@ -69,6 +74,16 @@ class RandoSettings:
             raise
 
 
+    def newInput(self, cls, label:str, row:int, *args):
+        label = Label(self.win,text=label,width=20,height=2,font=self.font, anchor='e', justify='left')
+        label.grid(column=0,row=row, sticky='E')
+        if cls == OptionMenu:
+            entry = cls(self.win, *args)
+        else:
+            entry = cls(self.win, *args, width=20,font=self.font)
+        entry.grid(column=1,row=row, sticky='W')
+        return entry
+
     def initWindow(self):
         self.win = Tk()
         self.win.protocol("WM_DELETE_WINDOW",self.closeWindow)
@@ -78,14 +93,44 @@ class RandoSettings:
         #self.win.config()
         self.font = font.Font(size=14)
 
-        seedLabel = Label(self.win,text='Seed: ',width=20,height=2,font=self.font)
-        seedLabel.grid(column=0,row=0)
-        seedEntry = Entry(self.win,width=20,font=self.font)
-        seedEntry.grid(column=1,row=0)
-        self.seedEntry = seedEntry
+        row=0
+        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!',width=40,height=2,font=self.font)
+        infoLabel.grid(column=0,row=row,columnspan=2)
+        row+=1
 
-        self.randoButton = Button(self.win,text='Randomize!',width=20,height=2,font=self.font,command=self.Randomize)
-        self.randoButton.grid(column=1,row=100)
+        self.seedEntry = self.newInput(Entry, 'Seed: ', row)
+        row+=1
+
+        # items add/reduce? maybe combine them into presets so it's simpler to understand
+        variable = StringVar(self.win)
+        variable.set("one")
+        self.items = self.newInput(OptionMenu, 'Items: ', row, variable, 'one', 'two', 'three')
+        row+=1
+
+        # enemies add/reduce?
+        variable = StringVar(self.win)
+        variable.set("one")
+        self.items = self.newInput(OptionMenu, 'Enemies: ', row, variable, 'one', 'two', 'three')
+        row+=1
+
+        # values range
+        variable = StringVar(self.win)
+        variable.set("one")
+        self.items = self.newInput(OptionMenu, 'Randomization Range: ', row, variable, 'one', 'two', 'three')
+        row+=1
+
+        # difficulty? values difficulty?
+        variable = StringVar(self.win)
+        variable.set("one")
+        self.items = self.newInput(OptionMenu, 'Difficulty: ', row, variable, 'one', 'two', 'three')
+        row+=1
+
+        #self.progressbar = Progressbar(self.win, maximum=1)
+        #self.progressbar.grid(column=0,row=row,columnspan=2)
+        #row+=1
+
+        self.randoButton = Button(self.win,text='Randomize!',width=20,height=2,font=self.font, command=self.Randomize)
+        self.randoButton.grid(column=1,row=100, sticky='SE')
 
     def update(self):
         self.win.update()
