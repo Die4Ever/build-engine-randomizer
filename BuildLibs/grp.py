@@ -109,7 +109,8 @@ class GrpFile:
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
             data = self.getfile(conName)
-            text = data.decode('ansi')
+            print(conName)
+            text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
             con.Randomize(seed)
             out = os.path.join(gamedir, basepath, conName)
