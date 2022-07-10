@@ -28,7 +28,7 @@ class Sprite:
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
     def __init__(self, gameName, name, data: bytearray):
-        print('\n', name, len(data))
+        info('\n', name, len(data))
         self.name = name
         self.game_name = gameName
         self.gameSettings = games.GetGameMapSettings(gameName)
@@ -39,10 +39,10 @@ class MapFile:
 
         if self.version == 6:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
-            raise NotImplemented('MAP Format Version 6 is not yet implemented')
+            raise NotImplemented('MAP Format Version 6 is not yet implemented', name)
 
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
-            raise AssertionError('unexpected map version '+str(self.version))
+            raise AssertionError('unexpected map version '+str(self.version), name)
 
         self.sprite_format = ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
             'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',

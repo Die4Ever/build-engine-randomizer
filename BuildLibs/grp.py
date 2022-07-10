@@ -9,19 +9,19 @@ class GrpFile:
     # or zip format, at least in the case of Ion Fury
     def __init__(self, filepath):
         self.filepath = filepath
-        print('__init__', filepath)
+        info(filepath)
         self.files = {}
         self.filesize = os.path.getsize(filepath)
         with open(filepath, 'rb') as f:
             self.sig = f.read(12)
 
-        print(self.sig)
+        trace(self.sig)
         if self.sig[:4] == b'PK\x03\x04':
-            print('is a zip file')
+            debug('is a zip file')
             self.type = 'zip'
             self.GetFilesInfoZip()
         elif self.sig[:12] == b'KenSilverman':
-            print('is a GRP file')
+            debug('is a GRP file')
             self.type = 'grp'
             self.GetFilesInfoGrp()
         else:
@@ -30,15 +30,22 @@ class GrpFile:
         cons = self.GetAllFilesEndsWith('.con')
         self.game = games.GetGame(filepath)
         if not self.game:
-            print(repr(cons))
+            info(repr(cons))
             raise Exception('unidentified game')
 
         self.conSettings = games.GetGameConSettings(self.game)
         if not self.conSettings:
-            raise Exception('missing GameConSettings')
+            raise Exception('missing GameConSettings', filepath)
         if not self.conSettings.conFiles:
+            warning("This game is missing CON file randomization")
             for con in cons:
                 self.ExtractFile('temp/', con)
+
+        mapSettings = games.GetGameMapSettings(self.game)
+        if not mapSettings.swappableItems:
+            warning("This game doesn't have any swappableItems")
+        if not mapSettings.swappableEnemies:
+            warning("This game doesn't have any swappableEnemies")
 
 
     def GetFilesInfoZip(self) -> None:
@@ -109,7 +116,6 @@ class GrpFile:
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
             data = self.getfile(conName)
-            print(conName)
             text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
             con.Randomize(seed)

@@ -70,22 +70,31 @@ def copyobj(obj):
     return obj
 
 verbose = 1
-debug = print
-trace = print
-warning = print
+
+def _warning(*args, **kargs):
+    print('WARNING:', *args, **kargs)
+
+def _debug(*args, **kargs):
+    print('DEBUG:', *args, **kargs)
+
+def _trace(*args, **kargs):
+    print('TRACE:', *args, **kargs)
+
+warning = _warning
+debug = _debug
+trace = _trace
+info = print
 
 def setVerbose(v: int):
     global debug, trace
     verbose = v
     if verbose:
-        debug = print
-        trace = print
+        debug = _debug
     else:
         debug = lambda *a, **b: None # do-nothing function
-        trace = debug
 
     if verbose >= 2:
-        trace = print
+        trace = _trace
     else:
         trace = lambda *a, **b: None # do-nothing function
 

@@ -6,6 +6,7 @@ defineregex = re.compile('^define\s+([^\s]+)\s+(\d+)(.*)$')
 
 class ConFile:
     def __init__(self, game, conSettings, name, text):
+        info('\n', name, len(text))
         self.game = game
         self.conSettings = conSettings
         self.name:str = name
@@ -36,7 +37,7 @@ class ConFile:
         if rng.random() < 0.5:
             r = 1/r
         newval = round(oldval * r)
-        print(name, oldval, newval)
+        info(name, oldval, newval)
         return 'define '+name+' '+str(newval)+theRest
 
     def Randomize(self, seed:int):
@@ -48,13 +49,6 @@ class ConFile:
                 l = self.RandomizeLine(l, seed)
             out += l + '\n'
         self.text = out
-        #print(out)
-        # loop through lines
-        # any that match "^define\s+(\w+)\s+(\d+)"
-            # check against regexes in conSettings
-            # if match then randomize
-        # append all lines into output text
-        pass
 
     def GetText(self) -> str:
         return self.text
