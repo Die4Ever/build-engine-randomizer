@@ -3,13 +3,14 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import font
 from tkinter import messagebox
+from idlelib.tooltip import Hovertip
 import traceback
 from BuildLibs.grp import *
 
 class RandoSettings:
     def __init__(self):
-        self.width=500
-        self.height=500
+        self.width=468
+        self.height=375
         self.initWindow()
         self.ChooseFile()
         if self.win:
@@ -24,7 +25,11 @@ class RandoSettings:
 
     def resize(self,event):
         if event.widget == self.win:
-            pass
+            try:
+                self.width = event.width
+                self.height = event.height
+            except Exception as e:
+                print('ERROR: in resize:', e)
 
     def _ChooseFile(self):
         grppath = ''
@@ -74,7 +79,7 @@ class RandoSettings:
             raise
 
 
-    def newInput(self, cls, label:str, row:int, *args):
+    def newInput(self, cls, label:str, tooltip:str, row:int, *args):
         label = Label(self.win,text=label,width=20,height=2,font=self.font, anchor='e', justify='left')
         label.grid(column=0,row=row, sticky='E')
         if cls == OptionMenu:
@@ -82,6 +87,9 @@ class RandoSettings:
         else:
             entry = cls(self.win, *args, width=20,font=self.font)
         entry.grid(column=1,row=row, sticky='W')
+
+        myTip = Hovertip(label, tooltip)
+        myTip = Hovertip(entry, tooltip)
         return entry
 
     def initWindow(self):
@@ -98,31 +106,31 @@ class RandoSettings:
         infoLabel.grid(column=0,row=row,columnspan=2)
         row+=1
 
-        self.seedEntry = self.newInput(Entry, 'Seed: ', row)
+        self.seedEntry = self.newInput(Entry, 'Seed: ', 'RNG Seed', row)
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
         variable = StringVar(self.win)
         variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Items: ', row, variable, 'one', 'two', 'three')
+        self.items = self.newInput(OptionMenu, 'Items: ', 'How many items', row, variable, 'one', 'two', 'three')
         row+=1
 
         # enemies add/reduce?
         variable = StringVar(self.win)
         variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Enemies: ', row, variable, 'one', 'two', 'three')
+        self.items = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies', row, variable, 'one', 'two', 'three')
         row+=1
 
         # values range
         variable = StringVar(self.win)
         variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Randomization Range: ', row, variable, 'one', 'two', 'three')
+        self.items = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized', row, variable, 'one', 'two', 'three')
         row+=1
 
         # difficulty? values difficulty?
         variable = StringVar(self.win)
         variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Difficulty: ', row, variable, 'one', 'two', 'three')
+        self.items = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge', row, variable, 'one', 'two', 'three')
         row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)
@@ -131,6 +139,7 @@ class RandoSettings:
 
         self.randoButton = Button(self.win,text='Randomize!',width=20,height=2,font=self.font, command=self.Randomize)
         self.randoButton.grid(column=1,row=100, sticky='SE')
+        Hovertip(self.randoButton, 'Dew it!')
 
     def update(self):
         self.win.update()
