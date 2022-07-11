@@ -12,16 +12,18 @@ class ConFile:
         self.name:str = name
         self.text:str = text
         self.regexes = []
+        self.difficulties = []
         for r in self.conSettings:
             self.regexes.append(re.compile('^'+r+'$'))
+            self.difficulties.append(self.conSettings[r]['difficulty'])
 
-    def ShouldRandomizeVar(self, name) -> bool:
-        for r in self.regexes:
-            if r.match(name):
-                return True
-        return False
+    def ShouldRandomizeVar(self, name) -> float:
+        for i in range(len(self.regexes)):
+            if self.regexes[i].match(name):
+                return self.difficulties[i]
+        return None
 
-    def RandomizeLine(self, l:str, seed:int, range:float, scale:float) -> str:
+    def RandomizeLine(self, l:str, seed:int, range:float, scale:float, difficulty:float) -> str:
         m = defineregex.match(l)
         if not m:
             return l
@@ -29,12 +31,21 @@ class ConFile:
         oldval = int(m.group(2))
         theRest = m.group(3)
 
-        if not self.ShouldRandomizeVar(name):
+        var_difficulty = self.ShouldRandomizeVar(name)
+        if var_difficulty is None:
             return l
 
         rng = random.Random(crc32('define', name, seed))
         r = rng.random() * range + 1
-        if rng.random() < 0.5:
+
+        if var_difficulty < 0:
+            recip_chance = difficulty
+        elif var_difficulty > 0:
+            recip_chance = 1 - difficulty
+        else:
+            recip_chance = 0.5
+
+        if rng.random() < recip_chance:
             r = 1/r
         r *= scale
         newval = round(oldval * r)
@@ -45,11 +56,12 @@ class ConFile:
         # split lines
         range:float = settings['conFile.range']
         scale:float = settings['conFile.scale']
+        difficulty:float = settings['conFile.difficulty']
         out = ''
         for l in self.text.splitlines():
             l = l.strip()
             if l.startswith('define '):
-                l = self.RandomizeLine(l, seed, range, scale)
+                l = self.RandomizeLine(l, seed, range, scale, difficulty)
             out += l + '\n'
         self.text = out
         info('\n')

@@ -422,14 +422,36 @@ swappableItems = {
 # Keys (picnums 1765-1779)
 # Locks 1846-1854
 
+# difficulty > 0 means higher number makes the game harder
 GameConSettings('Ion Fury', conFiles = {
-    'scripts/customize.con': [
-        '.*HEALTH', '.*MAXAMMO', '.*_DMG', '.*AMOUNT'
-    ]
+    'scripts/customize.con': {
+        '.*\wHEALTH': {'difficulty': -1},
+        '.*MAXAMMO': {'difficulty': -1},
+        '.*AMOUNT': {'difficulty': -1},
+
+        '.*_DMG': {'difficulty': 0}, # not sure if this affects enemies too or just the player?
+
+        '.*_HEALTH': {'difficulty': 1},
+    }
 })
 
 GameConSettings('Duke Nukem 3D', conFiles = {
-    'USER.CON': [
-        'SWEARFREQUENCY', '.*HEALTH', '.*AMMO', '.*STRENGTH', '.*AMMOAMOUNT', '.*_AMOUNT'
-    ]
+    'USER.CON': {
+        'SWEARFREQUENCY': {'difficulty': 0},
+        '.*HEALTH': {'difficulty': -1},
+        'MAX.*AMMO': {'difficulty': -1},
+        '.*AMMOAMOUNT': {'difficulty': -1},
+        '.*_AMOUNT': {'difficulty': -1},
+        'HANDBOMBBOX': {'difficulty': -1},
+        '.*_WEAPON_STRENGTH': {'difficulty': -1},
+
+        '.*\wSTRENGTH': {'difficulty': 1},
+        'PIG_SHIELD_AMOUNT\d': {'difficulty': 1},
+
+        # idk what these do
+        'OCTASCRATCHINGPLAYER': {'difficulty': 0},
+        'LIZGETTINGDAZEDAT': {'difficulty': 0},
+        'LIZEATINGPLAYER': {'difficulty': 0},
+        'NEWBEASTSCRATCHAMOUNT': {'difficulty': 0},
+    }
 })

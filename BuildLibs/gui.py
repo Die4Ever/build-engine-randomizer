@@ -58,6 +58,10 @@ class RandoSettings:
 
     def ChooseFile(self):
         self._ChooseFile()
+        if not self.grp.conSettings.conFiles:
+            self.difficultyVar.set('Unavailable for this game')
+            self.difficulty['state'] = 'disabled'
+
 
     def _Randomize(self):
         seed = self.seedEntry.get()
@@ -74,7 +78,7 @@ class RandoSettings:
 
         settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5}[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0
-        settings['conFile.difficulty'] = {'Easy': 0.5, 'Medium': 1, 'Difficult': 1.5}[self.difficultyVar.get()]
+        settings['conFile.difficulty'] = {'Easy': 0.3, 'Medium': 0.5, 'Difficult': 0.7, 'Unavailable for this game': 0.5}[self.difficultyVar.get()]
 
         self.grp.Randomize(seed, settings=settings)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
@@ -139,8 +143,8 @@ class RandoSettings:
 
         # difficulty? values difficulty?
         self.difficultyVar = StringVar(self.win, 'Medium')
-        #self.items = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult')
-        #row+=1
+        self.difficulty = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult')
+        row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)
         #self.progressbar.grid(column=0,row=row,columnspan=2)

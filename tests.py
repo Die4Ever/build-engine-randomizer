@@ -19,7 +19,7 @@ settings = {
     'MapFile.chanceDeleteEnemy': 0.5,
     'conFile.range': 1,
     'conFile.scale': 1,
-    'conFile.difficulty': 1,
+    'conFile.difficulty': 0.5,
 }
 
 different_settings = {
@@ -29,7 +29,7 @@ different_settings = {
     'MapFile.chanceDeleteEnemy': 0.25,
     'conFile.range': 1.5,
     'conFile.scale': 0.8,
-    'conFile.difficulty': 1.5,
+    'conFile.difficulty': 0.7,
 }
 
 original_order = [

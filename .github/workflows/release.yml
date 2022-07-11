@@ -24,12 +24,6 @@ jobs:
 
       - run: dist/build-engine-randomizer.exe --version
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-engine-randomizer
-          path: dist/build-engine-randomizer.exe
-
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1.0.2
@@ -61,12 +55,6 @@ jobs:
       - run: ls -lah dist
 
       - run: dist/build-engine-randomizer-linux --version
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-engine-randomizer-linux
-          path: dist/build-engine-randomizer-linux
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -100,12 +88,6 @@ jobs:
 
       - run: rm -rf dist/build-engine-randomizer-macos.app
       - run: dist/build-engine-randomizer-macos --version
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-engine-randomizer-macos
-          path: dist/build-engine-randomizer-macos
 
       - name: Upload Release Asset
         id: upload-release-asset
