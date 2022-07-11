@@ -66,11 +66,11 @@ class RandoSettings:
 
         settings = {}
 
-        settings['MapFile.chanceDupeItem'] = {'Few': 0.2, 'Some': 0.5, 'Many': 0.6}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeItem'] = {'Few': 0.3, 'Some': 0.5, 'Many': 0.6}[self.enemiesVar.get()]
         settings['MapFile.chanceDeleteItem'] = {'Few': 0.6, 'Some': 0.4, 'Many': 0.2}[self.enemiesVar.get()]
 
-        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.2, 'Some': 0.5, 'Many': 0.6}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.6, 'Some': 0.5, 'Many': 0.1}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.3, 'Some': 0.4, 'Many': 0.6}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.6, 'Some': 0.5, 'Many': 0.2}[self.enemiesVar.get()]
 
         settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5}[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0

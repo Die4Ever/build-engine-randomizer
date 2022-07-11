@@ -95,7 +95,7 @@ class MapFile:
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 3)
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2)
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
         self.SwapAllSprites(rng, self.enemies)

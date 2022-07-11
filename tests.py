@@ -71,6 +71,8 @@ class BaseTestCase(unittest.TestCase):
         return super().subTest(msg, **params)
 
     def test_1_extract_zipgrp(self):
+        # I zipped the GRP file to save space in the repo
+        # but also Ion Fury uses ZIP format anyways so we do need to test it
         grp: GrpFile = None
         with self.subTest('ExtractAll'):
             grp = GrpFile(zippath)
@@ -92,15 +94,16 @@ class BaseTestCase(unittest.TestCase):
         vanilla = self.Md5GameFiles('Vanilla', grp, temp)
 
         # now test randomizing with different seeds and settings, comparing MD5s each time
-        grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False, basepath='')
+        grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False)
         self.TestRandomize(zippath, 2052, grp0451, False)
-        self.TestRandomize(zippath, 451, grp0451, True)
-        self.TestRandomize(zippath, 451, grp0451, False, settings=different_settings)
+        self.TestRandomize(tempgrp, 451, grp0451, True)
+        self.TestRandomize(tempgrp, 451, grp0451, False, settings=different_settings)
 
 
-    def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings, basepath:str=temp) -> dict:
+    def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
         self.maxDiff = None
         testname = grppath + ' Seed ' + ('0451' if seed==451 else str(seed))
+        basepath = temp + str(crc32(testname+repr(settings))) + '/'
         with self.subTest('Randomize '+testname):
             grp = GrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
@@ -120,7 +123,7 @@ class BaseTestCase(unittest.TestCase):
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
             cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
-            return self.Md5Files(temp, (maps+cons))
+            return self.Md5Files(basepath, (maps+cons))
 
     def Md5Files(self, basepath: str, filenames: list) -> dict:
         md5s = {}

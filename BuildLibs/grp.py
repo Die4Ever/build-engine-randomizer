@@ -104,13 +104,16 @@ class GrpFile:
     def getmap(self, name) -> MapFile:
         return MapFile(self.game, name, bytearray(self.getfile(name)))
 
+    # basepath is only used by tests
     def Randomize(self, seed:int, settings:dict={}, basepath:str='') -> None:
         info('Randomizing with seed:', seed, ', settings:', settings)
         gamedir = os.path.dirname(self.filepath)
+        if not basepath:
+            basepath = gamedir
         for mapname in self.GetAllFilesEndsWith('.map'):
             map:MapFile = self.getmap(mapname)
             map.Randomize(seed, settings)
-            out = os.path.join(gamedir, basepath, mapname)
+            out = os.path.join(basepath, mapname)
             pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
             with open(out, 'wb') as f:
                 f.write(map.GetData())
@@ -120,7 +123,7 @@ class GrpFile:
             text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
             con.Randomize(seed, settings)
-            out = os.path.join(gamedir, basepath, conName)
+            out = os.path.join(basepath, conName)
             pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
             with open(out, 'w') as f:
                 f.write(con.GetText())
