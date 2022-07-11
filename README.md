@@ -1,4 +1,4 @@
-# build-engine-randomizer
+# Build Engine Randomizer
 Build Engine Randomizer (Duke Nukem 3D, Shadow Warrior, Ion Fury, etc.)
 
 "Damn, I'm lookin' good!"
