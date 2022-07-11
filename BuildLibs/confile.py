@@ -21,7 +21,7 @@ class ConFile:
                 return True
         return False
 
-    def RandomizeLine(self, l:str, seed:int) -> str:
+    def RandomizeLine(self, l:str, seed:int, range:float, scale:float) -> str:
         m = defineregex.match(l)
         if not m:
             return l
@@ -33,22 +33,26 @@ class ConFile:
             return l
 
         rng = random.Random(crc32('define', name, seed))
-        r = rng.random() + 1.0
+        r = rng.random() * range + 1
         if rng.random() < 0.5:
             r = 1/r
+        r *= scale
         newval = round(oldval * r)
-        info(name, oldval, newval)
+        info(name, oldval, newval, end=', ')
         return 'define '+name+' '+str(newval)+theRest
 
-    def Randomize(self, seed:int):
+    def Randomize(self, seed:int, settings:dict):
         # split lines
+        range:float = settings['conFile.range']
+        scale:float = settings['conFile.scale']
         out = ''
         for l in self.text.splitlines():
             l = l.strip()
             if l.startswith('define '):
-                l = self.RandomizeLine(l, seed)
+                l = self.RandomizeLine(l, seed, range, scale)
             out += l + '\n'
         self.text = out
+        info('\n')
 
     def GetText(self) -> str:
         return self.text

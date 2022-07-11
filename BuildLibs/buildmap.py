@@ -75,27 +75,33 @@ class MapFile:
             else:
                 self.other_sprites.append(sprite)
 
-    def Randomize(self, seed):
+    def Randomize(self, seed:int, settings:dict):
         debug('items', len(self.items), 'enemies', len(self.enemies), 'other_sprites', len(self.other_sprites), sep=', ')
 
+        chanceDupeItem:float = settings['MapFile.chanceDupeItem']
+        chanceDeleteItem:float = settings['MapFile.chanceDeleteItem']
+
+        chanceDupeEnemy:float = settings['MapFile.chanceDupeEnemy']
+        chanceDeleteEnemy:float = settings['MapFile.chanceDeleteEnemy']
+
         rng = random.Random(crc32('map dupe items', self.name, seed))
-        self.DupeSprites(rng, self.items, 0.65, 1)
+        self.DupeSprites(rng, self.items, chanceDupeItem, 1)
 
         rng = random.Random(crc32('map shuffle items', self.name, seed))
         self.SwapAllSprites(rng, self.items)
 
         rng = random.Random(crc32('map reduce items', self.name, seed))
-        self.ReduceSprites(rng, self.items, 0.45)
+        self.ReduceSprites(rng, self.items, chanceDeleteItem)
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, 0.85, 3)
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 3)
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
         self.SwapAllSprites(rng, self.enemies)
 
         rng = random.Random(crc32('map reduce enemies', self.name, seed))
-        self.ReduceSprites(rng, self.enemies, 0.25)
+        self.ReduceSprites(rng, self.enemies, chanceDeleteEnemy)
         trace('\n')
 
         self.WriteSprites()

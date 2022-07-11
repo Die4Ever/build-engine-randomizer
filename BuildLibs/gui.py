@@ -63,7 +63,20 @@ class RandoSettings:
         seed = self.seedEntry.get()
         if seed == '':
             seed = random.randint(1, 999999)
-        self.grp.Randomize(seed)
+
+        settings = {}
+
+        settings['MapFile.chanceDupeItem'] = {'Few': 0.2, 'Some': 0.5, 'Many': 0.6}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteItem'] = {'Few': 0.6, 'Some': 0.4, 'Many': 0.2}[self.enemiesVar.get()]
+
+        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.2, 'Some': 0.5, 'Many': 0.6}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.6, 'Some': 0.5, 'Many': 0.1}[self.enemiesVar.get()]
+
+        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5}[self.rangeVar.get()]
+        settings['conFile.scale'] = 1.0
+        settings['conFile.difficulty'] = {'Easy': 0.5, 'Medium': 1, 'Difficult': 1.5}[self.difficultyVar.get()]
+
+        self.grp.Randomize(seed, settings=settings)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
         self.closeWindow()
 
@@ -110,28 +123,24 @@ class RandoSettings:
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
-        variable = StringVar(self.win)
-        variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Items: ', 'How many items', row, variable, 'one', 'two', 'three')
+        self.itemsVar = StringVar(self.win, 'Some')
+        self.items = self.newInput(OptionMenu, 'Items: ', 'How many items', row, self.itemsVar, 'Few', 'Some', 'Many')
         row+=1
 
         # enemies add/reduce?
-        variable = StringVar(self.win)
-        variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies', row, variable, 'one', 'two', 'three')
+        self.enemiesVar = StringVar(self.win, 'Some')
+        self.items = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies', row, self.enemiesVar, 'Few', 'Some', 'Many')
         row+=1
 
         # values range
-        variable = StringVar(self.win)
-        variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized', row, variable, 'one', 'two', 'three')
+        self.rangeVar = StringVar(self.win, 'Medium')
+        self.items = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized', row, self.rangeVar, 'Low', 'Medium', 'High')
         row+=1
 
         # difficulty? values difficulty?
-        variable = StringVar(self.win)
-        variable.set("one")
-        self.items = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge', row, variable, 'one', 'two', 'three')
-        row+=1
+        self.difficultyVar = StringVar(self.win, 'Medium')
+        #self.items = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult')
+        #row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)
         #self.progressbar.grid(column=0,row=row,columnspan=2)

@@ -9,8 +9,28 @@ from mmap import mmap, ACCESS_READ
 
 #unittest.TestLoader.sortTestMethodsUsing = None
 temp = 'temp/'
-grppath: str = 'duke3d-shareware.grp.zip'
-testing_grp = 'temp/testing.grp'
+zippath: str = 'duke3d-shareware.grp.zip'
+tempgrp = 'temp/testing.grp'
+
+settings = {
+    'MapFile.chanceDupeItem': 0.5,
+    'MapFile.chanceDeleteItem': 0.5,
+    'MapFile.chanceDupeEnemy': 0.5,
+    'MapFile.chanceDeleteEnemy': 0.5,
+    'conFile.range': 1,
+    'conFile.scale': 1,
+    'conFile.difficulty': 1,
+}
+
+different_settings = {
+    'MapFile.chanceDupeItem': 0.75,
+    'MapFile.chanceDeleteItem': 0.25,
+    'MapFile.chanceDupeEnemy': 0.75,
+    'MapFile.chanceDeleteEnemy': 0.25,
+    'conFile.range': 1.5,
+    'conFile.scale': 0.8,
+    'conFile.difficulty': 1.5,
+}
 
 original_order = [
 'DEFS.CON', 'GAME.CON', 'USER.CON', 'D3DTIMBR.TMB', 'DUKESW.BIN', 'LOOKUP.DAT', 'PALETTE.DAT',
@@ -53,71 +73,61 @@ class BaseTestCase(unittest.TestCase):
     def test_1_extract_zipgrp(self):
         grp: GrpFile = None
         with self.subTest('ExtractAll'):
-            grp = GrpFile(grppath)
+            grp = GrpFile(zippath)
             self.assertEqual(len(grp.files), len(original_order))
             grp.ExtractAll(temp)
 
         with self.subTest('CreateGrpFile'):
-            CreateGrpFile(temp, testing_grp, original_order)
+            CreateGrpFile(temp, tempgrp, original_order)
 
         grp = None
         with self.subTest('Verify new GRP File'):
-            grp = GrpFile(testing_grp)
+            grp = GrpFile(tempgrp)
             self.assertEqual(grp.game.type, 'Duke Nukem 3D')
 
     def test_rando(self):
+        # first get vanilla MD5s
         with self.subTest('Open GRP File'):
-            grp: GrpFile = GrpFile(testing_grp)
+            grp: GrpFile = GrpFile(tempgrp)
+        vanilla = self.Md5GameFiles('Vanilla', grp, temp)
 
-        oldmd5s = {}
-        with self.subTest('MD5 Original Maps'):
-            maps = grp.GetAllFilesEndsWith('.map')
-            oldmd5s = self.Md5Maps(temp, maps)
+        # now test randomizing with different seeds and settings, comparing MD5s each time
+        grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False, basepath='')
+        self.TestRandomize(zippath, 2052, grp0451, False)
+        self.TestRandomize(zippath, 451, grp0451, True)
+        self.TestRandomize(zippath, 451, grp0451, False, settings=different_settings)
 
-        with self.subTest('Randomize GRP Maps'):
-            grp.Randomize(int('0451'))
 
-        newmd5s = {}
-        with self.subTest('MD5 GRP Randomized Maps'):
-            maps = grp.GetAllFilesEndsWith('.map')
-            newmd5s = self.Md5Maps(temp, maps)
-
-        with self.subTest('Compare MD5s After Randomizing, ZIP vs GRP'):
-            for k in oldmd5s.keys():
-                self.assertNotEqual(oldmd5s[k], newmd5s[k], k)
-
-        with self.subTest('Randomize ZIP Maps Seed 2052'):
+    def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings, basepath:str=temp) -> dict:
+        self.maxDiff = None
+        testname = grppath + ' Seed ' + ('0451' if seed==451 else str(seed))
+        with self.subTest('Randomize '+testname):
             grp = GrpFile(grppath)
-            grp.Randomize(int('2052'), temp)
+            grp.Randomize(seed, settings=settings, basepath=basepath)
 
-        md5s2052 = {}
-        with self.subTest('MD5 ZIP Randomized Maps Seed 2052'):
+            newMd5s = self.Md5GameFiles(testname, grp, basepath)
+
+            if shouldMatch:
+                self.assertDictEqual(oldMd5s, newMd5s)
+            else:
+                self.assertEqual(len(oldMd5s), len(newMd5s), 'Same number of files')
+                for k in oldMd5s.keys():
+                    self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
+            return newMd5s
+
+
+    def Md5GameFiles(self, testname:str, grp:GrpFile, basepath: str) -> dict:
+        with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
-            md5s2052 = self.Md5Maps(temp, maps)
+            cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
+            return self.Md5Files(temp, (maps+cons))
 
-        with self.subTest('Compare MD5s After Randomizing Seed 2052'):
-            for k in newmd5s.keys():
-                self.assertNotEqual(newmd5s[k], md5s2052[k], k)
-
-        with self.subTest('Randomize ZIP Maps Seed 0451'):
-            grp = GrpFile(grppath)
-            grp.Randomize(int('0451'), temp)
-
-        zipmd5s = {}
-        with self.subTest('MD5 ZIP Randomized Maps Seed 0451'):
-            maps = grp.GetAllFilesEndsWith('.map')
-            zipmd5s = self.Md5Maps(temp, maps)
-
-        with self.subTest('Compare MD5s Of GRP vs ZIP Randomized Maps Same Seed'):
-            self.assertDictEqual(newmd5s, zipmd5s)
-
-
-    def Md5Maps(self, basepath: str, filenames: list) -> dict:
+    def Md5Files(self, basepath: str, filenames: list) -> dict:
         md5s = {}
         for f in filenames:
             t = self.Md5File(basepath + f)
             md5s[f] = t
-        print(repr(md5s))
+        trace('Md5Files ', basepath, ': ', md5s)
         return md5s
 
     def Md5File(self, filename):
