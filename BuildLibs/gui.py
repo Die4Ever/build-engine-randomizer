@@ -58,6 +58,8 @@ class RandoSettings:
 
     def ChooseFile(self):
         self._ChooseFile()
+        if not self.isWindowOpen():
+            return
         if not self.grp.conSettings.conFiles:
             self.rangeVar.set('Unavailable for this game')
             self.range['state'] = 'disabled'
