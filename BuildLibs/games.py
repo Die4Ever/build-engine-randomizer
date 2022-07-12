@@ -349,6 +349,8 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
         'e1l3.map': [ # ensure the player gets weapons to start with
                 dict(pos=[24160, 52032, 45056], sectnum=296, choices=[21,22,23,24,25,26,27,28,29]), # under the chair
                 dict(pos=[28096, 50688, 22528], sectnum=297, choices=[21,22,23,24,25,26,27,28,29]), # in the locker
+                dict(pos=[47864, 29653, 20480], sectnum=265, choices=[23,47]), # explosives near the end of the map
+                dict(pos=[47270, 25876, 34370], sectnum=272, texcoords=[8, 8, 0, 0], choices=[26]), # single pipe bomb near the end of the map
             ]
     }
 )
