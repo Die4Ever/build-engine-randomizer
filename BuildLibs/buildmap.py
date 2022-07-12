@@ -68,15 +68,8 @@ class MapFile:
         self.other_sprites = []
         for i in range(num_sprites):
             sprite = self.GetSprite(i)
-            cstat = CStat(sprite.cstat)
-            if self.IsItem(sprite, cstat):
-                self.items.append(sprite)
-            elif self.IsEnemy(sprite, cstat):
-                self.enemies.append(sprite)
-            elif self.IsTrigger(sprite, cstat):
-                self.triggers.append(sprite)
-            else:
-                self.other_sprites.append(sprite)
+            self.AppendSprite(sprite)
+
 
     def Randomize(self, seed:int, settings:dict):
         debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
@@ -109,6 +102,10 @@ class MapFile:
 
         rng = random.Random(crc32('map rando triggers', self.name, seed))
         self.RandomizeTriggers(rng, self.triggers, self.gameSettings.triggers)
+
+        rng = random.Random(crc32('map additions', self.name, seed))
+        for add in self.gameSettings.additions.get(self.name.lower(), []):
+            self.AddSprite(rng, add)
 
         self.WriteSprites()
         debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
@@ -184,6 +181,39 @@ class MapFile:
             lowtags = settings.get('lowtags')
             if lowtags:
                 sprite.lowtag = rng.choice([*lowtags, sprite.lowtag])
+
+    def AddSprite(self, rng: random.Random, add: dict) -> None:
+        add = {
+            'picnum': rng.choice(add['choices']),
+            'cstat': 0,
+            'gfxstuff': [0,0,32,0],
+            'texcoords': [32,32,0,0],
+            'statnum': 0,
+            'angle': 1536,
+            'owner': -1,
+            'velocity': [0,0,0],
+            'lowtag': 0,
+            'hightag': 0,
+            'extra': -1,
+            **add.copy()
+        }
+        del add['choices']
+
+        sprite = Sprite(add)
+        self.AppendSprite(sprite)
+        print('added', repr(sprite))
+
+
+    def AppendSprite(self, sprite:Sprite) -> None:
+        cstat = CStat(sprite.cstat)
+        if self.IsItem(sprite, cstat):
+            self.items.append(sprite)
+        elif self.IsEnemy(sprite, cstat):
+            self.enemies.append(sprite)
+        elif self.IsTrigger(sprite, cstat):
+            self.triggers.append(sprite)
+        else:
+            self.other_sprites.append(sprite)
 
     def WriteSprites(self):
         sprites = self.items + self.enemies + self.triggers + self.other_sprites

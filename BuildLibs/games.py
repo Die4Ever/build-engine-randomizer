@@ -25,7 +25,7 @@ class Game():
         return repr(self.__dict__)
 
 class GameMapSettings:
-    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, triggers={}):
+    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, triggers={}, additions={}):
         global gamesMapSettings
         self.gameName = gameName
         self.minMapVersion = minMapVersion
@@ -33,6 +33,7 @@ class GameMapSettings:
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
         self.triggers = triggers
+        self.additions = additions
         if gameName:
             gamesMapSettings[gameName] = self
 
@@ -342,6 +343,13 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
     triggers = {
         # 675 EGG doesn't work for spawning?
         9: dict(name='RESPAWN', hightags=[1680, 1820, 1960, 2000, 2120, 2370], lowtags=[]),
+    },
+    additions = {
+        # lower case because python doesn't have case-insensitive dicts
+        'e1l3.map': [ # ensure the player gets weapons to start with
+                dict(pos=[24160, 52032, 45056], sectnum=296, choices=[21,22,23,24,25,26,27,28,29]), # under the chair
+                dict(pos=[28096, 50688, 22528], sectnum=297, choices=[21,22,23,24,25,26,27,28,29]), # in the locker
+            ]
     }
 )
 
