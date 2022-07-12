@@ -44,9 +44,9 @@ class MapFile:
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
             raise AssertionError('unexpected map version '+str(self.version), name)
 
-        self.sprite_format = ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
+        self.packer = FancyPacker('<', ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
             'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
-            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h')
+            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h'))
 
         self.sectors_start = 22
         self.sectors_length = self.numsects * self.sector_size
@@ -237,17 +237,14 @@ class MapFile:
         assert num >= 0
         start = self.sprites_start + num*self.sprite_size
         assert start + self.sprite_size <= len(self.data)
-        sprite = fancy_unpack(
-            '<', self.sprite_format,
-            self.data[start:start+self.sprite_size]
-        )
+        sprite = self.packer.unpack(self.data[start:start+self.sprite_size])
         return Sprite(sprite)
 
     def WriteSprite(self, sprite:Sprite, num):
         assert num >= 0
         start = self.sprites_start + num*self.sprite_size
         assert start + self.sprite_size <= len(self.data)
-        newdata = fancy_pack('<', self.sprite_format, sprite.__dict__)
+        newdata = self.packer.pack(sprite.__dict__)
         i = start
         for b in newdata:
             self.data[i] = b

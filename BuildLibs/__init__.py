@@ -15,39 +15,48 @@ import pathlib
 def GetVersion() -> str:
     return 'v0.451 Alpha'
 
-def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
-    format = endianness
-    layout = []
-    for k in range(len(mappings) // 2):
-        format += mappings[k*2+1]
-        layout.append(len(mappings[k*2+1]))
+class FancyPacker:
+    def __init__(self, endianness: str, mappings: tuple):
+        format = endianness
+        lens = []
+        keys = []
+        for k in range(len(mappings) // 2):
+            format += mappings[k*2+1]
+            lens.append(len(mappings[k*2+1]))
+            keys.append(mappings[k*2])
 
-    t = unpack(format, data)
-    dict = {}
-    i = 0
-    for k in range(len(mappings)>>1):
-        a = []
-        for f in range(len(mappings[k*2+1])):
-            a.append(t[i])
-            i+=1
-        if len(a)==1:
-            dict[mappings[k*2]] = a[0]
-        else:
-            dict[mappings[k*2]] = a
+        self.format = format
+        #self.mappings = mappings
+        self.keys = keys
+        self.lens = lens
 
-    return dict
+    def unpack(self, data: bytearray) -> dict:
+        t = unpack(self.format, data)
+        dict = {}
+        i = 0
+        for k in range(len(self.keys)):
+            if self.lens[k] == 1:
+                dict[self.keys[k]] = t[i]
+                i+=1
+                continue
+            a = []
+            for f in range(self.lens[k]):
+                a.append(t[i])
+                i+=1
+            dict[self.keys[k]] = a
 
-def fancy_pack(endianness: str, mappings: tuple, dict: Dict) -> bytearray:
-    format = endianness
-    values = []
-    for k in range(len(mappings) // 2):
-        format += mappings[k*2+1]
-        v = dict[mappings[k*2]]
-        if type(v) == list:
-            values += v
-        else:
-            values.append(v)
-    return pack(format, *values)
+        return dict
+
+    def pack(self, dict: dict) -> bytearray:
+        values = []
+        for k in range(len(self.keys)):
+            v = dict[self.keys[k]]
+            if type(v) == list:
+                values += v
+            else:
+                values.append(v)
+        return pack(self.format, *values)
+
 
 def crc32(*args):
     s = ' '.join(map(str, args))
