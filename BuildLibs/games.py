@@ -25,13 +25,14 @@ class Game():
         return repr(self.__dict__)
 
 class GameMapSettings:
-    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}):
+    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, triggers={}):
         global gamesMapSettings
         self.gameName = gameName
         self.minMapVersion = minMapVersion
         self.maxMapVersion = maxMapVersion
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
+        self.triggers = triggers
         if gameName:
             gamesMapSettings[gameName] = self
 
@@ -248,7 +249,8 @@ GameMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
         13850: 'A_HESKEL_BOT',
         12496: 'A_MECHBOSS_BOTTOM',
         12488: 'A_MECHBOSS_TOP',
-    }
+    },
+    triggers={}
 )
 
 GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
@@ -321,7 +323,7 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
         2165: 'LIZMANJUMP',
         2219: 'EXPLOSION2BOT',
         2370: 'GREENSLIME',
-        2370: 'GREENSLIME2',
+        2371: 'GREENSLIME2',
         # 2630: 'BOSS1',
         # 2631: 'BOSS1STAYPUT',
         # 2660: 'BOSS1SHOOT',
@@ -336,6 +338,10 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
         4671: 'NEWBEASTHANGDEAD',
         # 4740: 'BOSS4',
         # 4741: 'BOSS4STAYPUT',
+    },
+    triggers = {
+        # 675 EGG doesn't work for spawning?
+        9: dict(name='RESPAWN', hightags=[1680, 1820, 1960, 2000, 2120, 2370], lowtags=[]),
     }
 )
 
@@ -344,7 +350,7 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
 # voxel "([^"]+)"\s+\{\s+tile\s+(\d+)\s+\}
 # $2: '$1',
 GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
-swappableItems = {
+    swappableItems = {
         1802: 'medpak',
         1803: 'medkit',
         1797: 'uzi',
@@ -417,7 +423,8 @@ swappableItems = {
         1580: 'LITTLE_RIPPER',
         #3780: 'FISH',
         800: 'HORNET',
-    }
+    },
+    triggers={}
 )
 # Keys (picnums 1765-1779)
 # Locks 1846-1854

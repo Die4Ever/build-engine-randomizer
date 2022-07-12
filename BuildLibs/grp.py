@@ -36,10 +36,14 @@ class GrpFile:
         self.conSettings = games.GetGameConSettings(self.game)
         if not self.conSettings:
             raise Exception('missing GameConSettings', filepath)
-        if not self.conSettings.conFiles:
+        elif not self.conSettings.conFiles:
             warning("This game is missing CON file randomization")
             for con in cons:
                 self.ExtractFile('temp/', con)
+        else:
+            for con in self.conSettings.conFiles:
+                if con not in cons:
+                    warning('file not found', con)
 
         mapSettings = games.GetGameMapSettings(self.game)
         if not mapSettings.swappableItems:

@@ -59,6 +59,8 @@ class RandoSettings:
     def ChooseFile(self):
         self._ChooseFile()
         if not self.grp.conSettings.conFiles:
+            self.rangeVar.set('Unavailable for this game')
+            self.range['state'] = 'disabled'
             self.difficultyVar.set('Unavailable for this game')
             self.difficulty['state'] = 'disabled'
 
@@ -76,9 +78,10 @@ class RandoSettings:
         settings['MapFile.chanceDupeEnemy'] = {'Few': 0.3, 'Some': 0.4, 'Many': 0.6}[self.enemiesVar.get()]
         settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.6, 'Some': 0.5, 'Many': 0.2}[self.enemiesVar.get()]
 
-        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5}[self.rangeVar.get()]
+        unavail = 'Unavailable for this game'
+        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5, unavail: 1}[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0
-        settings['conFile.difficulty'] = {'Easy': 0.3, 'Medium': 0.5, 'Difficult': 0.7, 'Unavailable for this game': 0.5}[self.difficultyVar.get()]
+        settings['conFile.difficulty'] = {'Easy': 0.3, 'Medium': 0.5, 'Difficult': 0.7, unavail: 0.5}[self.difficultyVar.get()]
 
         self.grp.Randomize(seed, settings=settings)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
@@ -133,12 +136,12 @@ class RandoSettings:
 
         # enemies add/reduce?
         self.enemiesVar = StringVar(self.win, 'Some')
-        self.items = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies', row, self.enemiesVar, 'Few', 'Some', 'Many')
+        self.enemies = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies', row, self.enemiesVar, 'Few', 'Some', 'Many')
         row+=1
 
         # values range
         self.rangeVar = StringVar(self.win, 'Medium')
-        self.items = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized', row, self.rangeVar, 'Low', 'Medium', 'High')
+        self.range = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized', row, self.rangeVar, 'Low', 'Medium', 'High')
         row+=1
 
         # difficulty? values difficulty?

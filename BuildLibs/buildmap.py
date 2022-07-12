@@ -64,6 +64,7 @@ class MapFile:
 
         self.items = []
         self.enemies = []
+        self.triggers = []
         self.other_sprites = []
         for i in range(num_sprites):
             sprite = self.GetSprite(i)
@@ -72,11 +73,13 @@ class MapFile:
                 self.items.append(sprite)
             elif self.IsEnemy(sprite, cstat):
                 self.enemies.append(sprite)
+            elif self.IsTrigger(sprite, cstat):
+                self.triggers.append(sprite)
             else:
                 self.other_sprites.append(sprite)
 
     def Randomize(self, seed:int, settings:dict):
-        debug('items', len(self.items), 'enemies', len(self.enemies), 'other_sprites', len(self.other_sprites), sep=', ')
+        debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
 
         chanceDupeItem:float = settings['MapFile.chanceDupeItem']
         chanceDeleteItem:float = settings['MapFile.chanceDeleteItem']
@@ -104,8 +107,11 @@ class MapFile:
         self.ReduceSprites(rng, self.enemies, chanceDeleteEnemy)
         trace('\n')
 
+        rng = random.Random(crc32('map rando triggers', self.name, seed))
+        self.RandomizeTriggers(rng, self.triggers, self.gameSettings.triggers)
+
         self.WriteSprites()
-        debug('items', len(self.items), 'enemies', len(self.enemies), 'other_sprites', len(self.other_sprites), sep=', ')
+        debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
 
     def IsItem(self, sprite:Sprite, cstat: CStat) -> bool:
         if self.gameSettings.swappableItems and sprite.picnum not in self.gameSettings.swappableItems:
@@ -120,12 +126,17 @@ class MapFile:
     def IsEnemy(self, sprite:Sprite, cstat: CStat) -> bool:
         return sprite.picnum in self.gameSettings.swappableEnemies and cstat.invisible==False
 
+    def IsTrigger(self, sprite:Sprite, cstat: CStat) -> bool:
+        return sprite.picnum in self.gameSettings.triggers
+
     def SwapSprites(self, a:Sprite, b:Sprite):
         trace(a, b, '\n')
 
         swapobjkey(a, b, 'pos')
         swapobjkey(a, b, 'sectnum')
         swapobjkey(a, b, 'angle')
+        #swapobjkey(a, b, 'hightag')
+        #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
 
     def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float) -> Sprite:
         sprite = sprite.copy()
@@ -159,8 +170,23 @@ class MapFile:
             items[i] = items[-1]
             items.pop()
 
+    def RandomizeTriggers(self, rng: random.Random, sprites: list, triggerSettings: list) -> None:
+        if not triggerSettings:
+            return
+        sprite:Sprite
+        for sprite in sprites:
+            settings = triggerSettings.get(sprite.picnum)
+            if not settings:
+                continue
+            hightags = settings.get('hightags')
+            if hightags:
+                sprite.hightag = rng.choice([*hightags, sprite.hightag])
+            lowtags = settings.get('lowtags')
+            if lowtags:
+                sprite.lowtag = rng.choice([*lowtags, sprite.lowtag])
+
     def WriteSprites(self):
-        sprites = self.items + self.enemies + self.other_sprites
+        sprites = self.items + self.enemies + self.triggers + self.other_sprites
         new_len = self.sprites_start + len(sprites) * self.sprite_size
         if len(self.data) < new_len:
             diff = new_len - len(self.data)
