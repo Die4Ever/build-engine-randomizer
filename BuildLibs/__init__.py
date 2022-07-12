@@ -13,7 +13,7 @@ import random
 import pathlib
 
 def GetVersion() -> str:
-    return 'v0.1 Alpha'
+    return 'v0.451 Alpha'
 
 def fancy_unpack(endianness: str, mappings: tuple, data: bytearray) -> Dict:
     format = endianness
