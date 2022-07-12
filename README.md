@@ -9,4 +9,5 @@ For Shadow Warrior, use `voidsw.exe` from that same download as EDuke32 (it's in
 
 ![image](https://user-images.githubusercontent.com/30947252/178213934-88e4ef31-89b5-484e-839a-a50f5f88d00f.png)
 "Damn, I'm lookin' good!"
-![image](https://user-images.githubusercontent.com/30947252/178561957-52ca09dc-143a-4125-bd22-c5695b1b62bf.png)
+
+<img src="https://user-images.githubusercontent.com/30947252/178561957-52ca09dc-143a-4125-bd22-c5695b1b62bf.png" alt="GUI" width="600"/>
