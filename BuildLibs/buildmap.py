@@ -10,10 +10,20 @@ class CStat:
         self.blockingHitscan = bool(cstat & 0x800)
         self.invisible = bool(cstat & 0x8000)
 
+class Sector:
+    def __init__(self, **kargs):
+        self.__dict__ = dict(**kargs)
+        self.nearbySectors:set
+        self.walls:list
+        self.shapes:list
+
 
 class Sprite:
     def __init__(self, d):
         self.__dict__ = d
+        self.pos:tuple
+        self.picnum:int
+        self.sectnum:int
 
     def copy(self) -> 'Sprite':
         d = self.__dict__.copy()
@@ -69,6 +79,15 @@ class MapFile:
         for i in range(num_sprites):
             sprite = self.GetSprite(i)
             self.AppendSprite(sprite)
+
+        self.sectors = []
+        self.sectorCache = {}
+        for i in range(self.numsects):
+            # first wall, num walls
+            start = self.sectors_start + i*self.sector_size
+            # pair of firstwall and numwalls
+            sect = unpack('<hh', data[start:start + 4])
+            self.sectors.append(sect)
 
 
     def Randomize(self, seed:int, settings:dict):
@@ -137,12 +156,18 @@ class MapFile:
 
     def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float) -> Sprite:
         sprite = sprite.copy()
-        x = rng.choice([-300, -200, 200, 300])
-        y = rng.choice([-300, -200, 200, 300])
-        sprite.pos[0] += x * spacing
-        sprite.pos[1] += y * spacing
-        # TODO: check walls? and floors?
-        return sprite
+        for i in range(10):
+            x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
+            y = rng.choice([-350, -250, -150, 0, 150, 250, 350])
+            if x == 0 and y == 0:
+                continue
+            sprite.pos[0] += x * spacing
+            sprite.pos[1] += y * spacing
+            newsect = self.GetContainingSectorNearby(sprite.sectnum, sprite.pos)
+            if newsect is not None:
+                sprite.sectnum = newsect
+                return sprite
+        return None
 
     def SwapAllSprites(self, rng, toSwap):
         for a in range(len(toSwap)):
@@ -158,7 +183,8 @@ class MapFile:
             if rng.random() > rate:
                 continue
             newsprite = self.DupeSprite(rng, sprite, spacing)
-            items.append(newsprite)
+            if newsprite:
+                items.append(newsprite)
 
     def ReduceSprites(self, rng: random.Random, items: list, rate: float):
         for i in range(len(items)-1, -1, -1):
@@ -250,5 +276,69 @@ class MapFile:
             self.data[i] = b
             i+=1
 
+    def GetSectorInfo(self, sector:int) -> Sector:
+        if sector in self.sectorCache:
+            return self.sectorCache[sector]
+
+        wall = self.sectors[sector][0]
+        numwalls = self.sectors[sector][1]
+        walls = {}
+        nearbySectors = set()
+        shapes = [[]]
+        for i in range(numwalls):
+            start = self.walls_start + wall*self.wall_size
+            (x, y, nextwall, otherwall, nextsect) = unpack('<iihhh', self.data[start:start + 14])
+            nearbySectors.add(nextsect)
+            point = (x, y)
+            walls[wall] = point
+            shapes[-1].append(point)
+            if nextwall in walls:
+                shapes.append([])
+            wall += 1
+
+        shapes.pop(-1)
+        nearbySectors.discard(-1)
+        nearbySectors.discard(sector)
+        sect = Sector(walls=walls, nearbySectors=nearbySectors, shapes=shapes)
+        self.sectorCache[sector] = sect
+        return sect
+
+    def GetContainingSectorNearby(self, sector:int, point) -> int:
+        sectorInfo:Sector = self.GetSectorInfo(sector)
+        if PointIsInSector(sectorInfo, point):
+            return sector
+        for sect2 in sectorInfo.nearbySectors:
+            sectorInfo2:Sector = self.GetSectorInfo(sect2)
+            if PointIsInSector(sectorInfo2, point):
+                return sect2
+        return None
+
+
     def GetData(self) -> bytearray:
         return self.data
+
+
+def PointIsInSector(sect:Sector, testpos:tuple) -> bool:
+    intersects = 0
+    for shape in sect.shapes:
+        intersects = PointIsInShape(shape, testpos, intersects)
+    return (intersects%2)==1
+
+
+def PointIsInShape(walls, p, intersects) -> int:
+    # https://stackoverflow.com/a/2922778
+    i=0
+    n=len(walls)
+    j=n-1
+    while i < n:
+        # ensure the wall straddles the point on the Y axis
+        if ((walls[i][1] > p[1]) != (walls[j][1] > p[1])):
+            # check slope?
+            wallXSize = walls[j][0]-walls[i][0]
+            wallYSize = walls[j][1]-walls[i][1]
+            pointYDist = p[1]-walls[i][1]
+            if p[0] < wallXSize * pointYDist / wallYSize + walls[i][0]:
+                intersects += 1
+        j=i
+        i+=1
+    return intersects

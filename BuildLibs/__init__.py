@@ -13,7 +13,7 @@ import random
 import pathlib
 
 def GetVersion() -> str:
-    return 'v0.451 Alpha'
+    return 'v0.452 Alpha'
 
 class FancyPacker:
     def __init__(self, endianness: str, mappings: tuple):
@@ -51,7 +51,7 @@ class FancyPacker:
         values = []
         for k in range(len(self.keys)):
             v = dict[self.keys[k]]
-            if type(v) == list:
+            if self.lens[k] > 1:
                 values += v
             else:
                 values.append(v)

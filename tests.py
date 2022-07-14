@@ -1,9 +1,10 @@
 import shutil
+from BuildLibs import buildmap
 from BuildLibs.grp import *
 import BuildLibs.gui
 import cProfile, pstats
 import unittest
-from unittest import case
+from unittest import SkipTest, case
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 
@@ -137,6 +138,13 @@ class BaseTestCase(unittest.TestCase):
         with open(filename) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
             md5sum = md5(file).hexdigest()
             return md5sum
+
+    def test_walls(self):
+        with self.subTest('test PointIsInShape'):
+            walls = [(0,0), (10,0), (10,10), (0,10)]
+            self.assertEqual(buildmap.PointIsInShape(walls, (5,5), 0) % 2, 1)
+            self.assertEqual(buildmap.PointIsInShape(walls, (15,15), 0) % 2, 0)
+
 
 
 def runtests():
