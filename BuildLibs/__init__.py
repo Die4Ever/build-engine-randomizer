@@ -39,6 +39,7 @@ class FancyPacker:
                 dict[self.keys[k]] = t[i]
                 i+=1
                 continue
+            # TODO: try using tuples instead
             a = []
             for f in range(self.lens[k]):
                 a.append(t[i])

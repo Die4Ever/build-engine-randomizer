@@ -90,8 +90,21 @@ class MapFile:
             self.sectors.append(sect)
 
 
-    def Randomize(self, seed:int, settings:dict):
-        debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
+    def Randomize(self, seed:int, settings:dict, spoilerlog):
+        try:
+            spoilerlog.SetFilename(self.name)
+            spoilerlog.SetGameMapSettings(self.gameSettings)
+            self.spoilerlog = spoilerlog
+            self._Randomize(seed, settings)
+        finally:
+            self.spoilerlog = None
+            spoilerlog.FinishRandomizingFile()
+
+    def _Randomize(self, seed:int, settings:dict):
+        self.spoilerlog.write('before: '
+            + 'items: ' + str(len(self.items)) + ', enemies: ' + str(len(self.enemies))
+            + ', triggers: ' + str(len(self.triggers)) + ', other_sprites: ' + str(len(self.other_sprites))
+        )
 
         chanceDupeItem:float = settings['MapFile.chanceDupeItem']
         chanceDeleteItem:float = settings['MapFile.chanceDeleteItem']
@@ -100,23 +113,23 @@ class MapFile:
         chanceDeleteEnemy:float = settings['MapFile.chanceDeleteEnemy']
 
         rng = random.Random(crc32('map dupe items', self.name, seed))
-        self.DupeSprites(rng, self.items, chanceDupeItem, 1)
+        self.DupeSprites(rng, self.items, chanceDupeItem, 1, 'item')
 
         rng = random.Random(crc32('map shuffle items', self.name, seed))
-        self.SwapAllSprites(rng, self.items)
+        self.SwapAllSprites(rng, self.items, 'item')
 
         rng = random.Random(crc32('map reduce items', self.name, seed))
-        self.ReduceSprites(rng, self.items, chanceDeleteItem)
+        self.ReduceSprites(rng, self.items, chanceDeleteItem, 'item')
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2)
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, 'item')
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
-        self.SwapAllSprites(rng, self.enemies)
+        self.SwapAllSprites(rng, self.enemies, 'enemy')
 
         rng = random.Random(crc32('map reduce enemies', self.name, seed))
-        self.ReduceSprites(rng, self.enemies, chanceDeleteEnemy)
+        self.ReduceSprites(rng, self.enemies, chanceDeleteEnemy, 'enemy')
         trace('\n')
 
         rng = random.Random(crc32('map rando triggers', self.name, seed))
@@ -127,7 +140,11 @@ class MapFile:
             self.AddSprite(rng, add)
 
         self.WriteSprites()
-        debug('items', len(self.items), 'enemies', len(self.enemies), 'triggers', len(self.triggers), 'other_sprites', len(self.other_sprites), sep=', ')
+
+        self.spoilerlog.write(self.name + ': after: '
+            + 'items: ' + str(len(self.items)) + ', enemies: ' + str(len(self.enemies))
+            + ', triggers: ' + str(len(self.triggers)) + ', other_sprites: ' + str(len(self.other_sprites))
+        )
 
     def IsItem(self, sprite:Sprite, cstat: CStat) -> bool:
         if self.gameSettings.swappableItems and sprite.picnum not in self.gameSettings.swappableItems:
@@ -145,8 +162,8 @@ class MapFile:
     def IsTrigger(self, sprite:Sprite, cstat: CStat) -> bool:
         return sprite.picnum in self.gameSettings.triggers
 
-    def SwapSprites(self, a:Sprite, b:Sprite):
-        trace(a, b, '\n')
+    def SwapSprites(self, spritetype:str, a:Sprite, b:Sprite):
+        self.spoilerlog.SwapSprites(spritetype, a, b)
 
         swapobjkey(a, b, 'pos')
         swapobjkey(a, b, 'sectnum')
@@ -154,7 +171,7 @@ class MapFile:
         #swapobjkey(a, b, 'hightag')
         #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
 
-    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float) -> Sprite:
+    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, spritetype: str) -> Sprite:
         sprite = sprite.copy()
         for i in range(10):
             x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
@@ -166,30 +183,32 @@ class MapFile:
             newsect = self.GetContainingSectorNearby(sprite.sectnum, sprite.pos)
             if newsect is not None:
                 sprite.sectnum = newsect
+                self.spoilerlog.AddSprite(spritetype, sprite)
                 return sprite
         return None
 
-    def SwapAllSprites(self, rng, toSwap):
+    def SwapAllSprites(self, rng, toSwap, spritetype:str):
         for a in range(len(toSwap)):
             b = rng.randrange(0, len(toSwap))
             if a == b:
                 continue
             a = toSwap[a]
             b = toSwap[b]
-            self.SwapSprites(a, b)
+            self.SwapSprites(spritetype, a, b)
 
-    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float):
+    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float, spritetype: str):
         for sprite in items.copy():
             if rng.random() > rate:
                 continue
-            newsprite = self.DupeSprite(rng, sprite, spacing)
+            newsprite = self.DupeSprite(rng, sprite, spacing, spritetype)
             if newsprite:
                 items.append(newsprite)
 
-    def ReduceSprites(self, rng: random.Random, items: list, rate: float):
+    def ReduceSprites(self, rng: random.Random, items: list, rate: float, spritetype: str):
         for i in range(len(items)-1, -1, -1):
             if rng.random() > rate:
                 continue
+            self.spoilerlog.DelSprite(spritetype, items[i])
             items[i] = items[-1]
             items.pop()
 
@@ -204,9 +223,11 @@ class MapFile:
             hightags = settings.get('hightags')
             if hightags:
                 sprite.hightag = rng.choice([*hightags, sprite.hightag])
+                self.spoilerlog.SpriteChangedTag('hightag', sprite, sprite.hightag)
             lowtags = settings.get('lowtags')
             if lowtags:
                 sprite.lowtag = rng.choice([*lowtags, sprite.lowtag])
+                self.spoilerlog.SpriteChangedTag('lowtag', sprite, sprite.lowtag)
 
     def AddSprite(self, rng: random.Random, add: dict) -> None:
         add = {
@@ -227,7 +248,8 @@ class MapFile:
 
         sprite = Sprite(add)
         self.AppendSprite(sprite)
-        print('added', repr(sprite))
+        spritetype = self.GetSpriteType(sprite)
+        self.spoilerlog.AddSprite(spritetype, sprite)
 
 
     def AppendSprite(self, sprite:Sprite) -> None:
@@ -240,6 +262,17 @@ class MapFile:
             self.triggers.append(sprite)
         else:
             self.other_sprites.append(sprite)
+
+    def GetSpriteType(self, sprite:Sprite) -> str:
+        cstat = CStat(sprite.cstat)
+        if self.IsItem(sprite, cstat):
+            return 'item'
+        elif self.IsEnemy(sprite, cstat):
+            return 'enemy'
+        elif self.IsTrigger(sprite, cstat):
+            return 'trigger'
+        else:
+            return 'other'
 
     def WriteSprites(self):
         sprites = self.items + self.enemies + self.triggers + self.other_sprites

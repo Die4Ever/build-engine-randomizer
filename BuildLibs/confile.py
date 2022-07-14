@@ -49,10 +49,20 @@ class ConFile:
             r = 1/r
         r *= scale
         newval = round(oldval * r)
-        info(name, oldval, newval, end=', ')
+        self.spoilerlog.Change(name, oldval, newval)
         return 'define '+name+' '+str(newval)+theRest
 
-    def Randomize(self, seed:int, settings:dict):
+    def Randomize(self, seed:int, settings:dict, spoilerlog):
+        try:
+            spoilerlog.SetFilename(self.name)
+            spoilerlog.SetConSettings(self.conSettings)
+            self.spoilerlog = spoilerlog
+            self._Randomize(seed, settings)
+        finally:
+            self.spoilerlog = None
+            spoilerlog.FinishRandomizingFile()
+
+    def _Randomize(self, seed:int, settings:dict):
         # split lines
         range:float = settings['conFile.range']
         scale:float = settings['conFile.scale']

@@ -111,14 +111,37 @@ class BaseTestCase(unittest.TestCase):
 
             newMd5s = self.Md5GameFiles(testname, grp, basepath)
 
+            self.assertIsNotNone(oldMd5s, 'Old MD5s')
+            self.assertGreater(len(oldMd5s), 0, 'Old MD5s')
+            self.assertIsNotNone(newMd5s, 'New MD5s')
+            self.assertGreater(len(newMd5s), 0, 'New MD5s')
+
             if shouldMatch:
                 self.assertDictEqual(oldMd5s, newMd5s)
             else:
                 self.assertEqual(len(oldMd5s), len(newMd5s), 'Same number of files')
                 for k in oldMd5s.keys():
                     self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
-            return newMd5s
 
+            with open(basepath + '/Randomizer.txt') as spoilerlog:
+                logs = spoilerlog.read()
+                self.assertGreater(len(logs), 10, 'found spoiler logs')
+                self.assertInLogs('Randomizing with seed: '+str(seed), logs)
+                self.assertInLogs('Finished randomizing file: USER.CON', logs)
+                self.assertInLogs('Finished randomizing file: E1L6.MAP', logs)
+                self.assertInLogs('added item ', logs)
+                self.assertInLogs('swapping item ', logs)
+                self.assertInLogs('deleted item ', logs)
+                self.assertInLogs('added item ', logs)
+                self.assertInLogs('swapping enemy ', logs)
+                self.assertInLogs('deleted enemy ', logs)
+                self.assertInLogs('set hightag to ', logs)
+                self.assertInLogs('added item ', logs)
+        return newMd5s
+
+    def assertInLogs(self, text, logs):
+        if text not in logs:
+            self.fail(text + ' not found in logs')
 
     def Md5GameFiles(self, testname:str, grp:GrpFile, basepath: str) -> dict:
         with self.subTest('MD5 '+testname):
