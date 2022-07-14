@@ -173,12 +173,14 @@ class BaseTestCase(unittest.TestCase):
 def runtests():
     unittest.main(verbosity=9, warnings="error")#, failfast=True)
 
-try:
-    if os.path.isdir(temp):
-        shutil.rmtree(temp)
-    #cProfile.run("runtests()", sort="cumtime")
-    runtests()
-finally:
-#     if os.path.isdir(temp):
-#         shutil.rmtree(temp)
-    pass
+if __name__ == "__main__":
+    try:
+        if os.path.isdir(temp):
+            shutil.rmtree(temp)
+        #setVerbose(-10)
+        #cProfile.run("runtests()", sort="cumtime")
+        runtests()
+    finally:
+    #     if os.path.isdir(temp):
+    #         shutil.rmtree(temp)
+        pass

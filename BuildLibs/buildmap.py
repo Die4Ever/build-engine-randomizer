@@ -54,9 +54,9 @@ class MapFile:
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
             raise AssertionError('unexpected map version '+str(self.version), name)
 
-        self.packer = FancyPacker('<', ('pos', 'iii', 'cstat', 'h', 'picnum', 'h', 'gfxstuff', 'bBBB', 'texcoords', 'BBbb',
-            'sectnum', 'h', 'statnum', 'h', 'angle', 'h', 'owner', 'h',
-            'velocity', 'hhh', 'lowtag', 'h', 'hightag', 'h', 'extra', 'h'))
+        self.packer = FancyPacker('<', dict(pos='iii', cstat='h', picnum='h', gfxstuff='bBBB',
+            texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',
+            velocity='hhh', lowtag='h', hightag='h', extra='h'))
 
         self.sectors_start = 22
         self.sectors_length = self.numsects * self.sector_size

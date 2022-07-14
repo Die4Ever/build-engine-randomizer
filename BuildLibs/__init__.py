@@ -16,18 +16,16 @@ def GetVersion() -> str:
     return 'v0.452 Alpha'
 
 class FancyPacker:
-    def __init__(self, endianness: str, mappings: tuple):
+    def __init__(self, endianness: str, mappings: dict):
         format = endianness
         lens = []
         keys = []
-        for k in range(len(mappings) // 2):
-            format += mappings[k*2+1]
-            lens.append(len(mappings[k*2+1]))
-            keys.append(mappings[k*2])
+        for k, v in mappings.items():
+            format += v
+            lens.append(len(v))
 
         self.format = format
-        #self.mappings = mappings
-        self.keys = keys
+        self.keys = list(mappings.keys())
         self.lens = lens
 
     def unpack(self, data: bytearray) -> dict:
@@ -39,12 +37,8 @@ class FancyPacker:
                 dict[self.keys[k]] = t[i]
                 i+=1
                 continue
-            # TODO: try using tuples instead
-            a = []
-            for f in range(self.lens[k]):
-                a.append(t[i])
-                i+=1
-            dict[self.keys[k]] = a
+            dict[self.keys[k]] = list(t[i:i+self.lens[k]])
+            i+=self.lens[k]
 
         return dict
 
@@ -81,31 +75,25 @@ def copyobj(obj):
 
 verbose = 1
 
-def _warning(*args, **kargs):
+def error(*args, **kargs):
+    print('ERROR:', *args, **kargs)
+
+def warning(*args, **kargs):
     print('WARNING:', *args, **kargs)
 
-def _debug(*args, **kargs):
-    print('DEBUG:', *args, **kargs)
+def info(*args, **kargs):
+    if verbose > -1:
+        print('DEBUG:', *args, **kargs)
 
-def _trace(*args, **kargs):
-    print('TRACE:', *args, **kargs)
+def debug(*args, **kargs):
+    if verbose > 0:
+        print('DEBUG:', *args, **kargs)
 
-warning = _warning
-debug = _debug
-trace = _trace
-info = print
+def trace(*args, **kargs):
+    if verbose > 1:
+        print('TRACE:', *args, **kargs)
+
 
 def setVerbose(v: int):
-    global debug, trace
+    global verbose
     verbose = v
-    if verbose:
-        debug = _debug
-    else:
-        debug = lambda *a, **b: None # do-nothing function
-
-    if verbose >= 2:
-        trace = _trace
-    else:
-        trace = lambda *a, **b: None # do-nothing function
-
-setVerbose(verbose)

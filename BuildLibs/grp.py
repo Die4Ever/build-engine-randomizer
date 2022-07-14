@@ -9,7 +9,7 @@ import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
 except Exception as e:
-    error('Failed to set locale', e, '\n', "".join(traceback.format_exception(exc_type, exc_value, tb)))
+    error('Failed to set locale', e, '\n', traceback.format_exc())
 
 class SpoilerLog:
     def __init__(self, filename):
