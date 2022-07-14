@@ -25,31 +25,32 @@ class FancyPacker:
             lens.append(len(v))
 
         self.format = format
-        self.keys = list(mappings.keys())
-        self.lens = lens
+        self.keys = dict(zip(mappings.keys(), lens))
 
     def unpack(self, data: bytearray) -> dict:
         t = unpack(self.format, data)
         dict = {}
         i = 0
-        for k in range(len(self.keys)):
-            if self.lens[k] == 1:
-                dict[self.keys[k]] = t[i]
+        for k, L in self.keys.items():
+            if L == 1:
+                dict[k] = t[i]
                 i+=1
                 continue
-            dict[self.keys[k]] = list(t[i:i+self.lens[k]])
-            i+=self.lens[k]
+            dict[k] = list(t[i:i+L])
+            i+=L
 
         return dict
 
     def pack(self, dict: dict) -> bytearray:
-        values = []
-        for k in range(len(self.keys)):
-            v = dict[self.keys[k]]
-            if self.lens[k] > 1:
-                values += v
+        values = [None] * (len(self.format)-1)
+        i = 0
+        for k, L in self.keys.items():
+            v = dict[k]
+            if L > 1:
+                values[i:i+L] = v
             else:
-                values.append(v)
+                values[i] = v
+            i+=L
         return pack(self.format, *values)
 
 
