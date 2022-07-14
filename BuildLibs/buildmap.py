@@ -141,7 +141,7 @@ class MapFile:
 
         self.WriteSprites()
 
-        self.spoilerlog.write(self.name + ': after: '
+        self.spoilerlog.write('after: '
             + 'items: ' + str(len(self.items)) + ', enemies: ' + str(len(self.enemies))
             + ', triggers: ' + str(len(self.triggers)) + ', other_sprites: ' + str(len(self.other_sprites))
         )
@@ -173,7 +173,7 @@ class MapFile:
 
     def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, spritetype: str) -> Sprite:
         sprite = sprite.copy()
-        for i in range(10):
+        for i in range(20):
             x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
             y = rng.choice([-350, -250, -150, 0, 150, 250, 350])
             if x == 0 and y == 0:

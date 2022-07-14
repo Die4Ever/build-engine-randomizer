@@ -48,6 +48,7 @@ class SpoilerLog:
         self.file.write(text + '\n')
 
     def GetPicnumName(self, picnum: int) -> str:
+        valname = None
         if self.gameMapSettings and picnum in self.gameMapSettings.swappableItems:
             valname = self.gameMapSettings.swappableItems[picnum]
         if self.gameMapSettings and picnum in self.gameMapSettings.swappableEnemies:

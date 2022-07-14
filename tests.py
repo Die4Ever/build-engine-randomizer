@@ -105,6 +105,7 @@ class BaseTestCase(unittest.TestCase):
         self.maxDiff = None
         testname = grppath + ' Seed ' + ('0451' if seed==451 else str(seed))
         basepath = temp + str(crc32(testname+repr(settings))) + '/'
+        newMd5s = None
         with self.subTest('Randomize '+testname):
             grp = GrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
