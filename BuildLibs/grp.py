@@ -215,6 +215,15 @@ class GrpFile:
     def getmap(self, name, file) -> MapFile:
         return MapFile(self.game, name, bytearray(self.getfile(name, file)))
 
+    def GetOutputFiles(self, basepath:str='') -> tuple:
+        gamedir = os.path.dirname(self.filepath)
+        if not basepath:
+            basepath = gamedir
+        outs = []
+        for o in list(self.conSettings.conFiles.keys()) + self.GetAllFilesEndsWith('.map'):
+            outs.append(o)
+        return (basepath, outs)
+
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:str, spoilerlog, filehandle) -> None:
         spoilerlog.write('Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n\n')

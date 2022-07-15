@@ -10,7 +10,7 @@ from BuildLibs.grp import *
 class RandoSettings:
     def __init__(self):
         self.width=468
-        self.height=375
+        self.height=418
         self.initWindow()
         self.ChooseFile()
         if self.win:
@@ -89,10 +89,26 @@ class RandoSettings:
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
         self.closeWindow()
 
+    def WarnOverwrites(self) -> bool:
+        (basepath,outs) = self.grp.GetOutputFiles()
+        return messagebox.askokcancel(
+            title='Will overwrite the following files!',
+            message='Will overwrite the following files:\n'
+            + 'In ' + basepath + '\n'
+            + ", ".join(outs)
+        )
+
     def Randomize(self):
         try:
             self.randoButton["state"]='disabled'
             self.update()
+
+            if not self.WarnOverwrites():
+                info('Declined overwrite warning, not randomizing')
+                if self.isWindowOpen():
+                    self.randoButton["state"]='normal'
+                return
+
             self._Randomize()
         except Exception as e:
             error('Error Randomizing', self.grppath, e)
@@ -124,8 +140,8 @@ class RandoSettings:
         self.font = font.Font(size=14)
 
         row=0
-        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!',width=40,height=2,font=self.font)
-        infoLabel.grid(column=0,row=row,columnspan=2)
+        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!\nRandomizer will overwrite\nMAP and CON files inside the game directory.',width=40,height=4,font=self.font)
+        infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
         self.seedEntry = self.newInput(Entry, 'Seed: ', 'RNG Seed', row)
