@@ -13,4 +13,6 @@ For Shadow Warrior, use `voidsw.exe` from that same download as EDuke32 (it's in
 
 <img src="https://user-images.githubusercontent.com/30947252/178561957-52ca09dc-143a-4125-bd22-c5695b1b62bf.png" alt="GUI" width="600"/>
 
+Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths.
+
 [Join our Discord here!](https://discord.gg/QwjnYWhKsY)
