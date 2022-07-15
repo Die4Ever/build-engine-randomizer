@@ -180,7 +180,7 @@ class MapFile:
     def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements, replacementChance:float, spritetype: str) -> Sprite:
         sprite = sprite.copy()
         if rng.random() < replacementChance:
-            sprite.picnum = rng.choice((possibleReplacements, sprite.picnum))
+            sprite.picnum = rng.choice((*possibleReplacements, sprite.picnum))
         for i in range(20):
             x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
             y = rng.choice([-350, -250, -150, 0, 150, 250, 350])
