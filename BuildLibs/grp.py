@@ -144,7 +144,8 @@ class GrpFile:
 
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:str, spoilerlog, filehandle) -> None:
-        spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n\n')
+        spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
+        spoilerlog.write(repr(self.game) + '\n\n')
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
             data = self.getfile(conName, filehandle)
@@ -175,6 +176,11 @@ class GrpFile:
                 size = locale.format_string('%d bytes', len(data), grouping=True)
                 spoilerlog.write(mapname + ' writing to ' + out + ', is ' + size)
                 f.write(map.GetData())
+
+        spoilerlog.write('\n')
+        spoilerlog.write(repr(self.conSettings))
+        spoilerlog.write('\n')
+        spoilerlog.write(repr(self.mapSettings))
 
 
     def Randomize(self, seed:int, settings:dict={}, basepath:str='') -> None:

@@ -51,6 +51,9 @@ class GameConSettings:
         if gameName:
             gamesConSettings[gameName] = self
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
     def copy(self) -> 'GameConSettings':
         return copyobj(self)
 
