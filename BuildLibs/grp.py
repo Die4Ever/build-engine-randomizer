@@ -1,8 +1,10 @@
+from datetime import datetime
 import os
 from zipfile import ZipFile
 from BuildLibs import games
 from BuildLibs.buildmap import *
 from BuildLibs.confile import ConFile
+from BuildLibs.SpoilerLog import SpoilerLog
 import traceback
 import locale
 
@@ -10,91 +12,6 @@ try:
     locale.setlocale(locale.LC_ALL, '')
 except Exception as e:
     error('Failed to set locale', e, '\n', traceback.format_exc())
-
-class SpoilerLog:
-    def __init__(self, filename):
-        self.filename = filename
-        self.file = None
-        self.currentFile = ''
-        self.FinishRandomizingFile()
-
-    def __enter__(self):
-        self.file = open(self.filename, 'w')
-        return self
-
-    def __exit__(self, exc_type, exc_value, tb):
-        if exc_value:
-            text = "".join(traceback.format_exception(exc_type, exc_value, tb))
-            error(text)
-            self.file.write(text)
-
-        self.file.close()
-
-    def write(self, text):
-        info(text)
-        self.file.write(text + '\n')
-
-    def Change(self, var, old, new):
-        text = '    ' + var + ' changed from ' + str(old) + ' to ' + str(new)
-        info(text)
-        self.file.write(text + '\n')
-
-    def AddSprite(self, type, sprite):
-        text = '    added ' + type + ' ' + self.DescribeSprite(sprite)
-        trace(text)
-        self.file.write(text + '\n')
-
-    def DelSprite(self, type, sprite):
-        text = '    deleted ' + type + ' ' + self.DescribeSprite(sprite)
-        trace(text)
-        self.file.write(text + '\n')
-
-    def GetPicnumName(self, picnum: int) -> str:
-        valname = None
-        if self.gameMapSettings and picnum in self.gameMapSettings.swappableItems:
-            valname = self.gameMapSettings.swappableItems[picnum]
-        if self.gameMapSettings and picnum in self.gameMapSettings.swappableEnemies:
-            valname = self.gameMapSettings.swappableEnemies[picnum]
-        if valname:
-            return valname + ' ('+str(picnum)+')'
-        return str(picnum)
-
-    def DescribeSprite(self, sprite) -> str:
-        name = self.GetPicnumName(sprite.picnum)
-        # tuple gives parens so it looks better than a list
-        pos = tuple(sprite.pos)
-        return name + ' ' + str(pos)
-
-    def SwapSprites(self, spritetype, s1, s2):
-        text = '    swapping ' + spritetype + ' ' + self.DescribeSprite(s1) + ' with ' + self.DescribeSprite(s2)
-        trace(text)
-        self.file.write(text + '\n')
-
-    def SpriteChangedTag(self, tagname: str, sprite, tagval):
-        # tuple gives parens so it looks better than a list
-        pos = str(tuple(sprite.pos))
-        tagval = self.GetPicnumName(tagval)
-        text = '    set ' + tagname + ' to ' + tagval + ' on trigger (' + str(sprite.picnum) + ') at ' + pos
-        debug(text)
-        self.file.write(text + '\n')
-
-    # which file is currently being randomized
-    def SetFilename(self, filename):
-        self.currentFile = filename
-        self.write('\nStarting randomizing file: ' + filename)
-
-    def FinishRandomizingFile(self):
-        if self.currentFile:
-            self.write('Finished randomizing file: ' + self.currentFile + '\n')
-        self.currentFile = ''
-        self.conSettings = {}
-        self.gameMapSettings = {}
-
-    def SetConSettings(self, conSettings):
-        self.conSettings = conSettings
-
-    def SetGameMapSettings(self, gameMapSettings):
-        self.gameMapSettings = gameMapSettings
 
 
 class GrpFile:
@@ -204,6 +121,7 @@ class GrpFile:
         for f in self.files.keys():
             if f.lower().endswith(postfix):
                 matches.append(f)
+        matches.sort()
         return matches
 
     def getfile(self, name, filehandle=None) -> bytes:
@@ -226,7 +144,7 @@ class GrpFile:
 
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:str, spoilerlog, filehandle) -> None:
-        spoilerlog.write('Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n\n')
+        spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n\n')
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
             data = self.getfile(conName, filehandle)
@@ -257,7 +175,7 @@ class GrpFile:
         gamedir = os.path.dirname(self.filepath)
         if not basepath:
             basepath = gamedir
-        out = os.path.join(basepath, 'Randomizer.txt')
+        out = os.path.join(basepath, 'Randomizer.html')
         pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)

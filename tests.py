@@ -131,7 +131,7 @@ class Duke3dSWTestCase(unittest.TestCase):
                 for k in oldMd5s.keys():
                     self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
 
-            with open(basepath + '/Randomizer.txt') as spoilerlog:
+            with open(basepath + '/Randomizer.html') as spoilerlog:
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
