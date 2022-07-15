@@ -112,8 +112,11 @@ class MapFile:
         chanceDupeEnemy:float = settings['MapFile.chanceDupeEnemy']
         chanceDeleteEnemy:float = settings['MapFile.chanceDeleteEnemy']
 
+        itemVariety:float = settings['MapFile.itemVariety']
+        enemyVariety:float = settings['MapFile.enemyVariety']
+
         rng = random.Random(crc32('map dupe items', self.name, seed))
-        self.DupeSprites(rng, self.items, chanceDupeItem, 1, 'item')
+        self.DupeSprites(rng, self.items, chanceDupeItem, 1, self.gameSettings.swappableItems.keys(), itemVariety, 'item')
 
         rng = random.Random(crc32('map shuffle items', self.name, seed))
         self.SwapAllSprites(rng, self.items, 'item')
@@ -123,7 +126,7 @@ class MapFile:
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, 'enemy')
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, self.gameSettings.addableEnemies.keys(), enemyVariety, 'enemy')
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
         self.SwapAllSprites(rng, self.enemies, 'enemy')
@@ -174,8 +177,10 @@ class MapFile:
         #swapobjkey(a, b, 'hightag')
         #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
 
-    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, spritetype: str) -> Sprite:
+    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements, replacementChance:float, spritetype: str) -> Sprite:
         sprite = sprite.copy()
+        if rng.random() < replacementChance:
+            sprite.picnum = rng.choice((possibleReplacements, sprite.picnum))
         for i in range(20):
             x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
             y = rng.choice([-350, -250, -150, 0, 150, 250, 350])
@@ -199,11 +204,11 @@ class MapFile:
             b = toSwap[b]
             self.SwapSprites(spritetype, a, b)
 
-    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float, spritetype: str):
+    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float, possibleReplacements, replacementChance:float, spritetype: str):
         for sprite in items.copy():
             if rng.random() > rate:
                 continue
-            newsprite = self.DupeSprite(rng, sprite, spacing, spritetype)
+            newsprite = self.DupeSprite(rng, sprite, spacing, possibleReplacements, replacementChance, spritetype)
             if newsprite:
                 items.append(newsprite)
 

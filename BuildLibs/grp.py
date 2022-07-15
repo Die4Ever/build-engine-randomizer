@@ -55,10 +55,10 @@ class GrpFile:
                 if con not in cons:
                     warning('file not found', con)
 
-        mapSettings = games.GetGameMapSettings(self.game)
-        if not mapSettings.swappableItems:
+        self.mapSettings = games.GetGameMapSettings(self.game)
+        if not self.mapSettings.swappableItems:
             warning("This game doesn't have any swappableItems")
-        if not mapSettings.swappableEnemies:
+        if not self.mapSettings.swappableEnemies:
             warning("This game doesn't have any swappableEnemies")
 
 
@@ -159,15 +159,21 @@ class GrpFile:
                 spoilerlog.write(out + ' is ' + size)
                 f.write(text)
 
-        for mapname in self.GetAllFilesEndsWith('.map'):
+        maps = self.GetAllFilesEndsWith('.map')
+        mapRenames = {}
+        if settings.get('grp.reorderMaps'):
+            rng = random.Random(crc32('grp reorder maps', seed))
+            mapRenames = dict(zip(maps, rng.sample(maps, k=len(maps))))
+        for mapname in maps:
             map:MapFile = self.getmap(mapname, filehandle)
             map.Randomize(seed, settings, spoilerlog)
-            out = os.path.join(basepath, mapname)
+            writename = mapRenames.get(mapname, mapname)
+            out = os.path.join(basepath, writename)
             pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
             with open(out, 'wb') as f:
                 data = map.GetData()
                 size = locale.format_string('%d bytes', len(data), grouping=True)
-                spoilerlog.write(out + ' is ' + size)
+                spoilerlog.write(mapname + ' writing to ' + out + ', is ' + size)
                 f.write(map.GetData())
 
 

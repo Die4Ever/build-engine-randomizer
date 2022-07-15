@@ -25,13 +25,14 @@ class Game():
         return repr(self.__dict__)
 
 class GameMapSettings:
-    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, triggers={}, additions={}):
+    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, addableEnemies={}, triggers={}, additions={}):
         global gamesMapSettings
         self.gameName = gameName
         self.minMapVersion = minMapVersion
         self.maxMapVersion = maxMapVersion
         self.swappableItems = swappableItems
         self.swappableEnemies = swappableEnemies
+        self.addableEnemies = addableEnemies
         self.triggers = triggers
         self.additions = additions
         if gameName:
@@ -252,6 +253,23 @@ GameMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
         12496: 'A_MECHBOSS_BOTTOM',
         12488: 'A_MECHBOSS_TOP',
     },
+    addableEnemies = {
+        7300: 'A_MECHSECT',
+        12096: 'A_CULTIST',
+        12288: 'A_GREATER',
+        11796: 'A_SHOTGUNNER',
+        12925: 'A_BRUTE',
+        11600: 'A_DRONE',
+        11450: 'A_DEACON',
+        13175: 'A_ARCHANGEL',
+        13350: 'A_WENTEKO',
+        13600: 'A_NUKEMUTANT',
+        13685: 'A_NUKEMUTANT_RISE',
+        13720: 'A_NUKEMUTANT_GDF',
+        13785: 'A_NUKEMUTANT_GDF_RISE',
+        11392: 'A_PSEUDO_ENEMY',
+        13850: 'A_HESKEL_BOT',
+    },
     triggers={}
 )
 
@@ -323,7 +341,7 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
         2150: 'LIZMANSPITTING',
         2160: 'LIZMANFEEDING',
         2165: 'LIZMANJUMP',
-        2219: 'EXPLOSION2BOT',
+        #2219: 'EXPLOSION2BOT',
         2370: 'GREENSLIME',
         2371: 'GREENSLIME2',
         # 2630: 'BOSS1',
@@ -340,6 +358,19 @@ GameMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
         4671: 'NEWBEASTHANGDEAD',
         # 4740: 'BOSS4',
         # 4741: 'BOSS4STAYPUT',
+    },
+    addableEnemies = {
+        675: 'EGG',
+        1680: 'LIZTROOP',
+        1820: 'OCTABRAIN',
+        1880: 'DRONE',
+        1920: 'COMMANDER',
+        1960: 'RECON',
+        1975: 'TANK',
+        2000: 'PIGCOP',
+        2120: 'LIZMAN',
+        2370: 'GREENSLIME',
+        4610: 'NEWBEAST',
     },
     triggers = {
         # 675 EGG doesn't work for spawning?
@@ -420,7 +451,8 @@ GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
         818: 'mine2',
         819: 'mine3',
         #2470: 'EXIT_SWITCH'
-    }, swappableEnemies = {
+    },
+    swappableEnemies = {
         4096: 'EVIL_NINJA',
         4162: 'EVIL_NINJA_CROUCHING',
         4320: 'BIG_RIPPER',
@@ -433,6 +465,19 @@ GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
         5162: 'FEMALE_WARRIOR',
         1580: 'LITTLE_RIPPER',
         #3780: 'FISH',
+        800: 'HORNET',
+    },
+    addableEnemies = {
+        4096: 'EVIL_NINJA',
+        4320: 'BIG_RIPPER',
+        1210: 'SUMO_BOSS',
+        1300: 'SERPENT_BOSS',
+        1400: 'COOLIE',
+        1441: 'COOLIE_GHOST',
+        1469: 'GREEN_GUARDIAN',
+        5426: 'ZILLA_BOSS',
+        5162: 'FEMALE_WARRIOR',
+        1580: 'LITTLE_RIPPER',
         800: 'HORNET',
     },
     triggers={}
