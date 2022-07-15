@@ -17,15 +17,14 @@ def GetVersion() -> str:
 
 class FancyPacker:
     def __init__(self, endianness: str, mappings: dict):
-        format = endianness
+        self.format = endianness
         lens = []
-        keys = []
+        self.keys = {}
         for k, v in mappings.items():
-            format += v
+            self.format += v
+            self.keys[k] = len(v)
             lens.append(len(v))
 
-        self.format = format
-        self.keys = dict(zip(mappings.keys(), lens))
 
     def unpack(self, data: bytearray) -> dict:
         t = unpack(self.format, data)

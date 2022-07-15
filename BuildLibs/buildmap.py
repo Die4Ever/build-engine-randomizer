@@ -49,7 +49,7 @@ class MapFile:
 
         if self.version == 6:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
-            raise NotImplemented('MAP Format Version 6 is not yet implemented', name)
+            raise NotImplementedError('MAP Format Version 6 is not yet implemented', name)
 
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
             raise AssertionError('unexpected map version '+str(self.version), name)

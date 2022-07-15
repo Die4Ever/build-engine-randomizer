@@ -33,6 +33,7 @@ different_settings = {
     'conFile.difficulty': 0.7,
 }
 
+# we need the correct file order so we can match the md5
 original_order = [
 'DEFS.CON', 'GAME.CON', 'USER.CON', 'D3DTIMBR.TMB', 'DUKESW.BIN', 'LOOKUP.DAT', 'PALETTE.DAT',
 'TABLES.DAT', 'SECRET.VOC', 'BLANK.VOC', 'ROAM06.VOC', 'ROAM58.VOC', 'PREDRG.VOC', 'GBLASR01.VOC',
@@ -66,10 +67,16 @@ original_order = [
 'E1L2.MAP', 'E1L3.MAP', 'E1L4.MAP', 'E1L5.MAP', 'E1L6.MAP'
 ]
 
-class BaseTestCase(unittest.TestCase):
+class Duke3dSWTestCase(unittest.TestCase):
     def subTest(self, msg=case._subtest_msg_sentinel, **params):
         print('\n----------------------------------\nstarting subTest', msg, '\n----------------------------------')
         return super().subTest(msg, **params)
+
+    @classmethod
+    def tearDownClass(cls):
+        # GitHub Actions doesn't show STDERR
+        print('Finished '+ str(cls.__name__))
+        super().tearDownClass()
 
     def test_1_extract_zipgrp(self):
         # I zipped the GRP file to save space in the repo

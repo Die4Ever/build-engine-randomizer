@@ -96,6 +96,7 @@ def GetGameConSettings(game: Game) -> GameConSettings:
 
 Game('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1') # Steam version
 Game('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425') # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
+Game('PowerSlave',                         'PowerSlave',             26904012, 'AC80ECB6', '4ae5cbe10396147ae042463b7df8010f', '548751e10f5c25f80d95321565b13f4664434981') # STUFF.DAT
 
 #Game('DUKE.RTS v0.99',                    'Duke Nukem 3D',            175567, '6148685E', '7ECAF2753AA9CC924F746B3D0F36E7C2', 'A9356036AEA01583C85B71410F066285AFE3AF2B') # DUKE.RTS v0.99
 Game('Shareware DUKE3D.GRP v0.99',         'Duke Nukem 3D',           9690241, '02F18900', '56B35E575EBA7F16C0E19628BD6BD934', 'A6341C16BC1170B43BE7F28B5A91C080F9CE3409') # Shareware DUKE3D.GRP v0.99
@@ -438,6 +439,33 @@ GameMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
 )
 # Keys (picnums 1765-1779)
 # Locks 1846-1854
+
+
+GameMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
+    swappableItems={
+        488: 'Pistol',
+        490: 'Machine Gun',
+        491: 'Fancy Gun',
+    },
+    swappableEnemies={
+        1526: 'Mummy',# to 1531
+        1664: 'Mummy',# to 1746
+        1949: 'Mummy',# to 1963
+        2311: 'Anubis Zombie',# to 2373
+        2432: 'Omenwasp',# to 2497 and 2552?
+        2498: 'Armadillo',# to 2548
+        2559: 'Boss Looking Biped',# to 2642 and 2687
+        2643: 'Boss Looking Serpent',# to 2675
+        2698: 'Boss Looking Spider',# to 2750
+        2751: 'Lion Woman',# to 2816 and 3038 to 3049?
+        2817: 'Dude With Gun',# to 3032
+        3072: 'Scorpion',# to 3136 and 3151 to 3181?
+        3137: 'Mouth',# to 3147
+        3200: 'Grasshopper',# to 3250
+    },
+    triggers={},
+    additions={}
+)
 
 # difficulty > 0 means higher number makes the game harder
 GameConSettings('Ion Fury', conFiles = {

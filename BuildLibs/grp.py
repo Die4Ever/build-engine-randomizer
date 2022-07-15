@@ -24,7 +24,9 @@ class SpoilerLog:
 
     def __exit__(self, exc_type, exc_value, tb):
         if exc_value:
-            self.file.write("".join(traceback.format_exception(exc_type, exc_value, tb)))
+            text = "".join(traceback.format_exception(exc_type, exc_value, tb))
+            error(text)
+            self.file.write(text)
 
         self.file.close()
 
