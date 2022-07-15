@@ -44,6 +44,7 @@ class SpoilerLog:
             border-left-color: #555;
         }
         .FileSection {
+            cursor: auto;
             padding: 1rem;
         }
         .collapsed .FileSection {
@@ -54,6 +55,7 @@ class SpoilerLog:
     <script>
         function ClickFile(e) {
             el = e.currentTarget;
+            if(el != e.target) return;
             if(el.classList.contains('collapsed'))
                 el.classList.remove('collapsed');
             else
