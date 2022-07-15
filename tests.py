@@ -137,14 +137,9 @@ class Duke3dSWTestCase(unittest.TestCase):
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
                 self.assertInLogs('Finished randomizing file: USER.CON', logs)
                 self.assertInLogs('Finished randomizing file: E1L6.MAP', logs)
-                self.assertInLogs('added item ', logs)
-                self.assertInLogs('swapping item ', logs)
-                self.assertInLogs('deleted item ', logs)
-                self.assertInLogs('added item ', logs)
-                self.assertInLogs('swapping enemy ', logs)
-                self.assertInLogs('deleted enemy ', logs)
+                self.assertInLogs('<div class="ListSprites">', logs)
                 self.assertInLogs('set hightag to ', logs)
-                self.assertInLogs('added item ', logs)
+                self.assertInLogs('<div class="FileSection">', logs)
         return newMd5s
 
     def assertInLogs(self, text, logs):

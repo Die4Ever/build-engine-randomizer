@@ -123,7 +123,7 @@ class MapFile:
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, 'item')
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, 'enemy')
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
         self.SwapAllSprites(rng, self.enemies, 'enemy')
@@ -140,6 +140,9 @@ class MapFile:
             self.AddSprite(rng, add)
 
         self.WriteSprites()
+
+        self.spoilerlog.ListSprites('item', self.items)
+        self.spoilerlog.ListSprites('enemy', self.enemies)
 
         self.spoilerlog.write('after: '
             + 'items: ' + str(len(self.items)) + ', enemies: ' + str(len(self.enemies))

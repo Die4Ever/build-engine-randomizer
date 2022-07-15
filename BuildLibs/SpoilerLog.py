@@ -92,12 +92,12 @@ class SpoilerLog:
     def AddSprite(self, type, sprite):
         text = '    added ' + type + ' ' + self.DescribeSprite(sprite)
         trace(text)
-        self._WriteHtml('AddSprite', text)
+        #self._WriteHtml('AddSprite', text)
 
     def DelSprite(self, type, sprite):
         text = '    deleted ' + type + ' ' + self.DescribeSprite(sprite)
         trace(text)
-        self._WriteHtml('DelSprite', text)
+        #self._WriteHtml('DelSprite', text)
 
     def GetPicnumName(self, picnum: int) -> str:
         valname = None
@@ -118,7 +118,12 @@ class SpoilerLog:
     def SwapSprites(self, spritetype, s1, s2):
         text = '    swapping ' + spritetype + ' ' + self.DescribeSprite(s1) + ' with ' + self.DescribeSprite(s2)
         trace(text)
-        self._WriteHtml('SwapSprites', text)
+        #self._WriteHtml('SwapSprites', text)
+
+    def ListSprites(self, spritetype, sprites):
+        for sprite in sprites:
+            text = '    ' + spritetype + ' ' + self.DescribeSprite(sprite)
+            self._WriteHtml('ListSprites', text)
 
     def SpriteChangedTag(self, tagname: str, sprite, tagval):
         # tuple gives parens so it looks better than a list
