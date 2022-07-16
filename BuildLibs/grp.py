@@ -35,7 +35,7 @@ class GrpFile:
             self.type = 'grp'
             self.GetFilesInfoGrp()
         else:
-            raise Exception(filepath + ' is an unknown type')
+            raise Exception(filepath + ' is an unknown type, size: ', self.filesize)
 
         cons = self.GetAllFilesEndsWith('.con')
         self.game = games.GetGame(filepath)
@@ -45,9 +45,9 @@ class GrpFile:
 
         self.conSettings = games.GetGameConSettings(self.game)
         if not self.conSettings:
-            raise Exception('missing GameConSettings', filepath)
+            raise Exception('missing GameConSettings', self.game, filepath)
         elif not self.conSettings.conFiles:
-            warning("This game is missing CON file randomization")
+            warning("This game is missing CON file randomization", self.game, filepath)
             for con in cons:
                 self.ExtractFile('temp/', con)
         else:
@@ -57,9 +57,9 @@ class GrpFile:
 
         self.mapSettings = games.GetGameMapSettings(self.game)
         if not self.mapSettings.swappableItems:
-            warning("This game doesn't have any swappableItems")
+            warning("This game doesn't have any swappableItems", self.game, filepath)
         if not self.mapSettings.swappableEnemies:
-            warning("This game doesn't have any swappableEnemies")
+            warning("This game doesn't have any swappableEnemies", self.game, filepath)
 
 
     def GetFilesInfoZip(self) -> None:
@@ -190,7 +190,12 @@ class GrpFile:
         out = os.path.join(basepath, 'Randomizer.html')
         pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
-            return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
+            try:
+                return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
+            except:
+                error(self.game, ', seed: ', seed, ', settings: ', settings, ', basepath: ', basepath)
+                error('files: ', self.files)
+                raise
 
     def ExtractFile(self, outpath, name, filehandle=None) -> None:
         pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)

@@ -16,7 +16,6 @@ class SpoilerLog:
     def __exit__(self, exc_type, exc_value, tb):
         if exc_value:
             text = "".join(traceback.format_exception(exc_type, exc_value, tb))
-            error(text)
             self.file.write(text)
         self.WriteFooter()
         self.file.close()
@@ -88,7 +87,7 @@ class SpoilerLog:
 
     def Change(self, var, old, new):
         text = '    ' + var + ' changed from ' + str(old) + ' to ' + str(new)
-        info(text)
+        debug(text)
         self._WriteHtml('Change', text)
 
     def AddSprite(self, type, sprite):

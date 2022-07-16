@@ -2,8 +2,7 @@ import binascii
 import os
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
-
-from BuildLibs import copyobj, crc32
+from BuildLibs import *
 
 gamesList = {}
 gamesMapSettings = {}
@@ -64,11 +63,11 @@ def GetGame(grppath) -> Game:
         crc:int = binascii.crc32(file)
         g:Game = gamesList.get(crc)
         if g:
-            print('matched game:', repr(g))
+            info('matched game:', repr(g))
             return g
         md5sum:str = md5(file).hexdigest()
         sha:str = sha1(file).hexdigest()
-        print('ERROR: in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha, sep=', ')
+        error('ERROR: in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha, sep=', ')
         # TODO support for unknown games with default settings
         return None
     raise Exception('error in GetGame', grppath)

@@ -97,7 +97,7 @@ class RandoSettings:
             self.randoButton["state"]='normal'
             self.update()
         except Exception as e:
-            error('Error Opening File', grppath, e)
+            errordialog('Error Opening File', grppath, e)
             self.closeWindow()
             raise
         return True
@@ -166,7 +166,7 @@ class RandoSettings:
 
             self._Randomize()
         except Exception as e:
-            error('Error Randomizing', self.grppath, e)
+            errordialog('Error Randomizing', self.grppath, e)
             if self.isWindowOpen():
                 self.randoButton["state"]='normal'
             raise
@@ -256,8 +256,8 @@ def chooseFile(root):
     target = filedialog.askopenfilename(title="Choose a GRP file",filetypes=filetype)
     return target
 
-def error(title, msg, e=None):
+def errordialog(title, msg, e=None):
     if e:
         msg += '\n' + str(e) + '\n\n' + traceback.format_exc()
-    print(title, '\n', msg)
-    messagebox.showerror('Error Opening File', msg)
+    error(title, '\n', msg)
+    messagebox.showerror(title, msg)

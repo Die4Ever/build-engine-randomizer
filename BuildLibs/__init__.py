@@ -11,6 +11,7 @@ import binascii
 from collections import namedtuple
 import random
 import pathlib
+from datetime import datetime
 
 def GetVersion() -> str:
     return 'v0.5.2 Alpha'
@@ -77,9 +78,13 @@ verbose = 1
 
 def error(*args, **kargs):
     print('ERROR:', *args, **kargs)
+    with open("errorlog.txt", "a") as file:
+        print(datetime.now().strftime('%c') + ': ERROR:', *args, **kargs, file=file)
 
 def warning(*args, **kargs):
     print('WARNING:', *args, **kargs)
+    with open("errorlog.txt", "a") as file:
+        print(datetime.now().strftime('%c') + ': WARNING:', *args, **kargs, file=file)
 
 def info(*args, **kargs):
     if verbose > -1:
