@@ -2,9 +2,8 @@ from typeguard import typechecked, importhook
 importhook.install_import_hook('BuildLibs')
 
 import shutil
-from BuildLibs import buildmap
+from BuildLibs import buildmap, games, confile, gui, SpoilerLog
 from BuildLibs.grp import *
-import BuildLibs.gui
 import cProfile, pstats
 import unittest
 from unittest import SkipTest, case
@@ -39,6 +38,9 @@ different_settings = {
     'conFile.scale': 0.8,
     'conFile.difficulty': 0.7,
 }
+
+# zipped for tests
+games.Game('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
 
 # we need the correct file order so we can match the md5
 original_order = [
@@ -114,6 +116,24 @@ class Duke3dSWTestCase(unittest.TestCase):
         self.TestRandomize(zippath, 2052, grp0451, False)
         self.TestRandomize(tempgrp, 451, grp0451, True)
         self.TestRandomize(tempgrp, 451, grp0451, False, settings=different_settings)
+
+
+    def test_path_overrides(self):
+        with self.subTest('Open GRP File'):
+            grp: GrpFile = GrpFile(tempgrp)
+
+        with self.subTest('Create External File'):
+            testdata = 'Damn, I\'m lookin good!'
+            extname = 'external_file.txt'
+            grp.game.path_overrides[extname] = '../'+extname
+            gamedir = os.path.dirname(grp.filepath)
+            extpath = os.path.join(gamedir, extname)
+            with open(extpath, 'w') as file:
+                file.write(testdata)
+
+        with self.subTest('Read External File'):
+            t = grp.getfile(extname).decode('utf8')
+            self.assertEqual(t, testdata, 'Got external file path override')
 
 
     def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:

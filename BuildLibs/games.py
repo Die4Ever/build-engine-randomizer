@@ -9,7 +9,7 @@ gamesMapSettings = {}
 gamesConSettings = {}
 
 class Game():
-    def __init__(self, name, type, size:int=0, crc:str='', md5:str='', sha1:str='', path_overrides:dict={}):
+    def __init__(self, name='', type='', size:int=0, crc:str='', md5:str='', sha1:str='', path_overrides:dict={}):
         global gamesList
         self.name = name
         self.type = type
@@ -23,6 +23,9 @@ class Game():
 
     def __repr__(self):
         return repr(self.__dict__)
+
+    def copy(self) -> 'Game':
+        return copyobj(self)
 
 class GameMapSettings:
     def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, swappableItems={}, swappableEnemies={}, addableEnemies={}, triggers={}, additions={}):
@@ -65,7 +68,7 @@ def GetGame(grppath) -> Game:
         g:Game = gamesList.get(crc)
         if g:
             info('matched game:', repr(g))
-            return g
+            return g.copy()
         md5sum:str = md5(file).hexdigest()
         sha:str = sha1(file).hexdigest()
         error('ERROR: in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha, sep=', ')
@@ -148,9 +151,6 @@ Game('Duke: Nuclear Winter Demo', 'Duke: Nuclear Winter', 10965909, 'C7EFBFA9') 
 Game('Duke!ZONE II', 'Duke!ZONE II', 3186656, '1E9516F1') # { "Duke!ZONE II", (int32_t) 0x1E9516F1,  3186656, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "DZ-GAME.CON", NULL}
 Game('Duke Nukem\'s Penthouse Paradise', 'Duke Nukem\'s Penthouse Paradise', 2112419, '7CD82A3B') # { "Duke Nukem's Penthouse Paradise", (int32_t) 0x7CD82A3B,  2112419, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "ppakgame.con", NULL}, // original .zip release
 Game('Duke Nukem\'s Penthouse Paradise', 'Duke Nukem\'s Penthouse Paradise', 4247491, 'CF928A58') # { "Duke Nukem's Penthouse Paradise", (int32_t) 0xCF928A58,  4247491, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "PPAKGAME.CON", NULL}, // ZOOM Platform repacked .grp
-
-# zipped for tests
-Game('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
 
 
 # build these GameMapSettings using this regex find/replace
