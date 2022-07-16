@@ -43,6 +43,7 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
+      - run: sudo apt-get update -y
       - run: sudo apt-get install -y python3-tk idle3
       - run: pip3 install pyinstaller tk
 
