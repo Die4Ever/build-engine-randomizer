@@ -125,6 +125,12 @@ class GrpFile:
         return matches
 
     def getfile(self, name, filehandle=None) -> bytes:
+        if name in self.game.path_overrides:
+            path = self.game.path_overrides[name]
+            path = path.replace('../', '')
+            with open(path, 'rb') as file:
+                return file.read()
+
         if self.type == 'zip':
             return self.getfileZip(name, filehandle)
         else:

@@ -17,7 +17,7 @@ class ConFile:
             self.regexes.append(re.compile('^'+r+'$'))
             self.difficulties.append(self.conSettings[r]['difficulty'])
 
-    def ShouldRandomizeVar(self, name) -> float:
+    def ShouldRandomizeVar(self, name) -> Union[float,None]:
         for i in range(len(self.regexes)):
             if self.regexes[i].match(name):
                 return self.difficulties[i]

@@ -1,11 +1,11 @@
 import sys
-from typing import Dict
 
 if sys.version_info[0] < 3:
     raise ImportError('Python < 3 is unsupported.')
 if sys.version_info[0] == 3 and sys.version_info[1] < 6:
     raise ImportError('Python < 3.6 is unsupported.')
 
+from typing import Union
 from struct import unpack, pack
 import binascii
 from collections import namedtuple
@@ -41,7 +41,7 @@ class FancyPacker:
 
         return dict
 
-    def pack(self, dict: dict) -> bytearray:
+    def pack(self, dict: dict) -> bytes:
         values = [None] * (len(self.format)-1)
         i = 0
         for k, L in self.keys.items():

@@ -1,3 +1,6 @@
+from typeguard import typechecked, importhook
+importhook.install_import_hook('BuildLibs')
+
 import shutil
 from BuildLibs import buildmap
 from BuildLibs.grp import *
@@ -71,6 +74,7 @@ original_order = [
 'E1L2.MAP', 'E1L3.MAP', 'E1L4.MAP', 'E1L5.MAP', 'E1L6.MAP'
 ]
 
+@typechecked
 class Duke3dSWTestCase(unittest.TestCase):
     def subTest(self, msg=case._subtest_msg_sentinel, **params):
         print('\n----------------------------------\nstarting subTest', msg, '\n----------------------------------')

@@ -177,7 +177,7 @@ class MapFile:
         #swapobjkey(a, b, 'hightag')
         #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
 
-    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements, replacementChance:float, spritetype: str) -> Sprite:
+    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements, replacementChance:float, spritetype: str) -> Union[Sprite,None]:
         sprite = sprite.copy()
         if rng.random() < replacementChance:
             sprite.picnum = rng.choice((*possibleReplacements, sprite.picnum))
@@ -220,7 +220,7 @@ class MapFile:
             items[i] = items[-1]
             items.pop()
 
-    def RandomizeTriggers(self, rng: random.Random, sprites: list, triggerSettings: list) -> None:
+    def RandomizeTriggers(self, rng: random.Random, sprites: list, triggerSettings: dict) -> None:
         if not triggerSettings:
             return
         sprite:Sprite
@@ -344,7 +344,7 @@ class MapFile:
         self.sectorCache[sector] = sect
         return sect
 
-    def GetContainingSectorNearby(self, sector:int, point) -> int:
+    def GetContainingSectorNearby(self, sector:int, point) -> Union[int,None]:
         sectorInfo:Sector = self.GetSectorInfo(sector)
         if PointIsInSector(sectorInfo, point):
             return sector
@@ -359,7 +359,7 @@ class MapFile:
         return self.data
 
 
-def PointIsInSector(sect:Sector, testpos:tuple) -> bool:
+def PointIsInSector(sect:Sector, testpos:list) -> bool:
     intersects = 0
     for shape in sect.shapes:
         intersects = PointIsInShape(shape, testpos, intersects)

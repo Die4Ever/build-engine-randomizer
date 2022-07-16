@@ -9,7 +9,7 @@ gamesMapSettings = {}
 gamesConSettings = {}
 
 class Game():
-    def __init__(self, name, type, size:int=0, crc:str='', md5:str='', sha1:str=''):
+    def __init__(self, name, type, size:int=0, crc:str='', md5:str='', sha1:str='', path_overrides:dict={}):
         global gamesList
         self.name = name
         self.type = type
@@ -18,6 +18,7 @@ class Game():
         if crc:
             self.crc = int(crc, 16)
         self.sha1 = sha1.lower()
+        self.path_overrides = path_overrides
         gamesList[self.crc] = self
 
     def __repr__(self):
@@ -138,7 +139,7 @@ Game('VACA15.SSI v1.5',                    'Duke Caribbean: Life\'s a Beach', 22
 Game('VACATION.GRP (Atomic Edition)',      'Duke Caribbean: Life\'s a Beach', 22213819, '18F01C5B', '1C105CED73B776C172593764E9D0D93E', '65B8B787616ED637F86CFCAA90DE24C8E65B3DCC') # VACATION.GRP (Atomic Edition)
 
 Game('Duke Nukem 3D (South Korean Censored)', 'Duke Nukem 3D', 26385383, 'AA4F6A40') # DUKEKR_CRC
-Game('Duke Nukem 3D: Atomic Edition (WT)', 'Duke Nukem 3D', 44356548, '982AFE4A') # DUKEWT_CRC
+Game('Duke Nukem 3D: Atomic Edition (WT)', 'Duke Nukem 3D', 44356548, '982AFE4A', path_overrides={'USER.CON': '../USER.CON'}) # DUKEWT_CRC
 Game('Duke Nukem 3D MacUser Demo', 'Duke Nukem 3D', 10628573, '73A15EE7') # DUKEMD2_CRC
 Game('Platoon Leader', 'WWII GI', 37852572, 'D1ED8C0C') # PLATOONL_CRC
 Game('Duke it out in D.C.', 'Duke it out in D.C.', 8410187, '39A692BF') # { "Duke it out in D.C.", (int32_t) 0x39A692BF,  8410187, GAMEFLAG_DUKE|GAMEFLAG_ADDON, DUKE15_CRC, "DUKEDC.CON", NULL}
