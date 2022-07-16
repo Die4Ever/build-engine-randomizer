@@ -13,7 +13,7 @@ import random
 import pathlib
 
 def GetVersion() -> str:
-    return 'v0.5.1 Alpha'
+    return 'v0.5.2 Alpha'
 
 class FancyPacker:
     def __init__(self, endianness: str, mappings: dict):
