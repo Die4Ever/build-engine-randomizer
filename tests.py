@@ -133,7 +133,7 @@ class Duke3dSWTestCase(unittest.TestCase):
                 grp: GrpZipFile = LoadGrpFile(tempgrp)
 
             with self.subTest('Read External File'):
-               t = grp.getfile(extname).decode('utf8')
+               t = grp.getfile(extname).decode()
                self.assertEqual(t, testdata, 'Got external file path override')
         finally:
             games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D

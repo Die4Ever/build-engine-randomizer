@@ -294,21 +294,43 @@ class GrpZipFile(GrpBase):
 # used by Blood https://github.com/Die4Ever/build-engine-randomizer/issues/21
 class RffFile(GrpBase):
     def GetFilesInfo(self) -> None:
+        headerPack = FancyPacker('<', OrderedDict(sign='4s', version='h', pad1='h', offset='I', filenum='I'))
+        directoryPack = FancyPacker('<', OrderedDict(unused1='16s', offset='I', size='I', unused2='8s', flags='B', type='3s', name='8s', id='i'))
+        itemSize = 48
+
         with open(self.filepath, 'rb') as file:
             data = file.read(16)
+            header = headerPack.unpack(data)
+            self.offset = header['offset']
+            self.fileNum = header['filenum']
+            file.seek(self.offset, os.SEEK_SET)
+            data = bytearray(file.read(itemSize * self.fileNum))
 
-        pack = FancyPacker('<', OrderedDict(sign='cccc', version='h', pad1='h', offset='I', filenum='I'))
-        d = pack.unpack(data)
-        self.version = d['version']
-        self.versionClass = d['version'] & 0xff00
-        self.fileNum = d['filenum']
-        info(d['sign'], self.version, self.filenum, self.versionClass)
+        self.version = header['version']
+        self.versionClass = header['version'] & 0xff00
+        info(header['sign'], self.version, self.fileNum, self.versionClass)
+        info(header)
         if self.versionClass == 0x200:
             self.crypt = 0
         elif self.versionClass == 0x300:
             self.crypt = 1
         else:
-            raise NotImplementedError(self.filepath + ' ' + repr(d))
+            raise NotImplementedError(self.filepath + ' ' + repr(header))
+
+        if self.crypt:
+            data = Crypt(data, self.offset + (self.version & 0xff) * self.offset)
+
+        for i in range(self.fileNum):
+            d = directoryPack.unpack(data[i*itemSize:(i+1)*itemSize])
+            d['type'] = d['type'].decode()
+            name = d['name'].decode().replace('\x00', '')
+            filename = name + '.' + d['type']
+            d['name'] = filename
+            del d['unused1']
+            del d['unused2']
+            self.files[filename] = dict(**d)
+        print(self.files)
+
 
     def _getfile(self, name, filehandle) -> bytes:
         raise NotImplementedError('RffFile _getfile')
@@ -316,6 +338,11 @@ class RffFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
+def Crypt(data:bytearray, key:int) -> bytearray:
+    for i in range(len(data)):
+        data[i] = data[i] ^ (key>>1 & 0xff)
+        key += 1
+    return data
 
 def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
     outfile = open(outpath, 'wb')

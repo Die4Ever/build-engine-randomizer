@@ -12,19 +12,23 @@ from collections import namedtuple
 import random
 import pathlib
 from datetime import datetime
+import re
 
 def GetVersion() -> str:
     return 'v0.5.3 Alpha'
 
+packLengthRegex = re.compile('(\d+)(\w+)')
 class FancyPacker:
     def __init__(self, endianness: str, mappings: OrderedDict):
         self.format = endianness
-        lens = []
         self.keys = {}
         for k, v in mappings.items():
             self.format += v
-            self.keys[k] = len(v)
-            lens.append(len(v))
+            m = packLengthRegex.match(v)
+            if m:
+                self.keys[k] = 1
+            else:
+                self.keys[k] = len(v)
 
 
     def unpack(self, data: bytearray) -> dict:
