@@ -14,7 +14,7 @@ import pathlib
 from datetime import datetime
 
 def GetVersion() -> str:
-    return 'v0.5.2 Alpha'
+    return 'v0.5.3 Alpha'
 
 class FancyPacker:
     def __init__(self, endianness: str, mappings: dict):
@@ -68,7 +68,7 @@ def swapobjkey(a, b, key):
 def copyobj(obj):
     d = obj.__dict__.copy()
     for k in d.keys():
-        if type(d[k]) not in [int, str, type(None)]:
+        if type(d[k]) not in [int, str, bool, type(None)]:
             d[k] = d[k].copy()
     obj = type(obj)()
     obj.__dict__ = d

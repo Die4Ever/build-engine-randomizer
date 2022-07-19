@@ -144,13 +144,11 @@ class RandoSettings:
         self.closeWindow()
 
     def WarnOverwrites(self) -> bool:
-        (basepath,outs) = self.grp.GetOutputFiles()
+        deleting = self.grp.GetDeleteFolders(self.grp.GetOutputPath())
         return messagebox.askokcancel(
-            title='Will overwrite the following files!',
-            message='This may take a minute.\nWill overwrite the following files:\n'
-            + 'in ' + basepath + '\n\n'
-            + ", ".join(outs)
-            + ', Randomizer.html'
+            title='Will DELETE files!',
+            message='This may take a minute.\nWILL DELETE/OVERWRITE THE FOLLOWING:\n'
+            + '\n'.join(deleting)
         )
 
     def Randomize(self):
@@ -198,7 +196,7 @@ class RandoSettings:
         self.font = font.Font(size=14)
 
         row=0
-        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!\nRandomizer will overwrite\nMAP and CON files inside the game directory.',width=40,height=4,font=self.font)
+        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!\nRandomizer might overwrite files\ninside the game directory.',width=40,height=4,font=self.font)
         infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
@@ -236,6 +234,9 @@ class RandoSettings:
         self.reorderMapsVar = StringVar(self.win, 'Disabled')
         reorderMaps = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Enabled')
         row+=1
+
+        # TODO: option to enable/disable loading external files?
+        # TODO: option to enable.disable useRandomizerFolder
 
         #self.progressbar = Progressbar(self.win, maximum=1)
         #self.progressbar.grid(column=0,row=row,columnspan=2)

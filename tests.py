@@ -6,11 +6,11 @@ from BuildLibs import buildmap, games, confile, gui, SpoilerLog
 from BuildLibs.grp import *
 import cProfile, pstats
 import unittest
-from unittest import SkipTest, case
+from unittest import SkipTest, case, skip
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 
-#unittest.TestLoader.sortTestMethodsUsing = None
+unittest.TestLoader.sortTestMethodsUsing = None
 temp = 'temp/'
 zippath: str = 'duke3d-shareware.grp.zip'
 tempgrp = 'temp/testing.grp'
@@ -40,7 +40,7 @@ different_settings = {
 }
 
 # zipped for tests
-games.Game('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
+games.AddGame('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
 
 # we need the correct file order so we can match the md5
 original_order = [
@@ -118,22 +118,25 @@ class Duke3dSWTestCase(unittest.TestCase):
         self.TestRandomize(tempgrp, 451, grp0451, False, settings=different_settings)
 
 
-    def test_path_overrides(self):
-        with self.subTest('Open GRP File'):
-            grp: GrpFile = GrpFile(tempgrp)
+    def test_external_files(self):
+        try:
+            with self.subTest('Create External File'):
+                testdata = 'Damn, I\'m lookin good!'
+                extname = 'external_file.txt'
+                gamedir = os.path.dirname(tempgrp)
+                extpath = os.path.join(gamedir, extname)
+                with open(extpath, 'w') as file:
+                    file.write(testdata)
 
-        with self.subTest('Create External File'):
-            testdata = 'Damn, I\'m lookin good!'
-            extname = 'external_file.txt'
-            grp.game.path_overrides[extname] = '../'+extname
-            gamedir = os.path.dirname(grp.filepath)
-            extpath = os.path.join(gamedir, extname)
-            with open(extpath, 'w') as file:
-                file.write(testdata)
+            with self.subTest('Open GRP File'):
+                games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=True, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
+                grp: GrpFile = GrpFile(tempgrp)
 
-        with self.subTest('Read External File'):
-            t = grp.getfile(extname).decode('utf8')
-            self.assertEqual(t, testdata, 'Got external file path override')
+            with self.subTest('Read External File'):
+               t = grp.getfile(extname).decode('utf8')
+               self.assertEqual(t, testdata, 'Got external file path override')
+        finally:
+            games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
 
     def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
@@ -145,6 +148,7 @@ class Duke3dSWTestCase(unittest.TestCase):
             grp = GrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
 
+            basepath = os.path.join(basepath, 'Randomizer')
             newMd5s = self.Md5GameFiles(testname, grp, basepath)
 
             self.assertIsNotNone(oldMd5s, 'Old MD5s')
@@ -159,7 +163,7 @@ class Duke3dSWTestCase(unittest.TestCase):
                 for k in oldMd5s.keys():
                     self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
 
-            with open(basepath + '/Randomizer.html') as spoilerlog:
+            with open(os.path.join(basepath, 'Randomizer.html')) as spoilerlog:
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
@@ -183,7 +187,7 @@ class Duke3dSWTestCase(unittest.TestCase):
     def Md5Files(self, basepath: str, filenames: list) -> dict:
         md5s = {}
         for f in filenames:
-            t = self.Md5File(basepath + f)
+            t = self.Md5File(os.path.join(basepath, f))
             md5s[f] = t
         trace('Md5Files ', basepath, ': ', md5s)
         return md5s
@@ -202,7 +206,7 @@ class Duke3dSWTestCase(unittest.TestCase):
 
 
 def runtests():
-    unittest.main(verbosity=9, warnings="error")#, failfast=True)
+    unittest.main(verbosity=9, warnings="error", failfast=True)
 
 if __name__ == "__main__":
     try:

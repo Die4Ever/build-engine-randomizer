@@ -1,5 +1,7 @@
 from datetime import datetime
 import os
+import shutil
+from pathlib import Path
 from zipfile import ZipFile
 from BuildLibs import games
 from BuildLibs.buildmap import *
@@ -7,6 +9,7 @@ from BuildLibs.confile import ConFile
 from BuildLibs.SpoilerLog import SpoilerLog
 import traceback
 import locale
+import glob
 
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -21,6 +24,7 @@ class GrpFile:
         self.filepath = filepath
         info(filepath)
         self.files = {}
+        self.game:games.GameInfo = games.GetGame(filepath)
         self.filesize = os.path.getsize(filepath)
         with open(filepath, 'rb') as f:
             self.sig = f.read(12)
@@ -37,8 +41,8 @@ class GrpFile:
         else:
             raise Exception(filepath + ' is an unknown type, size: ', self.filesize)
 
+        self.GetExternalFiles()
         cons = self.GetAllFilesEndsWith('.con')
-        self.game = games.GetGame(filepath)
         if not self.game:
             info(repr(cons))
             raise Exception('unidentified game')
@@ -85,6 +89,36 @@ class GrpFile:
                 }
                 offset += size
 
+
+    def GetExternalFiles(self):
+        if not self.game.externalFiles:
+            return
+        gamedir = os.path.dirname(self.filepath)
+        searchdir = gamedir + '/**'
+        if gamedir == '':
+            searchdir = '**'
+        trace(searchdir)
+        files = glob.glob(searchdir, recursive=True)
+        trace(files)
+        for f in files:
+            p = Path(f)
+            rel = p.relative_to(gamedir)
+            if 'backup' in f.lower(): # TODO: probably don't need this anymore?
+                continue
+            if 'addons' in f.lower(): # TODO: support addons
+                continue
+            if 'Randomizer' in rel.parts:
+                continue
+            if not p.is_file():
+                continue
+
+            f = str(rel)
+            self.files[f] = {
+                'location': str(p),
+                #'parts': p.parts
+            }
+
+
     def getFileHandle(self):
         if self.type == 'zip':
             return ZipFile(self.filepath, 'r')
@@ -125,34 +159,46 @@ class GrpFile:
         return matches
 
     def getfile(self, name, filehandle=None) -> bytes:
-        if name in self.game.path_overrides:
-            name = self.game.path_overrides[name]
-            gamedir = os.path.dirname(self.filepath)
-            if '../' in name:
-                name = name.replace('../', gamedir + '/')
-                with open(name, 'rb') as file:
-                    return file.read()
+        overridepath = self.files[name].get('location')
+        if overridepath:
+            with open(overridepath, 'rb') as file:
+                return file.read()
 
         if self.type == 'zip':
             return self.getfileZip(name, filehandle)
         else:
             return self.getfileGrp(name, filehandle)
 
+
     def getmap(self, name, file) -> MapFile:
         return MapFile(self.game, name, bytearray(self.getfile(name, file)))
 
-    def GetOutputFiles(self, basepath:str='') -> tuple:
+    def GetOutputPath(self, basepath:str='') -> str:
         gamedir = os.path.dirname(self.filepath)
         if not basepath:
             basepath = gamedir
-        outs = []
-        for o in list(self.conSettings.conFiles.keys()) + self.GetAllFilesEndsWith('.map'):
-            outs.append(o)
-        return (basepath, outs)
+        if self.game.useRandomizerFolder:
+            basepath = os.path.join(basepath, 'Randomizer')
+        return str(Path(basepath))
+
+    def GetDeleteFolders(self, basepath:str) -> list:
+        if self.game.useRandomizerFolder:
+            return [basepath]
+
+        mapFiles = self.GetAllFilesEndsWith('.map')
+        folders = set(['Randomizer.html'])
+        f:str
+        for f in self.files:
+            if f in self.conSettings.conFiles or f in mapFiles:
+                folders.add(Path(f).parts[0])
+        ret = list(folders)
+        ret.sort(key=str.casefold)
+        return ret
 
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:str, spoilerlog, filehandle) -> None:
         spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
+        spoilerlog.write(self.filepath)
         spoilerlog.write(repr(self.game) + '\n\n')
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
@@ -192,15 +238,21 @@ class GrpFile:
 
 
     def Randomize(self, seed:int, settings:dict={}, basepath:str='') -> None:
-        gamedir = os.path.dirname(self.filepath)
-        if not basepath:
-            basepath = gamedir
+        basepath = self.GetOutputPath(basepath)
+        deleteFolders = self.GetDeleteFolders(basepath)
+        for f in deleteFolders:
+            if os.path.isdir(f):
+                shutil.rmtree(f)
+            elif os.path.isfile(f):
+                os.remove(f)
+
         out = os.path.join(basepath, 'Randomizer.html')
         pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
                 return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
             except:
+                error(self.filepath)
                 error(self.game, ', seed: ', seed, ', settings: ', settings, ', basepath: ', basepath)
                 error('files: ', self.files)
                 raise
