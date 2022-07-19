@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import shutil
 from pathlib import Path
+from typing import OrderedDict
 from zipfile import ZipFile
 from BuildLibs import games
 from BuildLibs.buildmap import *
@@ -62,7 +63,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         self.GetFilesInfo()
         self.GetExternalFiles()
         cons = self.GetAllFilesEndsWith('.con')
-        if not self.game:
+        if not self.game.type:
             info(repr(cons))
             raise Exception('unidentified game')
 
@@ -292,7 +293,28 @@ class GrpZipFile(GrpBase):
 
 # used by Blood https://github.com/Die4Ever/build-engine-randomizer/issues/21
 class RffFile(GrpBase):
-    pass
+    def GetFilesInfo(self) -> None:
+        with open(self.filepath, 'rb') as file:
+            data = file.read(16)
+
+        pack = FancyPacker('<', OrderedDict(sign='cccc', version='h', pad1='h', offset='I', filenum='I'))
+        d = pack.unpack(data)
+        self.version = d['version']
+        self.versionClass = d['version'] & 0xff00
+        self.fileNum = d['filenum']
+        info(d['sign'], self.version, self.filenum, self.versionClass)
+        if self.versionClass == 0x200:
+            self.crypt = 0
+        elif self.versionClass == 0x300:
+            self.crypt = 1
+        else:
+            raise NotImplementedError(self.filepath + ' ' + repr(d))
+
+    def _getfile(self, name, filehandle) -> bytes:
+        raise NotImplementedError('RffFile _getfile')
+
+    def getFileHandle(self):
+        return open(self.filepath, 'rb')
 
 
 def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:

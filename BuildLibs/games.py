@@ -97,8 +97,8 @@ def GetGame(grppath) -> GameInfo:
         md5sum:str = md5(file).hexdigest()
         sha:str = sha1(file).hexdigest()
         error('ERROR: in GetGame, unknown game', grppath, 'size:', size, 'crc32:', "0x{:X}".format(crc), 'md5:', md5sum, 'sha1:', sha, sep=', ')
-        # TODO support for unknown games with default settings
-        return None
+        # TODO support for unknown games with default settings, for now return dummy game
+        return GameInfo('Unknown Game')
     raise Exception('error in GetGame', grppath)
 
 def GetGameMapSettings(game: GameInfo) -> GameMapSettings:

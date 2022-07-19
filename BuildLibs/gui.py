@@ -253,7 +253,7 @@ def main():
     settings = RandoSettings()
 
 def chooseFile(root):
-    filetype = (("All Supported Files",("*.grp","STUFF.DAT")), ("GRP File","*.grp"), ("all files","*.*"))
+    filetype = (("All Supported Files",("*.grp","STUFF.DAT",'*.rff')), ("GRP File","*.grp"), ('RFF File','*.rff'), ("all files","*.*"))
     target = filedialog.askopenfilename(title="Choose a GRP file",filetypes=filetype)
     return target
 

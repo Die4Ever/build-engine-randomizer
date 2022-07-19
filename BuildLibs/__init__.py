@@ -5,7 +5,7 @@ if sys.version_info[0] < 3:
 if sys.version_info[0] == 3 and sys.version_info[1] < 6:
     raise ImportError('Python < 3.6 is unsupported.')
 
-from typing import Union
+from typing import OrderedDict, Union
 from struct import unpack, pack
 import binascii
 from collections import namedtuple
@@ -17,7 +17,7 @@ def GetVersion() -> str:
     return 'v0.5.3 Alpha'
 
 class FancyPacker:
-    def __init__(self, endianness: str, mappings: dict):
+    def __init__(self, endianness: str, mappings: OrderedDict):
         self.format = endianness
         lens = []
         self.keys = {}
