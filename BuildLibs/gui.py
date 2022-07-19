@@ -91,7 +91,7 @@ class RandoSettings:
             self.grppath = grppath
             self.root.title('Loading '+grppath+'...')
             self.update()
-            self.grp: GrpFile = GrpFile(grppath)
+            self.grp: GrpBase = LoadGrpFile(grppath)
 
             self.root.title(self.grp.game.type + ' ' + GetVersion() + ' Randomizer - ' + self.grp.game.name)
             self.randoButton["state"]='normal'

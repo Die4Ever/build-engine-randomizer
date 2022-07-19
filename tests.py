@@ -91,9 +91,9 @@ class Duke3dSWTestCase(unittest.TestCase):
     def test_1_extract_zipgrp(self):
         # I zipped the GRP file to save space in the repo
         # but also Ion Fury uses ZIP format anyways so we do need to test it
-        grp: GrpFile = None
+        grp: GrpBase = None
         with self.subTest('ExtractAll'):
-            grp = GrpFile(zippath)
+            grp = LoadGrpFile(zippath)
             self.assertEqual(len(grp.files), len(original_order))
             grp.ExtractAll(temp)
 
@@ -102,13 +102,13 @@ class Duke3dSWTestCase(unittest.TestCase):
 
         grp = None
         with self.subTest('Verify new GRP File'):
-            grp = GrpFile(tempgrp)
+            grp = LoadGrpFile(tempgrp)
             self.assertEqual(grp.game.type, 'Duke Nukem 3D')
 
     def test_rando(self):
         # first get vanilla MD5s
         with self.subTest('Open GRP File'):
-            grp: GrpFile = GrpFile(tempgrp)
+            grp: GrpFile = LoadGrpFile(tempgrp)
         vanilla = self.Md5GameFiles('Vanilla', grp, temp)
 
         # now test randomizing with different seeds and settings, comparing MD5s each time
@@ -130,7 +130,7 @@ class Duke3dSWTestCase(unittest.TestCase):
 
             with self.subTest('Open GRP File'):
                 games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=True, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
-                grp: GrpFile = GrpFile(tempgrp)
+                grp: GrpZipFile = LoadGrpFile(tempgrp)
 
             with self.subTest('Read External File'):
                t = grp.getfile(extname).decode('utf8')
@@ -145,7 +145,7 @@ class Duke3dSWTestCase(unittest.TestCase):
         basepath = temp + str(crc32(testname+repr(settings))) + '/'
         newMd5s = None
         with self.subTest('Randomize '+testname):
-            grp = GrpFile(grppath)
+            grp:GrpBase = LoadGrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
 
             basepath = os.path.join(basepath, 'Randomizer')
@@ -178,7 +178,7 @@ class Duke3dSWTestCase(unittest.TestCase):
         if text not in logs:
             self.fail(text + ' not found in logs')
 
-    def Md5GameFiles(self, testname:str, grp:GrpFile, basepath: str) -> dict:
+    def Md5GameFiles(self, testname:str, grp:GrpBase, basepath: str) -> dict:
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
             cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
