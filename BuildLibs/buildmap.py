@@ -35,6 +35,19 @@ class Sprite:
     def __repr__(self):
         return repr(self.__dict__)
 
+
+def LoadMap(gameName, name, data: bytearray) -> 'MapFile':
+    # Blood has a signature at the front of map files
+    if data[:4] == b'BLM\x1a':
+        return BloodMap(gameName, name, data)
+    else:
+        (version,) = unpack('<i', data[:4])
+        if version <= 6:
+            # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
+            raise NotImplementedError('MAP Format Version 6 is not yet implemented', name)
+        return MapFile(gameName, name, data)
+
+
 class MapFile:
     # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)
     def __init__(self, gameName, name, data: bytearray):
@@ -42,14 +55,9 @@ class MapFile:
         self.name = name
         self.game_name = gameName
         self.gameSettings = games.GetGameMapSettings(gameName)
-        (self.version, self.startx, self.starty, self.startz, self.startangle, self.startsect, self.numsects) = unpack('<iiiihhH', data[:22])
-        self.sector_size = 40
-        self.wall_size = 32
-        self.sprite_size = 44
+        self.crypt = 0
 
-        if self.version == 6:
-            # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
-            raise NotImplementedError('MAP Format Version 6 is not yet implemented', name)
+        self.ReadHeaders(data)
 
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
             raise AssertionError('unexpected map version '+str(self.version), name)
@@ -58,17 +66,6 @@ class MapFile:
             texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',
             velocity='hhh', lowtag='h', hightag='h', extra='h'))
 
-        self.sectors_start = 22
-        self.sectors_length = self.numsects * self.sector_size
-        num_walls_start = self.sectors_start + self.sectors_length
-        self.walls_start = num_walls_start + 2
-        (self.num_walls,) = unpack('<H', data[num_walls_start:self.walls_start])
-        self.walls_length = self.num_walls * self.wall_size
-        num_sprites_start = self.walls_start + self.walls_length
-        self.sprites_start = num_sprites_start + 2
-        (num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
-        self.sprites_length = num_sprites * self.sprite_size
-
         trace(self.__dict__, '\n')
         self.data = data
 
@@ -76,18 +73,40 @@ class MapFile:
         self.enemies = []
         self.triggers = []
         self.other_sprites = []
-        for i in range(num_sprites):
+        for i in range(self.num_sprites):
             sprite = self.GetSprite(i)
             self.AppendSprite(sprite)
 
         self.sectors = []
         self.sectorCache = {}
-        for i in range(self.numsects):
+        for i in range(self.numSects):
             # first wall, num walls
             start = self.sectors_start + i*self.sector_size
             # pair of firstwall and numwalls
             sect = unpack('<hh', data[start:start + 4])
             self.sectors.append(sect)
+
+
+    def ReadHeaders(self, data):
+        self.numSects:int
+        headerPacker = FancyPacker('<', OrderedDict(version='i', startPos='iii', startAngle='h', startSect='h', numSects='H'))
+        self.headerLen = 22
+        self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
+
+        self.sector_size = 40
+        self.wall_size = 32
+        self.sprite_size = 44
+
+        self.sectors_start = self.headerLen
+        self.sectors_length = self.numSects * self.sector_size
+        num_walls_start = self.sectors_start + self.sectors_length
+        self.walls_start = num_walls_start + 2
+        (self.num_walls,) = unpack('<H', data[num_walls_start:self.walls_start])
+        self.walls_length = self.num_walls * self.wall_size
+        num_sprites_start = self.walls_start + self.walls_length
+        self.sprites_start = num_sprites_start + 2
+        (self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
+        self.sprites_length = self.num_sprites * self.sprite_size
 
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
@@ -96,6 +115,9 @@ class MapFile:
             spoilerlog.SetGameMapSettings(self.gameSettings)
             self.spoilerlog = spoilerlog
             self._Randomize(seed, settings)
+        except:
+            error('Randomize', self.name)
+            raise
         finally:
             self.spoilerlog = None
             spoilerlog.FinishRandomizingFile()
@@ -359,6 +381,43 @@ class MapFile:
         return self.data
 
 
+class BloodMap(MapFile):
+    def ReadHeaders(self, data):
+        headerPacker = FancyPacker('<', OrderedDict(
+            sig='4s', version='h', startPos='iii', startAngle='h', startSect='h', pskybits='h', visibility='i',
+            songid='i', parallaxtype='c', mapRevision='i', numSects='H', num_walls='H', num_sprites='H')
+        )
+        self.headerLen = 43
+        self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
+
+        if self.songid != 0 and self.songid != 0x7474614d and self.songid != 0x4d617474:
+            data[6:self.headerLen] = BloodMapDecrypt(data[6:self.headerLen], 0x7474614d)
+            self.crypt = 1
+            self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
+            print(self.__dict__)
+
+        self.exactVersion = self.version
+        self.version = self.exactVersion >> 8
+
+        self.sector_size = 40
+        self.wall_size = 32
+        self.sprite_size = 44
+
+        # pskybits comes first?
+
+        self.sectors_start = self.headerLen
+        self.sectors_length = self.numSects * self.sector_size
+        num_walls_start = self.sectors_start + self.sectors_length
+        self.walls_start = num_walls_start + 2
+
+        #(self.num_walls,) = unpack('<H', data[num_walls_start:self.walls_start])
+        self.walls_length = self.num_walls * self.wall_size
+        num_sprites_start = self.walls_start + self.walls_length
+        self.sprites_start = num_sprites_start + 2
+        #(self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
+        self.sprites_length = self.num_sprites * self.sprite_size
+
+
 def PointIsInSector(sect:Sector, testpos:list) -> bool:
     intersects = 0
     for shape in sect.shapes:
@@ -383,3 +442,9 @@ def PointIsInShape(walls, p, intersects) -> int:
         j=i
         i+=1
     return intersects
+
+def BloodMapDecrypt(data:bytearray, key:int) -> bytearray:
+    for i in range(len(data)):
+        data[i] = data[i] ^ (key & 0xff)
+        key += 1
+    return data

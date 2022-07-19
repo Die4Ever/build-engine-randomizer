@@ -133,7 +133,8 @@ class GrpBase(metaclass=abc.ABCMeta):
 
 
     def getmap(self, name, file) -> MapFile:
-        return MapFile(self.game, name, bytearray(self.getfile(name, file)))
+        data = bytearray(self.getfile(name, file))
+        return LoadMap(self.game, name, data)
 
     def GetOutputPath(self, basepath:str='') -> str:
         gamedir = os.path.dirname(self.filepath)
@@ -253,16 +254,17 @@ class GrpFile(GrpBase):
                 offset += size
 
     def _getfile(self, name, filehandle) -> bytes:
-        if name not in self.files:
+        info = self.files.get(name)
+        if not info:
             raise Exception('file not found in GRP', name, len(self.files))
 
         if filehandle:
-            filehandle.seek(self.files[name]['offset'])
-            return filehandle.read(self.files[name]['size'])
+            filehandle.seek(info['offset'])
+            return filehandle.read(info['size'])
 
         with open(self.filepath, 'rb') as f:
-            f.seek(self.files[name]['offset'])
-            return f.read(self.files[name]['size'])
+            f.seek(info['offset'])
+            return f.read(info['size'])
 
     def getFileHandle(self):
         return open(self.filepath, 'rb')
@@ -301,6 +303,7 @@ class RffFile(GrpBase):
         with open(self.filepath, 'rb') as file:
             data = file.read(16)
             header = headerPack.unpack(data)
+            trace(header)
             self.offset = header['offset']
             self.fileNum = header['filenum']
             file.seek(self.offset, os.SEEK_SET)
@@ -308,8 +311,6 @@ class RffFile(GrpBase):
 
         self.version = header['version']
         self.versionClass = header['version'] & 0xff00
-        info(header['sign'], self.version, self.fileNum, self.versionClass)
-        info(header)
         if self.versionClass == 0x200:
             self.crypt = 0
         elif self.versionClass == 0x300:
@@ -318,7 +319,7 @@ class RffFile(GrpBase):
             raise NotImplementedError(self.filepath + ' ' + repr(header))
 
         if self.crypt:
-            data = Crypt(data, self.offset + (self.version & 0xff) * self.offset)
+            data = RffDecrypt(data, self.offset + (self.version & 0xff) * self.offset)
 
         for i in range(self.fileNum):
             d = directoryPack.unpack(data[i*itemSize:(i+1)*itemSize])
@@ -328,21 +329,33 @@ class RffFile(GrpBase):
             d['name'] = filename
             del d['unused1']
             del d['unused2']
-            self.files[filename] = dict(**d)
-        print(self.files)
+            self.files[filename] = d
 
 
     def _getfile(self, name, filehandle) -> bytes:
-        raise NotImplementedError('RffFile _getfile')
+        info = self.files.get(name)
+        if not info:
+            raise Exception('file not found in RFF', name, len(self.files))
+
+        if filehandle:
+            filehandle.seek(info['offset'], os.SEEK_SET)
+            data = filehandle.read(info['size'])
+        else:
+            with open(self.filepath, 'rb') as f:
+                f.seek(info['offset'], os.SEEK_SET)
+                data = f.read(info['size'])
+
+        DICT_CRYPT = 16
+        if info['flags'] & DICT_CRYPT:
+            data = bytearray(data)
+            decryptSize = min(info['size'], 0x100)
+            data[:decryptSize] = RffDecrypt(data[:decryptSize], 0)
+        return data
+
 
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
-def Crypt(data:bytearray, key:int) -> bytearray:
-    for i in range(len(data)):
-        data[i] = data[i] ^ (key>>1 & 0xff)
-        key += 1
-    return data
 
 def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
     outfile = open(outpath, 'wb')
@@ -360,3 +373,9 @@ def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
         outfile.write(d)
 
     outfile.close()
+
+def RffDecrypt(data:bytearray, key:int) -> bytearray:
+    for i in range(len(data)):
+        data[i] = data[i] ^ ((key>>1) & 0xff)
+        key += 1
+    return data

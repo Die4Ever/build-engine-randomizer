@@ -92,7 +92,7 @@ def warning(*args, **kargs):
 
 def info(*args, **kargs):
     if verbose > -1:
-        print('DEBUG:', *args, **kargs)
+        print('INFO:', *args, **kargs)
 
 def debug(*args, **kargs):
     if verbose > 0:
