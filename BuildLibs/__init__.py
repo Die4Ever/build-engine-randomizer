@@ -97,7 +97,10 @@ def checkCleanupErrorLog():
 
         if doCleanup:
             with open("errorlog.txt", 'w') as file:
-                print(GetVersion(), file=file)
+                print(GetVersion() +'\n', file=file)
+        else:
+            with open("errorlog.txt", "a") as file:
+                print('\n\n', file=file)
     except Exception as e:
         # the checked property means this function won't be called recursively
         error('checkCleanupErrorLog:', e)

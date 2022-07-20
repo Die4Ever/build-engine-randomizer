@@ -217,7 +217,7 @@ class GrpBase(metaclass=abc.ABCMeta):
             except:
                 error(self.filepath)
                 error(self.game, ', seed: ', seed, ', settings: ', settings, ', basepath: ', basepath)
-                error('files: ', self.files)
+                error('\n  == files: ', self.files, ' == end of files listing ==\n')
                 raise
 
     def ExtractFile(self, outpath, name, filehandle=None) -> None:
