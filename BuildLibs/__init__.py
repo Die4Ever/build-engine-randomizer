@@ -79,14 +79,36 @@ def copyobj(obj):
     return obj
 
 verbose = 1
+checkedErrorLogCleanup = False
+def checkCleanupErrorLog():
+    global checkedErrorLogCleanup
+    if checkedErrorLogCleanup:
+        return
+    doCleanup = False
+    with open("errorlog.txt") as file:
+        firstLine = file.readline()
+        print(firstLine)
+        if firstLine.strip() != GetVersion().strip():
+            doCleanup = True
+    if doCleanup:
+        with open("errorlog.txt", 'w') as file:
+            print(GetVersion(), file=file)
 
 def error(*args, **kargs):
     print('ERROR:', *args, **kargs)
+    try:
+        checkCleanupErrorLog()
+    except:
+        pass
     with open("errorlog.txt", "a") as file:
         print(datetime.now().strftime('%c') + ': ERROR:', *args, **kargs, file=file)
 
 def warning(*args, **kargs):
     print('WARNING:', *args, **kargs)
+    try:
+        checkCleanupErrorLog()
+    except:
+        pass
     with open("errorlog.txt", "a") as file:
         print(datetime.now().strftime('%c') + ': WARNING:', *args, **kargs, file=file)
 
