@@ -60,7 +60,7 @@ class MapFile:
         self.ReadHeaders(data)
 
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
-            raise AssertionError('unexpected map version '+str(self.version), name)
+            warning('unexpected map version', self.version, name, self.gameSettings.minMapVersion, self.gameSettings.maxMapVersion)
 
         self.packer = FancyPacker('<', OrderedDict(pos='iii', cstat='h', picnum='h', gfxstuff='bBBB',
             texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',

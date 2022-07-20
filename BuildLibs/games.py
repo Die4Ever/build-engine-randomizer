@@ -307,7 +307,7 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
     triggers={}
 )
 
-AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=7,
+AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
     swappableItems = {
         21: 'FIRSTGUNSPRITE',
         22: 'CHAINGUNSPRITE',
