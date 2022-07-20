@@ -5,6 +5,7 @@ if sys.version_info[0] < 3:
 if sys.version_info[0] == 3 and sys.version_info[1] < 6:
     raise ImportError('Python < 3.6 is unsupported.')
 
+import os
 from typing import OrderedDict, Union
 from struct import unpack, pack
 import binascii
@@ -79,36 +80,38 @@ def copyobj(obj):
     return obj
 
 verbose = 1
-checkedErrorLogCleanup = False
+
 def checkCleanupErrorLog():
-    global checkedErrorLogCleanup
-    if checkedErrorLogCleanup:
+    if getattr(checkCleanupErrorLog, "checked", False):
         return
-    doCleanup = False
-    with open("errorlog.txt") as file:
-        firstLine = file.readline()
-        print(firstLine)
-        if firstLine.strip() != GetVersion().strip():
-            doCleanup = True
-    if doCleanup:
-        with open("errorlog.txt", 'w') as file:
-            print(GetVersion(), file=file)
+    checkCleanupErrorLog.checked = True
+    doCleanup = True
+
+    try:
+        if os.path.isfile("errorlog.txt"):
+            with open("errorlog.txt") as file:
+                doCleanup = False
+                firstLine = file.readline()
+                if firstLine.strip() != GetVersion():
+                    doCleanup = True
+
+        if doCleanup:
+            with open("errorlog.txt", 'w') as file:
+                print(GetVersion(), file=file)
+    except Exception as e:
+        # the checked property means this function won't be called recursively
+        error('checkCleanupErrorLog:', e)
+
 
 def error(*args, **kargs):
     print('ERROR:', *args, **kargs)
-    try:
-        checkCleanupErrorLog()
-    except:
-        pass
+    checkCleanupErrorLog()
     with open("errorlog.txt", "a") as file:
         print(datetime.now().strftime('%c') + ': ERROR:', *args, **kargs, file=file)
 
 def warning(*args, **kargs):
     print('WARNING:', *args, **kargs)
-    try:
-        checkCleanupErrorLog()
-    except:
-        pass
+    checkCleanupErrorLog()
     with open("errorlog.txt", "a") as file:
         print(datetime.now().strftime('%c') + ': WARNING:', *args, **kargs, file=file)
 
