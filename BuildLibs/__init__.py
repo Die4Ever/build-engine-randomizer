@@ -16,9 +16,9 @@ from datetime import datetime
 import re
 
 def GetVersion() -> str:
-    return 'v0.5.3 Alpha'
+    return 'v0.5.4 Alpha'
 
-packLengthRegex = re.compile('(\d+)(\w+)')
+packLengthRegex = re.compile('^(.*?)(\d+)(\w)(.*?)$')
 class FancyPacker:
     def __init__(self, endianness: str, mappings: OrderedDict):
         self.format = endianness
@@ -27,7 +27,7 @@ class FancyPacker:
             self.format += v
             m = packLengthRegex.match(v)
             if m:
-                self.keys[k] = 1
+                self.keys[k] = len(m.group(1)) + 1 + len(m.group(4))
             else:
                 self.keys[k] = len(v)
 

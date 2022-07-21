@@ -9,6 +9,7 @@ import unittest
 from unittest import SkipTest, case, skip
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
+import glob
 
 unittest.TestLoader.sortTestMethodsUsing = None
 temp = 'temp/'
@@ -138,6 +139,12 @@ class Duke3dSWTestCase(unittest.TestCase):
         finally:
             games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
+    def test_other_grps(self):
+        # optionally use the othertests folder for testing your own collection of games that aren't freeware
+        # TODO: remove the .grp so we test all the files in the folder
+        files = glob.glob('othertests/*.grp', recursive=True)
+        for f in files:
+            self.TestRandomize(f, 451, {}, False)
 
     def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
         self.maxDiff = None
@@ -148,40 +155,45 @@ class Duke3dSWTestCase(unittest.TestCase):
             grp:GrpBase = LoadGrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
 
-            basepath = os.path.join(basepath, 'Randomizer')
+            if grp.game.useRandomizerFolder:
+                basepath = os.path.join(basepath, 'Randomizer')
             newMd5s = self.Md5GameFiles(testname, grp, basepath)
-
-            self.assertIsNotNone(oldMd5s, 'Old MD5s')
-            self.assertGreater(len(oldMd5s), 0, 'Old MD5s')
             self.assertIsNotNone(newMd5s, 'New MD5s')
             self.assertGreater(len(newMd5s), 0, 'New MD5s')
 
-            if shouldMatch:
-                self.assertDictEqual(oldMd5s, newMd5s)
-            else:
-                self.assertEqual(len(oldMd5s), len(newMd5s), 'Same number of files')
-                for k in oldMd5s.keys():
-                    self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
+            if oldMd5s:
+                self.assertIsNotNone(oldMd5s, 'Old MD5s')
+                self.assertGreater(len(oldMd5s), 0, 'Old MD5s')
+                if shouldMatch:
+                    self.assertDictEqual(oldMd5s, newMd5s)
+                else:
+                    self.assertEqual(len(oldMd5s), len(newMd5s), 'Same number of files')
+                    for k in oldMd5s.keys():
+                        self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
 
             with open(os.path.join(basepath, 'Randomizer.html')) as spoilerlog:
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
-                self.assertInLogs('Finished randomizing file: USER.CON', logs)
-                self.assertInLogs('Finished randomizing file: E1L6.MAP', logs)
+                for con in grp.conSettings.conFiles.keys():
+                    self.assertInLogs('Finished randomizing file: '+con, logs)
+                for map in grp.GetAllFilesEndsWith('.map'):
+                    self.assertInLogs('Finished randomizing file: '+map, logs)
                 self.assertInLogs('<div class="ListSprites">', logs)
-                self.assertInLogs('set hightag to ', logs)
+                if grp.mapSettings.triggers:
+                    self.assertInLogs('set hightag to ', logs)
                 self.assertInLogs('<div class="FileSection">', logs)
         return newMd5s
 
     def assertInLogs(self, text, logs):
-        if text not in logs:
+        if text.lower() not in logs.lower():
             self.fail(text + ' not found in logs')
 
     def Md5GameFiles(self, testname:str, grp:GrpBase, basepath: str) -> dict:
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
-            cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
+            #cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
+            cons = list(grp.conSettings.conFiles.keys())
             return self.Md5Files(basepath, (maps+cons))
 
     def Md5Files(self, basepath: str, filenames: list) -> dict:

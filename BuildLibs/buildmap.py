@@ -24,6 +24,7 @@ class Sprite:
         self.pos:tuple
         self.picnum:int
         self.sectnum:int
+        self.length:int
 
     def copy(self) -> 'Sprite':
         d = self.__dict__.copy()
@@ -57,56 +58,86 @@ class MapFile:
         self.gameSettings = games.GetGameMapSettings(gameName)
         self.crypt = 0
 
+        self.version = 0
+        self.sector_size = 40
+        self.wall_size = 32
+        self.sprite_size = 44
+        self.header2Len = 0
+        self.x_sector_size = 0
+        self.x_sprite_size = 0
+        self.x_wall_size = 0
+
         self.ReadHeaders(data)
 
         if self.version < self.gameSettings.minMapVersion or self.version > self.gameSettings.maxMapVersion:
             warning('unexpected map version', self.version, name, self.gameSettings.minMapVersion, self.gameSettings.maxMapVersion)
 
-        self.packer = FancyPacker('<', OrderedDict(pos='iii', cstat='h', picnum='h', gfxstuff='bBBB',
-            texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',
-            velocity='hhh', lowtag='h', hightag='h', extra='h'))
-
         trace(self.__dict__, '\n')
         self.data = data
+
+        self.spritePacker = FancyPacker('<', OrderedDict(pos='iii', cstat='h', picnum='h', gfxstuff='bBBB',
+            texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',
+            velocity='hhh', lowtag='h', hightag='h', extra='h'))
 
         self.items = []
         self.enemies = []
         self.triggers = []
         self.other_sprites = []
-        for i in range(self.num_sprites):
-            sprite = self.GetSprite(i)
-            self.AppendSprite(sprite)
-
         self.sectors = []
+        self.walls = []
         self.sectorCache = {}
-        for i in range(self.numSects):
-            # first wall, num walls
-            start = self.sectors_start + i*self.sector_size
-            # pair of firstwall and numwalls
-            sect = unpack('<hh', data[start:start + 4])
-            self.sectors.append(sect)
-
+        self.ReadData()
 
     def ReadHeaders(self, data):
         self.numSects:int
         headerPacker = FancyPacker('<', OrderedDict(version='i', startPos='iii', startAngle='h', startSect='h', numSects='H'))
         self.headerLen = 22
         self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
-
-        self.sector_size = 40
-        self.wall_size = 32
-        self.sprite_size = 44
-
         self.sectors_start = self.headerLen
-        self.sectors_length = self.numSects * self.sector_size
-        num_walls_start = self.sectors_start + self.sectors_length
-        self.walls_start = num_walls_start + 2
-        (self.num_walls,) = unpack('<H', data[num_walls_start:self.walls_start])
-        self.walls_length = self.num_walls * self.wall_size
-        num_sprites_start = self.walls_start + self.walls_length
-        self.sprites_start = num_sprites_start + 2
-        (self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
-        self.sprites_length = self.num_sprites * self.sprite_size
+
+    def ReadData(self):
+        pos = self.ReadSectors()
+        (self.num_walls,) = unpack('<H', self.data[pos:pos + 2])
+        self.walls_start = pos + 2
+        pos = self.ReadWalls()
+        (self.num_sprites,) = unpack('<H', self.data[pos:pos + 2])
+        self.sprites_start = pos + 2
+        self.sprites_end = self.ReadSprites()
+
+    def ReadSectors(self) -> int:
+        pos = self.sectors_start
+        for i in range(self.numSects):
+            # pair of firstwall and numwalls
+            if self.crypt and self.version == 7:
+                self.data[pos:pos + self.sector_size] = MapDecrypt(self.data[pos:pos + self.sector_size], self.mapRevision*self.sector_size)
+            sect = unpack('<hh', self.data[pos:pos + 4])
+            self.sectors.append(sect)
+            pos += self.sector_size
+            (extra,) = unpack('<h', self.data[pos-2:pos])
+            if extra > 0:
+                pos += self.x_sector_size
+        return pos
+
+    def ReadWalls(self) -> int:
+        pos = self.walls_start
+        for i in range(self.num_walls):
+            if self.crypt and self.version == 7:
+                self.data[pos:pos + self.wall_size] = MapDecrypt(self.data[pos:pos + self.wall_size], (self.mapRevision*self.wall_size)  | 0x7474614d)
+            wall = unpack('<iihhh', self.data[pos:pos + 14])
+            self.walls.append(wall)
+            pos += self.wall_size
+            (extra,) = unpack('<h', self.data[pos-2:pos])
+            if extra > 0:
+                pos += self.x_wall_size
+        return pos
+
+    def ReadSprites(self):
+        pos = self.sprites_start
+        for i in range(self.num_sprites):
+            sprite = self.GetSprite(i, pos)
+            self.AppendSprite(sprite)
+            pos += sprite.length
+        return pos
 
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
@@ -272,6 +303,7 @@ class MapFile:
             'lowtag': 0,
             'hightag': 0,
             'extra': -1,
+            'length': self.sprite_size,
             **add.copy()
         }
         del add['choices']
@@ -306,38 +338,33 @@ class MapFile:
 
     def WriteSprites(self):
         sprites = self.items + self.enemies + self.triggers + self.other_sprites
-        new_len = self.sprites_start + len(sprites) * self.sprite_size
-        if len(self.data) < new_len:
-            diff = new_len - len(self.data)
-            self.data = bytearray().join((self.data, b'\x00' * diff))
-        elif len(self.data) > new_len:
-            self.data = self.data[:new_len]
 
-        newdata = pack('<H', len(sprites))
-        i = self.walls_start + self.walls_length
-        for b in newdata:
-            self.data[i] = b
-            i+=1
+        (self.data[self.sprites_start - 2], self.data[self.sprites_start - 1]) = pack('<H', len(sprites))
 
+        pos = self.sprites_start
+        self.data = self.data[:pos]
         for i in range(len(sprites)):
-            self.WriteSprite(sprites[i], i)
+            self.WriteSprite(sprites[i], i, pos)
+            pos += sprites[i].length
 
-    def GetSprite(self, num) -> Sprite:
-        assert num >= 0
-        start = self.sprites_start + num*self.sprite_size
-        assert start + self.sprite_size <= len(self.data)
-        sprite = self.packer.unpack(self.data[start:start+self.sprite_size])
-        return Sprite(sprite)
+    def GetSprite(self, id, pos) -> Sprite:
+        assert id >= 0
+        assert pos + self.sprite_size <= len(self.data)
+        if self.crypt and self.version == 7:
+            self.data[pos:pos+self.sprite_size] = MapDecrypt(self.data[pos:pos+self.sprite_size], (self.mapRevision*self.sprite_size) | 0x7474614d)
+        d = self.spritePacker.unpack(self.data[pos:pos+self.sprite_size])
 
-    def WriteSprite(self, sprite:Sprite, num):
-        assert num >= 0
-        start = self.sprites_start + num*self.sprite_size
-        assert start + self.sprite_size <= len(self.data)
-        newdata = self.packer.pack(sprite.__dict__)
-        i = start
-        for b in newdata:
-            self.data[i] = b
-            i+=1
+        sprite = Sprite(d)
+        sprite.length = self.sprite_size
+        if sprite.extra > 0:
+            sprite.length += self.x_sprite_size
+        return sprite
+
+    def WriteSprite(self, sprite:Sprite, id, pos):
+        assert id >= 0
+        assert pos == len(self.data)
+        newdata = self.spritePacker.pack(sprite.__dict__)
+        self.data.extend(newdata)
 
     def GetSectorInfo(self, sector:int) -> Sector:
         if sector in self.sectorCache:
@@ -349,8 +376,7 @@ class MapFile:
         nearbySectors = set()
         shapes = [[]]
         for i in range(numwalls):
-            start = self.walls_start + wall*self.wall_size
-            (x, y, nextwall, otherwall, nextsect) = unpack('<iihhh', self.data[start:start + 14])
+            (x, y, nextwall, otherwall, nextsect) = self.walls[wall]
             nearbySectors.add(nextsect)
             point = (x, y)
             walls[wall] = point
@@ -391,31 +417,43 @@ class BloodMap(MapFile):
         self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
 
         if self.songid != 0 and self.songid != 0x7474614d and self.songid != 0x4d617474:
-            data[6:self.headerLen] = BloodMapDecrypt(data[6:self.headerLen], 0x7474614d)
+            data[6:self.headerLen] = MapDecrypt(data[6:self.headerLen], 0x7474614d)
             self.crypt = 1
             self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
-            print(self.__dict__)
 
         self.exactVersion = self.version
         self.version = self.exactVersion >> 8
 
-        self.sector_size = 40
-        self.wall_size = 32
-        self.sprite_size = 44
+        if self.version == 7: # if (byte_1A76C8)
+            self.header2Len = 128
+            header2Start = self.headerLen
+            if self.crypt:
+                data[header2Start:header2Start+128] = MapDecrypt(data[header2Start:header2Start+128], self.num_walls)
 
-        # pskybits comes first?
+            header2Start += 64 # skip the starting padding
+            header2Packer = FancyPacker('<', OrderedDict(x_sprite_size='i', x_wall_size='i', x_sector_size='i'))
+            header2 = header2Packer.unpack(data[header2Start:header2Start + 12])
+            self.__dict__.update(header2)
+            print(self.__dict__)
+        else:
+            self.header2Len = 0
+            self.x_sector_size = 60
+            self.x_sprite_size = 56
+            self.x_wall_size = 24
 
-        self.sectors_start = self.headerLen
-        self.sectors_length = self.numSects * self.sector_size
-        num_walls_start = self.sectors_start + self.sectors_length
-        self.walls_start = num_walls_start + 2
+        self.sky_start = self.headerLen + self.header2Len
+        self.sky_length = (1<<self.pskybits) * 2
+        self.sectors_start = self.sky_start + self.sky_length
 
-        #(self.num_walls,) = unpack('<H', data[num_walls_start:self.walls_start])
-        self.walls_length = self.num_walls * self.wall_size
-        num_sprites_start = self.walls_start + self.walls_length
-        self.sprites_start = num_sprites_start + 2
-        #(self.num_sprites,) = unpack('<H', data[num_sprites_start:self.sprites_start])
-        self.sprites_length = self.num_sprites * self.sprite_size
+    def ReadData(self):
+        self.walls_start = self.ReadSectors()
+        self.sprites_start = self.ReadWalls()
+        self.sprites_end = self.ReadSprites()
+        print(self.items, self.enemies, self.triggers, self.other_sprites)
+
+    def WriteSprites(self):
+        super().WriteSprites()
+        # TODO: write md4 hash?
 
 
 def PointIsInSector(sect:Sector, testpos:list) -> bool:
@@ -443,7 +481,7 @@ def PointIsInShape(walls, p, intersects) -> int:
         i+=1
     return intersects
 
-def BloodMapDecrypt(data:bytearray, key:int) -> bytearray:
+def MapDecrypt(data:bytearray, key:int) -> bytearray:
     for i in range(len(data)):
         data[i] = data[i] ^ (key & 0xff)
         key += 1
