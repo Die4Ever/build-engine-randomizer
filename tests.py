@@ -111,6 +111,8 @@ class Duke3dSWTestCase(unittest.TestCase):
         with self.subTest('Open GRP File'):
             grp: GrpFile = LoadGrpFile(tempgrp)
         vanilla = self.Md5GameFiles('Vanilla', grp, temp)
+        self.assertIsNotNone(vanilla, 'Vanilla MD5s')
+        self.assertGreater(len(vanilla), 0, 'Vanilla MD5s')
 
         # now test randomizing with different seeds and settings, comparing MD5s each time
         grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False)
@@ -192,7 +194,6 @@ class Duke3dSWTestCase(unittest.TestCase):
     def Md5GameFiles(self, testname:str, grp:GrpBase, basepath: str) -> dict:
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
-            #cons = ['USER.CON']# grp.GetAllFilesEndsWith('.con')
             cons = list(grp.conSettings.conFiles.keys())
             return self.Md5Files(basepath, (maps+cons))
 

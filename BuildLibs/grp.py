@@ -99,7 +99,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         for f in files:
             p = Path(f)
             rel = p.relative_to(gamedir)
-            if 'backup' in f.lower(): # TODO: probably don't need this anymore?
+            if 'backup' in f.lower(): # TODO: maybe move old files to backup instead of deleting? but then have to delete the previous files in backup?
                 continue
             if 'addons' in f.lower(): # TODO: support addons
                 continue

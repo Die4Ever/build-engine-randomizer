@@ -215,12 +215,6 @@ class MapFile:
             return False
         return True
 
-    def IsEnemy(self, sprite:Sprite, cstat: CStat) -> bool:
-        return sprite.picnum in self.gameSettings.swappableEnemies and cstat.invisible==False
-
-    def IsTrigger(self, sprite:Sprite, cstat: CStat) -> bool:
-        return sprite.picnum in self.gameSettings.triggers
-
     def SwapSprites(self, spritetype:str, a:Sprite, b:Sprite):
         self.spoilerlog.SwapSprites(spritetype, a, b)
 
@@ -316,22 +310,26 @@ class MapFile:
 
     def AppendSprite(self, sprite:Sprite) -> None:
         cstat = CStat(sprite.cstat)
-        if self.IsItem(sprite, cstat):
+        if sprite.picnum in self.gameSettings.swappableItems:
             self.items.append(sprite)
-        elif self.IsEnemy(sprite, cstat):
+        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
+            self.items.append(sprite)
+        elif sprite.picnum in self.gameSettings.swappableEnemies and cstat.invisible==False:
             self.enemies.append(sprite)
-        elif self.IsTrigger(sprite, cstat):
+        elif sprite.picnum in self.gameSettings.triggers:
             self.triggers.append(sprite)
         else:
             self.other_sprites.append(sprite)
 
     def GetSpriteType(self, sprite:Sprite) -> str:
         cstat = CStat(sprite.cstat)
-        if self.IsItem(sprite, cstat):
+        if sprite.picnum in self.gameSettings.swappableItems:
             return 'item'
-        elif self.IsEnemy(sprite, cstat):
+        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
+            return 'item'
+        elif sprite.picnum in self.gameSettings.swappableEnemies and cstat.invisible==False:
             return 'enemy'
-        elif self.IsTrigger(sprite, cstat):
+        elif sprite.picnum in self.gameSettings.triggers:
             return 'trigger'
         else:
             return 'other'

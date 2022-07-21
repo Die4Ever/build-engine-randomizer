@@ -54,8 +54,8 @@ class ScrollableFrame:
 
 class RandoSettings:
     def __init__(self):
-        self.width=489
-        self.height=573
+        self.width=480
+        self.height=500
         self.initWindow()
         self.ChooseFile()
         if self.root:
@@ -114,15 +114,24 @@ class RandoSettings:
         if not self.grp.mapSettings.addableEnemies:
             self.enemyVarietyVar.set('Unavailable for this game')
             self.enemyVariety['state'] = 'disabled'
+        if self.grp.game.useRandomizerFolder:
+            self.randomizerFolderVar.set('Enabled')
+        else:
+            self.randomizerFolderVar.set('Disabled')
+        if self.grp.game.externalFiles:
+            self.randomizerFolder['state'] = 'disabled'
+        else:
+            self.randomizerFolder['state'] = 'normal'
 
-
-    def _Randomize(self):
+    def ReadSettings(self):
+        settings = {}
         seed = self.seedEntry.get()
         if seed == '':
             seed = random.randint(1, 999999)
+        settings['seed'] = seed
 
-        settings = {}
         unavail = 'Unavailable for this game'
+        enabled = {'Disabled': False, 'Enabled': True, 'Unavailable for this game': False}
 
         settings['MapFile.chanceDupeItem'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
         settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
@@ -137,8 +146,13 @@ class RandoSettings:
         settings['conFile.scale'] = 1.0
         settings['conFile.difficulty'] = {'Easy': 0.3, 'Medium': 0.5, 'Difficult': 0.7, 'Extreme': 0.9, unavail: 0.5}[self.difficultyVar.get()]
 
-        settings['grp.reorderMaps'] = {'Disabled': False, 'Enabled': True}[self.reorderMapsVar.get()]
+        settings['grp.reorderMaps'] = enabled[self.reorderMapsVar.get()]
+        settings['useRandomizerFolder'] = enabled[self.randomizerFolderVar.get()]
+        self.grp.game.useRandomizerFolder = settings['useRandomizerFolder']
+        return settings
 
+    def _Randomize(self, settings):
+        seed = settings['seed']
         self.grp.Randomize(seed, settings=settings)
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
         self.closeWindow()
@@ -155,6 +169,7 @@ class RandoSettings:
         try:
             self.randoButton["state"]='disabled'
             self.update()
+            settings = self.ReadSettings()
 
             if not self.WarnOverwrites():
                 info('Declined overwrite warning, not randomizing')
@@ -162,7 +177,7 @@ class RandoSettings:
                     self.randoButton["state"]='normal'
                 return
 
-            self._Randomize()
+            self._Randomize(settings)
         except Exception as e:
             errordialog('Error Randomizing', self.grppath, e)
             if self.isWindowOpen():
@@ -171,12 +186,12 @@ class RandoSettings:
 
 
     def newInput(self, cls, label:str, tooltip:str, row:int, *args):
-        label = Label(self.win,text=label,width=20,height=2,font=self.font, anchor='e', justify='left')
+        label = Label(self.win,text=label,width=22,height=2,font=self.font, anchor='e', justify='left')
         label.grid(column=0,row=row, sticky='E')
         if cls == OptionMenu:
             entry = cls(self.win, *args)
         else:
-            entry = cls(self.win, *args, width=20,font=self.font)
+            entry = cls(self.win, *args, width=18,font=self.font)
         entry.grid(column=1,row=row, sticky='W')
 
         myTip = Hovertip(label, tooltip)
@@ -200,7 +215,7 @@ class RandoSettings:
         infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
-        self.seedEntry = self.newInput(Entry, 'Seed: ', 'RNG Seed', row)
+        self.seedEntry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row)
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
@@ -236,13 +251,16 @@ class RandoSettings:
         row+=1
 
         # TODO: option to enable/disable loading external files?
-        # TODO: option to enable.disable useRandomizerFolder
+
+        self.randomizerFolderVar = StringVar(self.win, '')
+        self.randomizerFolder = self.newInput(OptionMenu, 'Use Randomizer Folder: ', 'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.', row, self.randomizerFolderVar, 'Disabled', 'Enabled')
+        row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)
         #self.progressbar.grid(column=0,row=row,columnspan=2)
         #row+=1
 
-        self.randoButton = Button(self.win,text='Randomize!',width=20,height=2,font=self.font, command=self.Randomize)
+        self.randoButton = Button(self.win,text='Randomize!',width=18,height=2,font=self.font, command=self.Randomize)
         self.randoButton.grid(column=1,row=100, sticky='SE')
         Hovertip(self.randoButton, 'Dew it!')
 
