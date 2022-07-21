@@ -71,11 +71,11 @@ class RandoSettings:
     def resize(self,event):
         if event.widget == self.root:
             try:
-                #print('resize', event.width, event.height)
+                trace('resize', event.width, event.height)
                 self.width = event.width
                 self.height = event.height
             except Exception as e:
-                print('ERROR: in resize:', e)
+                error('ERROR: in resize:', e)
 
     def _ChooseFile(self):
         grppath = ''

@@ -90,9 +90,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         if not self.game.externalFiles:
             return
         gamedir = os.path.dirname(self.filepath)
-        searchdir = gamedir + '/**'
-        if gamedir == '':
-            searchdir = '**'
+        searchdir = os.path.join(gamedir, '**')
         trace(searchdir)
         files = glob.glob(searchdir, recursive=True)
         trace(files)
@@ -224,7 +222,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
         data = self.getfile(name, filehandle)
         trace(name, len(data))
-        with open(outpath + name, 'wb') as o:
+        with open(os.path.join(outpath, name), 'wb') as o:
             o.write(data)
 
     def ExtractAll(self, outpath) -> None:
@@ -364,7 +362,7 @@ def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
 
     datas = []
     for name in filenames:
-        with open(frompath + name, 'rb') as f:
+        with open(os.path.join(frompath, name), 'rb') as f:
             d = f.read()
             datas.append(d)
             outfile.write(pack('<12sI', name.encode('ascii'), len(d)))

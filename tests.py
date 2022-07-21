@@ -78,7 +78,7 @@ original_order = [
 ]
 
 @typechecked
-class Duke3dSWTestCase(unittest.TestCase):
+class BERandoTestCase(unittest.TestCase):
     def subTest(self, msg=case._subtest_msg_sentinel, **params):
         print('\n----------------------------------\nstarting subTest', msg, '\n----------------------------------')
         return super().subTest(msg, **params)
@@ -143,10 +143,15 @@ class Duke3dSWTestCase(unittest.TestCase):
 
     def test_other_grps(self):
         # optionally use the othertests folder for testing your own collection of games that aren't freeware
-        # TODO: remove the .grp so we test all the files in the folder
-        files = glob.glob('othertests/*.grp', recursive=True)
+        files = glob.glob('othertests/*', recursive=True)
         for f in files:
-            self.TestRandomize(f, 451, {}, False)
+            if 'skip' in f:
+                continue
+            with self.subTest(f):
+                self.TestRandomize(f, 451, {}, False)
+                #grp = LoadGrpFile(f)
+                #grp.ExtractAll(os.path.join(temp,f+'-extracted'))
+
 
     def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
         self.maxDiff = None
@@ -215,6 +220,18 @@ class Duke3dSWTestCase(unittest.TestCase):
             walls = [(0,0), (10,0), (10,10), (0,10)]
             self.assertEqual(buildmap.PointIsInShape(walls, (5,5), 0) % 2, 1)
             self.assertEqual(buildmap.PointIsInShape(walls, (15,15), 0) % 2, 0)
+
+    def test_encrypt_decrypt(self):
+        # ensure it's reversible
+        data = bytearray(b'123456')
+        d2 = buildmap.MapCrypt(data, 451)
+        d2 = buildmap.MapCrypt(d2, 451)
+        self.assertEqual(data, d2)
+
+        data = bytearray(b'dfgdfghcvbngertguhyrtujityr3456436fdghsdfgxcvb')
+        d2 = buildmap.MapCrypt(data, 0x7474614d)
+        d2 = buildmap.MapCrypt(d2, 0x7474614d)
+        self.assertEqual(data, d2)
 
 
 

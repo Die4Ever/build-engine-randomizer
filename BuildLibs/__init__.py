@@ -23,6 +23,7 @@ class FancyPacker:
     def __init__(self, endianness: str, mappings: OrderedDict):
         self.format = endianness
         self.keys = {}
+        self.total_len = 0
         for k, v in mappings.items():
             self.format += v
             m = packLengthRegex.match(v)
@@ -30,9 +31,10 @@ class FancyPacker:
                 self.keys[k] = len(m.group(1)) + 1 + len(m.group(4))
             else:
                 self.keys[k] = len(v)
+            self.total_len += self.keys[k]
 
 
-    def unpack(self, data: bytearray) -> dict:
+    def unpack(self, data: bytes) -> dict:
         t = unpack(self.format, data)
         dict = {}
         i = 0
@@ -47,7 +49,7 @@ class FancyPacker:
         return dict
 
     def pack(self, dict: dict) -> bytes:
-        values = [None] * (len(self.format)-1)
+        values = [None] * self.total_len
         i = 0
         for k, L in self.keys.items():
             v = dict[k]
