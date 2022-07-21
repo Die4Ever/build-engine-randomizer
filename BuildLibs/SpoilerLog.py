@@ -16,7 +16,7 @@ class SpoilerLog:
     def __exit__(self, exc_type, exc_value, tb):
         if exc_value:
             text = "".join(traceback.format_exception(exc_type, exc_value, tb))
-            self.file.write(text)
+            self._WriteHtml('error', text)
         self.WriteFooter()
         self.file.close()
 
@@ -48,6 +48,9 @@ class SpoilerLog:
         }
         .collapsed .FileSection {
             display: none;
+        }
+        .error {
+            color: #f44;
         }
     </style>
 
@@ -87,7 +90,7 @@ class SpoilerLog:
 
     def Change(self, var, old, new):
         text = '    ' + var + ' changed from ' + str(old) + ' to ' + str(new)
-        debug(text)
+        trace(text)
         self._WriteHtml('Change', text)
 
     def AddSprite(self, type, sprite):
@@ -131,7 +134,7 @@ class SpoilerLog:
         pos = str(tuple(sprite.pos))
         tagval = self.GetPicnumName(tagval)
         text = '    set ' + tagname + ' to ' + tagval + ' on trigger (' + str(sprite.picnum) + ') at ' + pos
-        debug(text)
+        trace(text)
         self._WriteHtml('SpriteChangedTag', text)
 
     # which file is currently being randomized

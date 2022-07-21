@@ -124,11 +124,11 @@ class RandoSettings:
         settings = {}
         unavail = 'Unavailable for this game'
 
-        settings['MapFile.chanceDupeItem'] = {'Few': 0.3, 'Some': 0.5, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.3, 'Many': 0.1, 'Extreme': 0.1}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeItem'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
 
-        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.2, 'Some': 0.5, 'Many': 0.6, 'Extreme': 0.9}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.5, 'Some': 0.3, 'Many': 0.2, 'Extreme': 0.1}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
 
         settings['MapFile.itemVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.itemVarietyVar.get()]
         settings['MapFile.enemyVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.enemyVarietyVar.get()]
