@@ -159,10 +159,13 @@ class RandoSettings:
 
     def WarnOverwrites(self) -> bool:
         deleting = self.grp.GetDeleteFolders(self.grp.GetOutputPath())
+        deletingstrs = []
+        for d in deleting:
+            deletingstrs.append(str(d))
         return messagebox.askokcancel(
             title='Will DELETE files!',
             message='This may take a minute.\nWILL DELETE/OVERWRITE THE FOLLOWING:\n'
-            + '\n'.join(deleting)
+            + '\n'.join(deletingstrs)
         )
 
     def Randomize(self):

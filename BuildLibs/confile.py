@@ -1,5 +1,6 @@
 from BuildLibs import *
 from BuildLibs import games
+from pathlib import Path
 import re
 
 defineregex = re.compile('^define\s+([^\s]+)\s+(\d+)(.*)$')
@@ -54,7 +55,7 @@ class ConFile:
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
         try:
-            spoilerlog.SetFilename(self.name)
+            spoilerlog.SetFilename(Path(self.name))
             spoilerlog.SetConSettings(self.conSettings)
             self.spoilerlog = spoilerlog
             self._Randomize(seed, settings)

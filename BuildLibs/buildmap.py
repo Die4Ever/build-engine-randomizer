@@ -1,6 +1,7 @@
 from struct import *
 from BuildLibs import *
 from BuildLibs import games
+from pathlib import Path
 
 class CStat:
     def __init__(self, cstat):
@@ -144,7 +145,7 @@ class MapFile:
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
         try:
-            spoilerlog.SetFilename(self.name)
+            spoilerlog.SetFilename(Path(self.name))
             spoilerlog.SetGameMapSettings(self.gameSettings)
             self.spoilerlog = spoilerlog
             self._Randomize(seed, settings)

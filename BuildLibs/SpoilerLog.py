@@ -1,8 +1,9 @@
 import traceback
 from BuildLibs import *
+from pathlib import Path
 
 class SpoilerLog:
-    def __init__(self, filename):
+    def __init__(self, filename:Path):
         self.filename = filename
         self.file = None
         self.currentFile = ''
@@ -81,11 +82,11 @@ class SpoilerLog:
         html = '\n</body></html>'
         self.file.write(html)
 
-    def write(self, text):
+    def write(self, text:str):
         info(text)
         self._WriteHtml('write', text)
 
-    def _WriteHtml(self, classname, text):
+    def _WriteHtml(self, classname:str, text:str):
         self.file.write('<div class="'+classname+'">' + text.replace('\n', '<br/>') + '</div>\n')
 
     def Change(self, var, old, new):
@@ -129,7 +130,7 @@ class SpoilerLog:
             text = '    ' + spritetype + ' ' + self.DescribeSprite(sprite)
             self._WriteHtml('ListSprites', text)
 
-    def SpriteChangedTag(self, tagname: str, sprite, tagval):
+    def SpriteChangedTag(self, tagname:str, sprite, tagval):
         # tuple gives parens so it looks better than a list
         pos = str(tuple(sprite.pos))
         tagval = self.GetPicnumName(tagval)
@@ -138,9 +139,9 @@ class SpoilerLog:
         self._WriteHtml('SpriteChangedTag', text)
 
     # which file is currently being randomized
-    def SetFilename(self, filename):
+    def SetFilename(self, filename:Path):
         self.currentFile = filename
-        text = 'Starting randomizing file: ' + filename
+        text = 'Starting randomizing file: ' + str(filename)
         debug(text)
         self.file.write(
             '\n<br/><div class="SetFilename collapsed">' + text + '<br/>\n'
@@ -150,13 +151,13 @@ class SpoilerLog:
 
     def FinishRandomizingFile(self):
         if self.currentFile:
-            text = 'Finished randomizing file: ' + self.currentFile
+            text = 'Finished randomizing file: ' + str(self.currentFile)
             debug(text)
             self.file.write(
                 '<div class="FinishRandomizingFile">' + text + '</div>\n'
                 + '</div></div>\n'
             )
-        self.currentFile = ''
+        self.currentFile = None
         self.conSettings = {}
         self.gameMapSettings = {}
 

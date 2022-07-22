@@ -19,7 +19,7 @@ except Exception as e:
     error('Failed to set locale', e, '\n', traceback.format_exc())
 
 
-def LoadGrpFile(filepath) -> 'GrpBase':
+def LoadGrpFile(filepath:Path) -> 'GrpBase':
     info(filepath)
     game:games.GameInfo = games.GetGame(filepath)
     filesize = os.path.getsize(filepath)
@@ -53,7 +53,7 @@ class GrpBase(metaclass=abc.ABCMeta):
     def _getfile(self, name, filehandle) -> bytes:
         return
 
-    def __init__(self, filepath, filesize, game):
+    def __init__(self, filepath:Path, filesize, game):
         self.filepath = filepath
         info(filepath)
         self.files = {}
@@ -90,9 +90,9 @@ class GrpBase(metaclass=abc.ABCMeta):
         if not self.game.externalFiles:
             return
         gamedir = os.path.dirname(self.filepath)
-        searchdir = os.path.join(gamedir, '**')
+        searchdir = Path(gamedir, '**')
         trace(searchdir)
-        files = glob.glob(searchdir, recursive=True)
+        files = glob.glob(str(searchdir), recursive=True)
         trace(files)
         for f in files:
             p = Path(f)
@@ -108,7 +108,7 @@ class GrpBase(metaclass=abc.ABCMeta):
 
             f = str(rel)
             self.files[f] = {
-                'location': str(p),
+                'location': p,
                 #'parts': p.parts
             }
 
@@ -134,15 +134,15 @@ class GrpBase(metaclass=abc.ABCMeta):
         data = bytearray(self.getfile(name, file))
         return LoadMap(self.game, name, data)
 
-    def GetOutputPath(self, basepath:str='') -> str:
+    def GetOutputPath(self, basepath:Path=Path('')) -> Path:
         gamedir = os.path.dirname(self.filepath)
         if not basepath:
             basepath = gamedir
         if self.game.useRandomizerFolder:
-            basepath = os.path.join(basepath, 'Randomizer')
-        return str(Path(basepath))
+            basepath = Path(basepath, 'Randomizer')
+        return Path(basepath)
 
-    def GetDeleteFolders(self, basepath:str) -> list:
+    def GetDeleteFolders(self, basepath:Path) -> list:
         if self.game.useRandomizerFolder:
             return [basepath]
 
@@ -157,9 +157,9 @@ class GrpBase(metaclass=abc.ABCMeta):
         return ret
 
     # basepath is only used by tests
-    def _Randomize(self, seed:int, settings:dict, basepath:str, spoilerlog, filehandle) -> None:
+    def _Randomize(self, seed:int, settings:dict, basepath:Path, spoilerlog, filehandle) -> None:
         spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
-        spoilerlog.write(self.filepath)
+        spoilerlog.write(str(self.filepath))
         spoilerlog.write(repr(self.game) + '\n\n')
 
         for (conName,conSettings) in self.conSettings.conFiles.items():
@@ -167,12 +167,12 @@ class GrpBase(metaclass=abc.ABCMeta):
             text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
             con.Randomize(seed, settings, spoilerlog)
-            out = os.path.join(basepath, conName)
-            pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+            out = Path(basepath, conName)
+            out.parent.mkdir(parents=True, exist_ok=True)
             with open(out, 'w') as f:
                 text = con.GetText()
                 size = locale.format_string('%d bytes', len(text), grouping=True)
-                spoilerlog.write(out + ' is ' + size)
+                spoilerlog.write(str(out) + ' is ' + size)
                 f.write(text)
 
         maps = self.GetAllFilesEndsWith('.map')
@@ -184,12 +184,12 @@ class GrpBase(metaclass=abc.ABCMeta):
             map:MapFile = self.getmap(mapname, filehandle)
             map.Randomize(seed, settings, spoilerlog)
             writename = mapRenames.get(mapname, mapname)
-            out = os.path.join(basepath, writename)
-            pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+            out = Path(basepath, writename)
+            out.parent.mkdir(parents=True, exist_ok=True)
             with open(out, 'wb') as f:
                 data = map.GetData()
                 size = locale.format_string('%d bytes', len(data), grouping=True)
-                spoilerlog.write(mapname + ' writing to ' + out + ', is ' + size)
+                spoilerlog.write(str(mapname) + ' writing to ' + str(out) + ', is ' + size)
                 f.write(map.GetData())
 
         spoilerlog.write('\n')
@@ -198,34 +198,38 @@ class GrpBase(metaclass=abc.ABCMeta):
         spoilerlog.write(repr(self.mapSettings))
 
 
-    def Randomize(self, seed:int, settings:dict={}, basepath:str='') -> None:
-        basepath = self.GetOutputPath(basepath)
+    def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
+        basepath:Path = self.GetOutputPath(basepath)
         deleteFolders = self.GetDeleteFolders(basepath)
         for f in deleteFolders:
-            if os.path.isdir(f):
+            f = Path(f)
+            if f.is_dir():
                 shutil.rmtree(f)
-            elif os.path.isfile(f):
+            elif f.is_file():
                 os.remove(f)
 
-        out = os.path.join(basepath, 'Randomizer.html')
+        out = Path(basepath, 'Randomizer.html')
         pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
                 return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
             except:
-                error(self.filepath)
+                error(str(self.filepath))
                 error(self.game, ', seed: ', seed, ', settings: ', settings, ', basepath: ', basepath)
                 error('\n  == files: ', self.files, ' == end of files listing ==\n')
                 raise
 
-    def ExtractFile(self, outpath, name, filehandle=None) -> None:
-        pathlib.Path(outpath).mkdir(parents=True, exist_ok=True)
+    def ExtractFile(self, outpath:Path, name, filehandle=None) -> None:
+        outfile = Path(outpath, name)
+        outfile.parent.mkdir(parents=True, exist_ok=True)
         data = self.getfile(name, filehandle)
-        trace(name, len(data))
-        with open(os.path.join(outpath, name), 'wb') as o:
+        print(name, len(data), outfile)
+        if not data:
+            return
+        with open(outfile, 'wb') as o:
             o.write(data)
 
-    def ExtractAll(self, outpath) -> None:
+    def ExtractAll(self, outpath:Path) -> None:
         with self.getFileHandle() as filehandle:
             for name in self.files.keys():
                 self.ExtractFile(outpath, name, filehandle)
@@ -355,17 +359,17 @@ class RffFile(GrpBase):
         return open(self.filepath, 'rb')
 
 
-def CreateGrpFile(frompath: str, outpath: str, filenames: list) -> None:
+def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
     outfile = open(outpath, 'wb')
     outfile.write(b'KenSilverman')
     outfile.write(pack('<I', len(filenames)))
 
     datas = []
     for name in filenames:
-        with open(os.path.join(frompath, name), 'rb') as f:
+        with open(Path(frompath, name), 'rb') as f:
             d = f.read()
             datas.append(d)
-            outfile.write(pack('<12sI', name.encode('ascii'), len(d)))
+            outfile.write(pack('<12sI', str(name).encode('ascii'), len(d)))
 
     for d in datas:
         outfile.write(d)

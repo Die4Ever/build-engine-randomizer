@@ -12,9 +12,9 @@ from mmap import mmap, ACCESS_READ
 import glob
 
 unittest.TestLoader.sortTestMethodsUsing = None
-temp = 'temp/'
-zippath: str = 'duke3d-shareware.grp.zip'
-tempgrp = 'temp/testing.grp'
+temp:Path = Path('temp/')
+zippath:Path = Path('duke3d-shareware.grp.zip')
+tempgrp:Path = Path('temp/testing.grp')
 
 settings = {
     'MapFile.chanceDupeItem': 0.5,
@@ -126,8 +126,8 @@ class BERandoTestCase(unittest.TestCase):
             with self.subTest('Create External File'):
                 testdata = 'Damn, I\'m lookin good!'
                 extname = 'external_file.txt'
-                gamedir = os.path.dirname(tempgrp)
-                extpath = os.path.join(gamedir, extname)
+                gamedir = Path(tempgrp).parent
+                extpath = Path(gamedir, extname)
                 with open(extpath, 'w') as file:
                     file.write(testdata)
 
@@ -148,22 +148,34 @@ class BERandoTestCase(unittest.TestCase):
             if 'skip' in f:
                 continue
             with self.subTest(f):
+                f = Path(f)
                 self.TestRandomize(f, 451, {}, False)
-                #grp = LoadGrpFile(f)
-                #grp.ExtractAll(os.path.join(temp,f+'-extracted'))
+                grp = LoadGrpFile(f)
+                grp.ExtractAll(Path(temp,str(f)+'-extracted'))
+
+    def test_combine(self):
+        # optionally make a new grp file
+        globfiles = glob.glob('combine/*', recursive=True)
+        files = []
+        for f in globfiles:
+            f = Path(f)
+            if f.is_file():
+                files.append(f)
+        if files:
+            CreateGrpFile(Path(''), Path('temp/combined.grp'), files)
 
 
-    def TestRandomize(self, grppath:str, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
+    def TestRandomize(self, grppath:Path, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
         self.maxDiff = None
-        testname = grppath + ' Seed ' + ('0451' if seed==451 else str(seed))
-        basepath = temp + str(crc32(testname+repr(settings))) + '/'
+        testname = str(grppath) + ' Seed ' + ('0451' if seed==451 else str(seed))
+        basepath = Path(temp, str(crc32(testname+repr(settings))))
         newMd5s = None
         with self.subTest('Randomize '+testname):
             grp:GrpBase = LoadGrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
 
             if grp.game.useRandomizerFolder:
-                basepath = os.path.join(basepath, 'Randomizer')
+                basepath = Path(basepath, 'Randomizer')
             newMd5s = self.Md5GameFiles(testname, grp, basepath)
             self.assertIsNotNone(newMd5s, 'New MD5s')
             self.assertGreater(len(newMd5s), 0, 'New MD5s')
@@ -178,13 +190,15 @@ class BERandoTestCase(unittest.TestCase):
                     for k in oldMd5s.keys():
                         self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
 
-            with open(os.path.join(basepath, 'Randomizer.html')) as spoilerlog:
+            with open(Path(basepath, 'Randomizer.html')) as spoilerlog:
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
                 for con in grp.conSettings.conFiles.keys():
+                    con = str(Path(con))
                     self.assertInLogs('Finished randomizing file: '+con, logs)
                 for map in grp.GetAllFilesEndsWith('.map'):
+                    map = str(Path(map))
                     self.assertInLogs('Finished randomizing file: '+map, logs)
                 self.assertInLogs('<div class="ListSprites">', logs)
                 if grp.mapSettings.triggers:
@@ -196,21 +210,21 @@ class BERandoTestCase(unittest.TestCase):
         if text.lower() not in logs.lower():
             self.fail(text + ' not found in logs')
 
-    def Md5GameFiles(self, testname:str, grp:GrpBase, basepath: str) -> dict:
+    def Md5GameFiles(self, testname:str, grp:GrpBase, basepath:Path) -> dict:
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
             cons = list(grp.conSettings.conFiles.keys())
             return self.Md5Files(basepath, (maps+cons))
 
-    def Md5Files(self, basepath: str, filenames: list) -> dict:
+    def Md5Files(self, basepath: Path, filenames: list) -> dict:
         md5s = {}
         for f in filenames:
-            t = self.Md5File(os.path.join(basepath, f))
+            t = self.Md5File(Path(basepath, f))
             md5s[f] = t
         trace('Md5Files ', basepath, ': ', md5s)
         return md5s
 
-    def Md5File(self, filename):
+    def Md5File(self, filename:Path):
         with open(filename) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
             md5sum = md5(file).hexdigest()
             return md5sum

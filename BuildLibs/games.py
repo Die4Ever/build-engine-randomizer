@@ -3,6 +3,7 @@ import os
 from hashlib import md5, sha1
 from mmap import mmap, ACCESS_READ
 from BuildLibs import *
+from pathlib import Path
 
 gamesList = {}
 gamesMapSettings = {}
@@ -79,7 +80,7 @@ def AddConSettings(*args, **kargs) -> GameConSettings:
     gamesConSettings[gcs.gameName] = gcs
     return gcs
 
-def GetGame(grppath) -> GameInfo:
+def GetGame(grppath:Path) -> GameInfo:
     global gamesList
     size = os.path.getsize(grppath)
     with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
@@ -111,6 +112,11 @@ def GetGameConSettings(game: GameInfo) -> GameConSettings:
     g:GameConSettings = gamesConSettings.get(game.type, GameConSettings())
     return g.copy()
 
+def SpriteRange(min, max, value):
+    d={}
+    for i in range(min,max+1):
+        d[i] = value
+    return d
 
 
 
@@ -548,7 +554,89 @@ AddMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
 )
 
 
-AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7)
+AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
+    swappableItems={
+        519: 'Doctor\'s Bag',
+        524: 'Flare Gun',
+        525: 'Voodoo Doll',
+        526: 'Napalm Launcher',
+        527: 'Random Weapon',
+        589: 'Dynamite',
+        619: 'Shells',
+        760: 'Crystal Ball',
+        800: 'Life Leech',
+        802: 'Gasoline',
+        809: 'TNT',
+        810: 'Remote Mine',
+        811: 'Proximity Mine',
+        812: 'Shells',
+        813: 'Bullets',
+        814: 'Bullets',
+        815: 'Ammo',
+        816: 'Flares',
+        817: 'Shield', # ?
+        818: 'Flares',
+        819: 'Flares',
+        820: 'Soulsphere', # ?
+        822: 'Medicine Pouch',
+        827: 'Jumping Boots',
+        829: 'Akimbo',
+        830: 'Diving Suit',
+        831: 'Something?',
+        837: 'Suit',
+        839: 'Beastvision',
+        **SpriteRange(2169, 2172, 'Life Essence'),
+        **SpriteRange(2428, 2432, 'Reflective Shots'),
+        **SpriteRange(2433, 2437, 'Life Seed'),
+        # GUI elements?
+        # 2560: 'Jumping Boots',
+        # 2561: 'Skulls',
+        # 2562: 'Something?',
+        # 2563: 'Shadow Cloak',
+        # 2564: 'Diving Helmet',
+        # 2565: 'Diving Suit',
+        # 2566: 'Crystal Ball',
+        # 2567: 'Akimbo',
+        # 2568: 'Beast Vision',
+        # 2569: 'Health',
+        2578: 'Fire Armor',
+        2586: 'Body Armor',
+        2594: 'Super Armor',
+        2602: 'Spirit Armor',
+        2628: 'Basic Armor',
+        #**SpriteRange(2552, 2558, 'Key'),
+    },
+    swappableEnemies={
+        **SpriteRange(1170, 1258, 'Zombie'),
+        **SpriteRange(1270, 1324, 'Hellhound'),
+        **SpriteRange(3724, 3728, 'Hellhound Skeleton'),
+        **SpriteRange(1370, 1442, 'Fat Zombie'),
+        **SpriteRange(3604, 3623, 'Fat Zombie'),
+        **SpriteRange(1470, 1536, 'Gargoyle'),
+        **SpriteRange(3719, 3723, 'Stone Gargoyle'),
+        **SpriteRange(1570, 1662, 'Gill Beast'),
+        **SpriteRange(3734, 3738, 'Gill Beast Skeleton'),
+        **SpriteRange(1745, 1764, 'Rat'),
+        **SpriteRange(1792, 1820, 'Acid Pod'),
+        #**SpriteRange(1024, 1028, 'Tchernobog'),
+        #**SpriteRange(1835, 1854, 'Tchernobog'),
+        #**SpriteRange(3140, 3144, 'Tchernobog'),
+        **SpriteRange(1870, 1889, 'Bone Eel'),
+        **SpriteRange(3729, 3733, 'Bone Eel'),
+        **SpriteRange(1908, 1947, 'Spider'),
+        **SpriteRange(1948, 1974, 'Bat'),
+        **SpriteRange(1980, 2011, 'Hand from Hell'),
+        **SpriteRange(2659, 2806, 'Cerberus'),
+        **SpriteRange(2820, 2909, 'Cultist'),
+        **SpriteRange(2955, 3040, 'Beast'),
+        **SpriteRange(3584, 2603, 'Beast Swimming'),
+        **SpriteRange(3694, 3718, 'Beast'),
+        **SpriteRange(3060, 3114, 'Phantasm'),
+        **SpriteRange(3739, 3743, 'Phantasm Skeleton'),
+        **SpriteRange(3663, 3677, 'Skeleton'), # ?
+    },
+    addableEnemies={
+    })
 
 
 # difficulty > 0 means higher number makes the game harder

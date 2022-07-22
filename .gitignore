@@ -3,6 +3,7 @@ dist/
 build/
 errorlog.txt
 othertests/
+combine/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
