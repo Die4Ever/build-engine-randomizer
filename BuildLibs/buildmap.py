@@ -139,7 +139,7 @@ class MapFile:
                 pos += self.x_wall_size
         return pos
 
-    def ReadSprites(self):
+    def ReadSprites(self) -> int:
         pos = self.sprites_start
         for i in range(self.num_sprites):
             sprite = self.GetSprite(i, pos)
@@ -399,8 +399,6 @@ class MapFile:
         shapes = [[]]
         for i in range(numwalls):
             (x, y, nextwall, otherwall, nextsect) = self.walls[wall]
-            if type(self) == MapV6:
-                nextsect = otherwall
             nearbySectors.add(nextsect)
             point = (x, y)
             walls[wall] = point
@@ -443,6 +441,14 @@ class MapV6(MapFile):
             picnum='h', angle='h', velocity='hhh', owner='h',
             sectnum='h', statnum='h', lowtag='h', hightag='h', extra='h')
         )
+
+    def ReadWalls(self) -> int:
+        pos = super().ReadWalls()
+        for i in range(len(self.walls)):
+            # v6 has otherwall and nextsect backwards
+            (x, y, nextwall, nextsect, otherwall) = self.walls[i]
+            self.walls[i] = (x, y, nextwall, otherwall, nextsect)
+        return pos
 
 
 class BloodMap(MapFile):

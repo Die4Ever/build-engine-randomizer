@@ -1,5 +1,7 @@
 from typeguard import typechecked, importhook
-importhook.install_import_hook('BuildLibs')
+profiling=0
+if not profiling:
+    importhook.install_import_hook('BuildLibs')
 
 import shutil
 from BuildLibs import buildmap, games, confile, gui, SpoilerLog
@@ -150,8 +152,8 @@ class BERandoTestCase(unittest.TestCase):
             with self.subTest(f):
                 f = Path(f)
                 self.TestRandomize(f, 451, {}, False)
-                grp = LoadGrpFile(f)
-                grp.ExtractAll(Path(temp,str(f)+'-extracted'))
+                #grp = LoadGrpFile(f)
+                #grp.ExtractAll(Path(temp,str(f)+'-extracted'))
 
     def test_combine(self):
         # optionally make a new grp file
@@ -256,9 +258,11 @@ if __name__ == "__main__":
     try:
         if os.path.isdir(temp):
             shutil.rmtree(temp)
-        #setVerbose(-10)
-        #cProfile.run("runtests()", sort="cumtime")
-        runtests()
+        if profiling:
+            setVerbose(-10)
+            cProfile.run("runtests()", sort="cumtime")
+        else:
+            runtests()
     finally:
     #     if os.path.isdir(temp):
     #         shutil.rmtree(temp)
