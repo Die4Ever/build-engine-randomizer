@@ -390,6 +390,8 @@ class MapFile:
         if sector in self.sectorCache:
             return self.sectorCache[sector]
 
+        assert sector >= 0
+        assert sector < len(self.sectors)
         wall = self.sectors[sector][0]
         numwalls = self.sectors[sector][1]
         walls = {}
@@ -397,7 +399,7 @@ class MapFile:
         shapes = [[]]
         for i in range(numwalls):
             (x, y, nextwall, otherwall, nextsect) = self.walls[wall]
-            if self.version == 6:
+            if type(self) == MapV6:
                 nextsect = otherwall
             nearbySectors.add(nextsect)
             point = (x, y)

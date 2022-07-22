@@ -135,6 +135,7 @@ def SpriteRange(min, max, value):
 AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', useRandomizerFolder=False) # Steam version
 AddGame('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425', useRandomizerFolder=False) # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
 AddGame('PowerSlave',                         'PowerSlave',             26904012, 'AC80ECB6', '4ae5cbe10396147ae042463b7df8010f', '548751e10f5c25f80d95321565b13f4664434981') # STUFF.DAT
+AddGame('PowerSlave',                         'PowerSlave',             27108170, 'E3B172F1', 'b51391e08a17e5c46e25f6cf46f892eb', 'b84fd656be67271910e5eba4caf69bc81192c174') # STUFF.DAT
 AddGame('PowerSlave Demo',                    'PowerSlave',             15904838, '1D8C7645', '61f5b2871e57e757932f338adefbc878', '6bb4b2974da3d90e70c6b4dc56b296f907c180f0') # STUFF.DAT shareware
 AddGame('Exhumed Demo',                       'PowerSlave',             16481687, '1A6E27FA', 'e368de92d99e4fb85ebe5f188eb175e3', '2062fec5d513850b3c3dc66c7d44c4b0f91296db') # STUFF.DAT shareware
 AddGame('Blood',                              'Blood',                   9570681, 'A8FDDA84', '50e921649a91b2f707af8ef89141e468', '7051cd336a924db4948a99ad2ca2889afc5393a6') # BLOOD.RFF
@@ -531,25 +532,44 @@ AddMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
 
 AddMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
     swappableItems={
+        **SpriteRange(326, 331, 'Life Blood'),
+        **SpriteRange(332, 337, 'Cobra Venom Bowl'),
+        782: 'Still Beating Heart',
         488: 'Pistol',
         490: 'Machine Gun',
         491: 'Fancy Gun',
+        877: 'Quick Loader',
+        878: 'Grenade',
+        879: 'Fuel Canister',
+        881: 'Machine Gun Ammo',
+        882: 'Machine Gun Ammo',
+        **SpriteRange(899, 901, 'Cobra Staff'),
+        983: 'Extra Life',
+        #**SpriteRange(3320, 3347, 'Key'),
+        3457: 'Golden Cobra',
+        **SpriteRange(3502, 3507, 'Magical Essence'),
+        **SpriteRange(3516, 3520, 'Raw Energy'),
+        3602: 'Grenade',
     },
     swappableEnemies={
-        1526: 'Mummy',# to 1531
-        1664: 'Mummy',# to 1746
-        1949: 'Mummy',# to 1963
-        2311: 'Anubis Zombie',# to 2373
-        2432: 'Omenwasp',# to 2497 and 2552?
-        2498: 'Armadillo',# to 2548
-        2559: 'Boss Looking Biped',# to 2642 and 2687
-        2643: 'Boss Looking Serpent',# to 2675
-        2698: 'Boss Looking Spider',# to 2750
-        2751: 'Lion Woman',# to 2816 and 3038 to 3049?
-        2817: 'Dude With Gun',# to 3032
-        3072: 'Scorpion',# to 3136 and 3151 to 3181?
-        3137: 'Mouth',# to 3147
-        3200: 'Grasshopper',# to 3250
+        **SpriteRange(861, 875, 'Spider'),
+        **SpriteRange(1526, 1531, 'Mummy'),
+        **SpriteRange(1664, 1746, 'Mummy'),
+        **SpriteRange(1949, 1963, 'Mummy'),
+        **SpriteRange(2311, 2373, 'Anubis Zombie'),
+        **SpriteRange(2432, 2497, 'Omenwasp'),
+        2552: 'Omenwasp',
+        **SpriteRange(2498, 2548, 'Am-mit'),
+        #**SpriteRange(2559, 2642, 'Set'),
+        #2687: 'Set',
+        #**SpriteRange(2643, 2675, 'Magmantis'),
+        #**SpriteRange(2698, 2750, 'Selkis'),
+        **SpriteRange(2751, 2816, 'Bastet'),
+        **SpriteRange(3038, 3049, 'Bastet'),
+        #**SpriteRange(3072, 3136, 'Kilmaatikahn'),
+        #**SpriteRange(3151, 3181, 'Kilmaatikahn'),
+        **SpriteRange(3137, 3147, 'Mouth'),
+        **SpriteRange(3200, 3250, 'Grasshopper'),
     },
     triggers={},
     additions={}
