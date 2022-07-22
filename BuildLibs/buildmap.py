@@ -46,7 +46,7 @@ def LoadMap(gameName, name, data: bytearray) -> 'MapFile':
         (version,) = unpack('<i', data[:4])
         if version <= 6:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
-            raise NotImplementedError('MAP Format Version 6 is not yet implemented', name)
+            return MapV6(gameName, name, data)
         return MapFile(gameName, name, data)
 
 
@@ -76,9 +76,7 @@ class MapFile:
         trace(self.__dict__, '\n')
         self.data = data
 
-        self.spritePacker = FancyPacker('<', OrderedDict(pos='iii', cstat='h', picnum='h', gfxstuff='bBBB',
-            texcoords='BBbb', sectnum='h', statnum='h', angle='h', owner='h',
-            velocity='hhh', lowtag='h', hightag='h', extra='h'))
+        self.CreateSpritePacker()
 
         self.items = []
         self.enemies = []
@@ -95,6 +93,13 @@ class MapFile:
         self.headerLen = 22
         self.__dict__.update(headerPacker.unpack(data[:self.headerLen]))
         self.sectors_start = self.headerLen
+
+    def CreateSpritePacker(self):
+        self.spritePacker = FancyPacker('<', OrderedDict(
+            pos='iii', cstat='h', picnum='h', gfxstuff='bBB', filler='B',
+            texcoords='BBbb', sectnum='h', statnum='h', angle='h',
+            owner='h', velocity='hhh', lowtag='h', hightag='h', extra='h')
+        )
 
     def ReadData(self):
         pos = self.ReadSectors()
@@ -291,7 +296,8 @@ class MapFile:
         add = {
             'picnum': rng.choice(add['choices']),
             'cstat': 0,
-            'gfxstuff': [0,0,32,0],
+            'gfxstuff': [0,0,32],
+            'filler': 0,
             'texcoords': [32,32,0,0],
             'statnum': 0,
             'angle': 1536,
@@ -391,6 +397,8 @@ class MapFile:
         shapes = [[]]
         for i in range(numwalls):
             (x, y, nextwall, otherwall, nextsect) = self.walls[wall]
+            if self.version == 6:
+                nextsect = otherwall
             nearbySectors.add(nextsect)
             point = (x, y)
             walls[wall] = point
@@ -419,6 +427,20 @@ class MapFile:
 
     def GetData(self) -> bytearray:
         return self.data
+
+
+class MapV6(MapFile):
+    def ReadHeaders(self, data):
+        super().ReadHeaders(data)
+        self.sector_size = 37
+        self.sprite_size = 43
+
+    def CreateSpritePacker(self):
+        self.spritePacker = FancyPacker('<', OrderedDict(
+            pos='iii', cstat='h', gfxstuff='bBB', texcoords='BBbb',
+            picnum='h', angle='h', velocity='hhh', owner='h',
+            sectnum='h', statnum='h', lowtag='h', hightag='h', extra='h')
+        )
 
 
 class BloodMap(MapFile):

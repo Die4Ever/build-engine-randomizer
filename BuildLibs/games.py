@@ -135,6 +135,8 @@ def SpriteRange(min, max, value):
 AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', useRandomizerFolder=False) # Steam version
 AddGame('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425', useRandomizerFolder=False) # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
 AddGame('PowerSlave',                         'PowerSlave',             26904012, 'AC80ECB6', '4ae5cbe10396147ae042463b7df8010f', '548751e10f5c25f80d95321565b13f4664434981') # STUFF.DAT
+AddGame('PowerSlave Demo',                    'PowerSlave',             15904838, '1D8C7645', '61f5b2871e57e757932f338adefbc878', '6bb4b2974da3d90e70c6b4dc56b296f907c180f0') # STUFF.DAT shareware
+AddGame('Exhumed Demo',                       'PowerSlave',             16481687, '1A6E27FA', 'e368de92d99e4fb85ebe5f188eb175e3', '2062fec5d513850b3c3dc66c7d44c4b0f91296db') # STUFF.DAT shareware
 AddGame('Blood',                              'Blood',                   9570681, 'A8FDDA84', '50e921649a91b2f707af8ef89141e468', '7051cd336a924db4948a99ad2ca2889afc5393a6') # BLOOD.RFF
 AddGame('Blood DOS',                          'Blood',                   8200353, 'B291418F', '7c77e3ca23960fe7dcad9ff7de054566', '9246062a9573639c69ec369efd56a0e7e7ffc8e0') # blood.rff
 
