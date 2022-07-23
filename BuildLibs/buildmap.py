@@ -22,7 +22,7 @@ class Sector:
 class Sprite:
     def __init__(self, d):
         self.__dict__ = d
-        self.pos:tuple
+        self.pos:list
         self.picnum:int
         self.sectnum:int
         self.length:int
@@ -177,7 +177,7 @@ class MapFile:
         enemyVariety:float = settings['MapFile.enemyVariety']
 
         rng = random.Random(crc32('map dupe items', self.name, seed))
-        self.DupeSprites(rng, self.items, chanceDupeItem, 1, self.gameSettings.swappableItems.keys(), itemVariety, 'item')
+        self.DupeSprites(rng, self.items, chanceDupeItem, 1, self.gameSettings.swappableItems, itemVariety, 'item')
 
         rng = random.Random(crc32('map shuffle items', self.name, seed))
         self.SwapAllSprites(rng, self.items, 'item')
@@ -187,7 +187,10 @@ class MapFile:
         trace('\n')
 
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
-        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, self.gameSettings.addableEnemies.keys(), enemyVariety, 'enemy')
+        enemiesReplacements = {}
+        for i in self.gameSettings.addableEnemies:
+            enemiesReplacements[i] = self.gameSettings.swappableEnemies[i]
+        self.DupeSprites(rng, self.enemies, chanceDupeEnemy, 2, enemiesReplacements, enemyVariety, 'enemy')
 
         rng = random.Random(crc32('map shuffle enemies', self.name, seed))
         self.SwapAllSprites(rng, self.enemies, 'enemy')
@@ -232,10 +235,16 @@ class MapFile:
         #swapobjkey(a, b, 'hightag')
         #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
 
-    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements, replacementChance:float, spritetype: str) -> Union[Sprite,None]:
+    def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements:dict, replacementChance:float, spritetype: str) -> Union[Sprite,None]:
         sprite = sprite.copy()
         if rng.random() < replacementChance:
-            sprite.picnum = rng.choice((*possibleReplacements, sprite.picnum))
+            replace = rng.choice((*possibleReplacements.keys(), sprite.picnum))
+            if replace != sprite.picnum:
+                sprite.lowtag = possibleReplacements[replace].get('lowtag', sprite.lowtag)
+                xrepeat = possibleReplacements[replace].get('xrepeat', sprite.texcoords[0])
+                yrepeat = possibleReplacements[replace].get('yrepeat', sprite.texcoords[1])
+                sprite.texcoords = [xrepeat, yrepeat, 0, 0]
+            sprite.picnum = replace
         for i in range(20):
             x = rng.choice([-350, -250, -150, 0, 150, 250, 350])
             y = rng.choice([-350, -250, -150, 0, 150, 250, 350])
@@ -259,7 +268,7 @@ class MapFile:
             b = toSwap[b]
             self.SwapSprites(spritetype, a, b)
 
-    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float, possibleReplacements, replacementChance:float, spritetype: str):
+    def DupeSprites(self, rng: random.Random, items: list, rate: float, spacing: float, possibleReplacements:dict, replacementChance:float, spritetype: str):
         for sprite in items.copy():
             if rng.random() > rate:
                 continue

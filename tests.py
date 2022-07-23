@@ -170,7 +170,8 @@ class BERandoTestCase(unittest.TestCase):
     def TestRandomize(self, grppath:Path, seed:int, oldMd5s:dict, shouldMatch:bool, settings:dict=settings) -> dict:
         self.maxDiff = None
         testname = str(grppath) + ' Seed ' + ('0451' if seed==451 else str(seed))
-        basepath = Path(temp, str(crc32(testname+repr(settings))))
+        foldername = grppath.name + '-' + str(crc32(testname+repr(settings)))
+        basepath = Path(temp, foldername)
         newMd5s = None
         with self.subTest('Randomize '+testname):
             grp:GrpBase = LoadGrpFile(grppath)

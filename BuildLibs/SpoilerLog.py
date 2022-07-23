@@ -107,9 +107,9 @@ class SpoilerLog:
     def GetPicnumName(self, picnum: int) -> str:
         valname = None
         if self.gameMapSettings and picnum in self.gameMapSettings.swappableItems:
-            valname = self.gameMapSettings.swappableItems[picnum]
-        if self.gameMapSettings and picnum in self.gameMapSettings.swappableEnemies:
-            valname = self.gameMapSettings.swappableEnemies[picnum]
+            valname = self.gameMapSettings.swappableItems[picnum]['name']
+        elif self.gameMapSettings and picnum in self.gameMapSettings.swappableEnemies:
+            valname = self.gameMapSettings.swappableEnemies[picnum]['name']
         if valname:
             return valname + ' ('+str(picnum)+')'
         return str(picnum)
