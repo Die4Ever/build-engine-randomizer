@@ -49,6 +49,7 @@ class GameMapSettings:
         self.addableEnemies = addableEnemies
         self.triggers = triggers
         self.additions = additions
+        self.__dict__.update(kargs)
 
     def __repr__(self):
         return repr(self.__dict__)
@@ -113,8 +114,14 @@ def GetGameConSettings(game: GameInfo) -> GameConSettings:
     g:GameConSettings = gamesConSettings.get(game.type, GameConSettings())
     return g.copy()
 
-def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0):
-    return dict(name=name, category=category, lowtag=lowtag, xrepeat=xrepeat, yrepeat=yrepeat)
+def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0) -> dict:
+    d = dict(name=name, category=category)
+    if lowtag:
+        d['lowtag'] = lowtag
+    if xrepeat:
+        d['xrepeat'] = xrepeat
+        d['yrepeat'] = yrepeat
+    return d
 
 def SpriteRange(min:int, max:int, value:dict):
     d={}
@@ -627,14 +634,12 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
         2820: SpriteInfo('Beast Cultist', 'monsters', lowtag=249, xrepeat=40, yrepeat=40),
         3054: SpriteInfo('Earth Zombie', 'monsters', lowtag=205, xrepeat=40, yrepeat=40),
         3060: SpriteInfo('Phantasm', 'monsters', lowtag=210, xrepeat=40, yrepeat=40),
-        3140: SpriteInfo('Tchernobog', 'monsters', lowtag=229, xrepeat=64, yrepeat=64),
         #3385: SpriteInfo('Shotgun Cultist Prone', 'monsters', lowtag=230, xrepeat=40, yrepeat=40),
         3385: SpriteInfo('Shotgun Cultist Prone', 'monsters', lowtag=246, xrepeat=40, yrepeat=40),
         3798: SpriteInfo('Innocent', 'monsters', lowtag=245, xrepeat=40, yrepeat=40),
         3870: SpriteInfo('Tiny Caleb', 'monsters', lowtag=250, xrepeat=4, yrepeat=4),
     },
-    addableEnemies=[
-    ],
+    addableEnemies=[1170, 1209, 1270, 1370, 1470, 1530, 1570, 1745, 1792, 1797, 1870, 1920, 1980, 2680, 3054, 3060, 3385, 3870],
     keyItems={
         2552: SpriteInfo('Skull Key', 'keys', lowtag=100, xrepeat=8, yrepeat=8),
         2553: SpriteInfo('Eye Key', 'keys', lowtag=101, xrepeat=8, yrepeat=8),
@@ -665,6 +670,9 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
         1078: SpriteInfo('1-Way Switch', 'switches', lowtag=21, xrepeat=12, yrepeat=12),
         1161: SpriteInfo('Combination Switch', 'switches', lowtag=22, xrepeat=12, yrepeat=12),
         2532: SpriteInfo('Combination Switch', 'switches', lowtag=22, xrepeat=12, yrepeat=12),
+    },
+    bosses={
+        3140: SpriteInfo('Tchernobog', 'monsters', lowtag=229, xrepeat=64, yrepeat=64),
     }
 )
 
