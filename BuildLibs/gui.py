@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import font
 from tkinter import messagebox
+import webbrowser
 from idlelib.tooltip import Hovertip
 import traceback
 from BuildLibs.grp import *
@@ -212,6 +213,7 @@ class RandoSettings:
         self.win = scroll.frame
         #self.win.config()
         self.font = font.Font(size=14)
+        self.linkfont = font.Font(size=12, underline=True)
 
         row=0
         infoLabel = Label(self.win,text='Make sure you have a backup of your game files!\nRandomizer might overwrite files\ninside the game directory.',width=40,height=4,font=self.font)
@@ -263,6 +265,11 @@ class RandoSettings:
         #self.progressbar.grid(column=0,row=row,columnspan=2)
         #row+=1
 
+        discordLink = Label(self.win,text='discord.gg/QwjnYWhKsY',width=22,height=2,font=self.linkfont, fg="Blue", cursor="hand2")
+        discordLink.bind('<Button-1>', lambda *args: webbrowser.open_new('https://discord.gg/QwjnYWhKsY'))
+        discordLink.grid(column=0,row=100)
+        myTip = Hovertip(discordLink, 'Join our Discord!')
+
         self.randoButton = Button(self.win,text='Randomize!',width=18,height=2,font=self.font, command=self.Randomize)
         self.randoButton.grid(column=1,row=100, sticky='SE')
         Hovertip(self.randoButton, 'Dew it!')
@@ -274,7 +281,7 @@ def main():
     settings = RandoSettings()
 
 def chooseFile(root):
-    filetype = (("All Supported Files",("*.grp","STUFF.DAT",'*.rff')), ("GRP File","*.grp"), ('RFF File','*.rff'), ("all files","*.*"))
+    filetype = (("All Supported Files",("*.grp","STUFF.DAT",'*.rff')), ("GRP Files","*.grp"), ('RFF Files','*.rff'), ('DAT Files', '*.DAT'), ("All Files","*.*"))
     target = filedialog.askopenfilename(title="Choose a GRP file",filetypes=filetype)
     return target
 
