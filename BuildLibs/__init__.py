@@ -16,7 +16,7 @@ from datetime import datetime
 import re
 
 def GetVersion() -> str:
-    return 'v0.5.6 Alpha'
+    return 'v0.5.7 Alpha'
 
 packLengthRegex = re.compile('^(.*?)(\d+)(\w)(.*?)$')
 class FancyPacker:

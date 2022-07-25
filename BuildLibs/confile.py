@@ -9,19 +9,17 @@ class ConFile:
     def __init__(self, game, conSettings, name, text):
         info('\n', name, len(text))
         self.game = game
-        self.conSettings = conSettings
+        self.conSettings:dict = conSettings
         self.name:str = name
         self.text:str = text
-        self.regexes = []
-        self.difficulties = []
-        for r in self.conSettings:
-            self.regexes.append(re.compile('^'+r+'$'))
-            self.difficulties.append(self.conSettings[r]['difficulty'])
+        for v in self.conSettings:
+            r = re.compile('^'+v['regexstr']+'$')
+            v['regex'] = r
 
-    def ShouldRandomizeVar(self, name) -> Union[float,None]:
-        for i in range(len(self.regexes)):
-            if self.regexes[i].match(name):
-                return self.difficulties[i]
+    def GetVarSettings(self, name) -> Union[None,dict]:
+        for v in self.conSettings:
+            if v['regex'].match(name):
+                return v
         return None
 
     def RandomizeLine(self, l:str, seed:int, range:float, scale:float, difficulty:float) -> str:
@@ -32,11 +30,13 @@ class ConFile:
         oldval = int(m.group(2))
         theRest = m.group(3)
 
-        var_difficulty = self.ShouldRandomizeVar(name)
-        if var_difficulty is None:
+        var_settings:dict = self.GetVarSettings(name)
+        if var_settings is None:
             return l
+        var_difficulty = var_settings.get('difficulty', 0)
 
         rng = random.Random(crc32('define', name, seed))
+        range *= var_settings.get('range', 1)
         r = rng.random() * range + 1
 
         if var_difficulty < 0:

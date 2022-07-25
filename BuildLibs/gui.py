@@ -137,15 +137,15 @@ class RandoSettings:
         settings['MapFile.chanceDupeItem'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
         settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
 
-        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Extreme': 0.75}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Extreme': 0.15}[self.enemiesVar.get()]
 
         settings['MapFile.itemVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.itemVarietyVar.get()]
         settings['MapFile.enemyVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.enemyVarietyVar.get()]
 
-        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.5, 'Extreme': 2.0, unavail: 1}[self.rangeVar.get()]
+        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0
-        settings['conFile.difficulty'] = {'Easy': 0.3, 'Medium': 0.5, 'Difficult': 0.7, 'Extreme': 0.9, unavail: 0.5}[self.difficultyVar.get()]
+        settings['conFile.difficulty'] = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Extreme': 0.75, unavail: 0.4}[self.difficultyVar.get()]
 
         settings['grp.reorderMaps'] = enabled[self.reorderMapsVar.get()]
         settings['useRandomizerFolder'] = enabled[self.randomizerFolderVar.get()]
@@ -220,45 +220,45 @@ class RandoSettings:
         infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
-        self.seedEntry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row)
+        self.seedEntry:Entry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row)
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
         self.itemsVar = StringVar(self.win, 'Some')
-        items = self.newInput(OptionMenu, 'Items: ', 'How many items.\n"Some" is a similar amount to vanilla.', row, self.itemsVar, 'Few', 'Some', 'Many', 'Extreme')
+        items:OptionMenu = self.newInput(OptionMenu, 'Items: ', 'How many items.\n"Some" is a similar amount to vanilla.', row, self.itemsVar, 'Few', 'Some', 'Many', 'Extreme')
         row+=1
 
         # enemies add/reduce?
         self.enemiesVar = StringVar(self.win, 'Some')
-        enemies = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.', row, self.enemiesVar, 'Few', 'Some', 'Many', 'Extreme')
+        enemies:OptionMenu = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.', row, self.enemiesVar, 'Few', 'Some', 'Many', 'Extreme')
         row+=1
 
         # values range
         self.rangeVar = StringVar(self.win, 'Medium')
-        self.range = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized.\nThis affects the values in CON files.', row, self.rangeVar, 'Low', 'Medium', 'High', 'Extreme')
+        self.range:OptionMenu = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized.\nThis affects the values in CON files.', row, self.rangeVar, 'Low', 'Medium', 'High', 'Extreme')
         row+=1
 
         # difficulty? values difficulty?
         self.difficultyVar = StringVar(self.win, 'Medium')
-        self.difficulty = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge.\nThis affects the values in CON files.', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult', 'Extreme')
+        self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge.\nThis affects the values in CON files.', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult', 'Extreme')
         row+=1
 
         self.itemVarietyVar = StringVar(self.win, 'Normal')
-        self.itemVariety = self.newInput(OptionMenu, 'Item Variety: ', 'Chance to add items that shouldn\'t be on the map.', row, self.itemVarietyVar, 'Normal', 'Increased', 'Extreme')
+        self.itemVariety:OptionMenu = self.newInput(OptionMenu, 'Item Variety: ', 'Chance to add items that shouldn\'t be on the map.', row, self.itemVarietyVar, 'Normal', 'Increased', 'Extreme')
         row+=1
 
         self.enemyVarietyVar = StringVar(self.win, 'Normal')
-        self.enemyVariety = self.newInput(OptionMenu, 'Enemy Variety: ', 'Chance to add enemies that shouldn\'t be on the map.\nThis can create difficult situations.', row, self.enemyVarietyVar, 'Normal', 'Increased', 'Extreme')
+        self.enemyVariety:OptionMenu = self.newInput(OptionMenu, 'Enemy Variety: ', 'Chance to add enemies that shouldn\'t be on the map.\nThis can create difficult situations.', row, self.enemyVarietyVar, 'Normal', 'Increased', 'Extreme')
         row+=1
 
         self.reorderMapsVar = StringVar(self.win, 'Disabled')
-        reorderMaps = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Enabled')
+        reorderMaps:OptionMenu = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Enabled')
         row+=1
 
         # TODO: option to enable/disable loading external files?
 
         self.randomizerFolderVar = StringVar(self.win, '')
-        self.randomizerFolder = self.newInput(OptionMenu, 'Use Randomizer Folder: ', 'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.', row, self.randomizerFolderVar, 'Disabled', 'Enabled')
+        self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Use Randomizer Folder: ', 'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.', row, self.randomizerFolderVar, 'Disabled', 'Enabled')
         row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)

@@ -129,6 +129,9 @@ def SpriteRange(min:int, max:int, value:dict):
         d[i] = value
     return d
 
+def ConVar(regex:str, difficulty:float=0, range:float=1) -> dict:
+    return { 'regexstr': regex, 'difficulty': difficulty, 'range': 1 }
+
 
 
 
@@ -679,34 +682,35 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
 
 # difficulty > 0 means higher number makes the game harder
 AddConSettings('Ion Fury', conFiles = {
-    'scripts/customize.con': {
-        '.*\wHEALTH': {'difficulty': -1},
-        '.*MAXAMMO': {'difficulty': -1},
-        '.*AMOUNT': {'difficulty': -1},
+    'scripts/customize.con': [
+        ConVar('.*\wHEALTH', -1, range=0.5),
+        ConVar('MEDKIT_HEALTHAMOUNT', -1, range=0.5),
+        ConVar('.*MAXAMMO', -1),
+        ConVar('.*AMOUNT', -1),
 
-        '.*_DMG': {'difficulty': 0}, # not sure if this affects enemies too or just the player?
+        ConVar('.*_DMG', 0), # not sure if this affects enemies too or just the player?
 
-        '.*_HEALTH': {'difficulty': 1},
-    }
+        ConVar('.*_HEALTH', 1),
+    ]
 })
 
 AddConSettings('Duke Nukem 3D', conFiles = {
-    'USER.CON': {
-        'SWEARFREQUENCY': {'difficulty': 0},
-        '.*HEALTH': {'difficulty': -1},
-        'MAX.*AMMO': {'difficulty': -1},
-        '.*AMMOAMOUNT': {'difficulty': -1},
-        '.*_AMOUNT': {'difficulty': -1},
-        'HANDBOMBBOX': {'difficulty': -1},
-        '.*_WEAPON_STRENGTH': {'difficulty': -1},
+    'USER.CON': [
+        ConVar('SWEARFREQUENCY', 0),
+        ConVar('.*HEALTH', -1, range=0.5),
+        ConVar('MAX.*AMMO', -1),
+        ConVar('.*AMMOAMOUNT', -1),
+        ConVar('.*_AMOUNT', -1),
+        ConVar('HANDBOMBBOX', -1),
+        ConVar('.*_WEAPON_STRENGTH', -1),
 
-        '.*\wSTRENGTH': {'difficulty': 1},
-        'PIG_SHIELD_AMOUNT\d': {'difficulty': 1},
+        ConVar('.*\wSTRENGTH', 1),
+        ConVar('PIG_SHIELD_AMOUNT\d', 1),
 
         # idk what these do
-        'OCTASCRATCHINGPLAYER': {'difficulty': 0},
-        'LIZGETTINGDAZEDAT': {'difficulty': 0},
-        'LIZEATINGPLAYER': {'difficulty': 0},
-        'NEWBEASTSCRATCHAMOUNT': {'difficulty': 0},
-    }
+        ConVar('OCTASCRATCHINGPLAYER', 0),
+        ConVar('LIZGETTINGDAZEDAT', 0),
+        ConVar('LIZEATINGPLAYER', 0),
+        ConVar('NEWBEASTSCRATCHAMOUNT', 0),
+    ]
 })
