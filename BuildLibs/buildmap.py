@@ -95,6 +95,7 @@ class MapFile:
         self.sectors_start = self.headerLen
 
     def CreateSpritePacker(self):
+        # keep AddSprite up to date with this
         self.spritePacker = FancyPacker('<', OrderedDict(
             pos='iii', cstat='h', picnum='h', shade='b', palette='B', clipdist='B',
             filler='B', texcoords='BBbb', sectnum='h', statnum='h', angle='h',
@@ -305,10 +306,13 @@ class MapFile:
                 self.spoilerlog.SpriteChangedTag('lowtag', sprite, sprite.lowtag)
 
     def AddSprite(self, rng: random.Random, add: dict) -> None:
+        # keep up to date with CreateSpritePacker
         add = {
             'picnum': rng.choice(add['choices']),
             'cstat': 0,
-            'gfxstuff': [0,0,32],
+            'shade': 0,
+            'palette': 0,
+            'clipdist': 32,
             'filler': 0,
             'texcoords': [32,32,0,0],
             'statnum': 0,
@@ -448,6 +452,7 @@ class MapV6(MapFile):
         self.sprite_size = 43
 
     def CreateSpritePacker(self):
+        # keep AddSprite up to date with this
         self.spritePacker = FancyPacker('<', OrderedDict(
             pos='iii', cstat='h', shade='b', palette='B', clipdist='B',
             texcoords='BBbb', picnum='h', angle='h', velocity='hhh', owner='h',
