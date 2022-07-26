@@ -114,13 +114,15 @@ def GetGameConSettings(game: GameInfo) -> GameConSettings:
     g:GameConSettings = gamesConSettings.get(game.type, GameConSettings())
     return g.copy()
 
-def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0) -> dict:
+def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0, palettes=None) -> dict:
     d = dict(name=name, category=category)
     if lowtag:
         d['lowtag'] = lowtag
     if xrepeat:
         d['xrepeat'] = xrepeat
         d['yrepeat'] = yrepeat
+    if palettes:
+        d['palettes'] = palettes
     return d
 
 def SpriteRange(min:int, max:int, value:dict):

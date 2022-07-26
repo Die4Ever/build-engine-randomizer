@@ -96,8 +96,8 @@ class MapFile:
 
     def CreateSpritePacker(self):
         self.spritePacker = FancyPacker('<', OrderedDict(
-            pos='iii', cstat='h', picnum='h', gfxstuff='bBB', filler='B',
-            texcoords='BBbb', sectnum='h', statnum='h', angle='h',
+            pos='iii', cstat='h', picnum='h', shade='b', palette='B', clipdist='B',
+            filler='B', texcoords='BBbb', sectnum='h', statnum='h', angle='h',
             owner='h', velocity='hhh', lowtag='h', hightag='h', extra='h')
         )
 
@@ -240,9 +240,12 @@ class MapFile:
         if rng.random() < replacementChance:
             replace = rng.choice((*possibleReplacements.keys(), sprite.picnum))
             if replace != sprite.picnum:
-                sprite.lowtag = possibleReplacements[replace].get('lowtag', sprite.lowtag)
-                xrepeat = possibleReplacements[replace].get('xrepeat', sprite.texcoords[0])
-                yrepeat = possibleReplacements[replace].get('yrepeat', sprite.texcoords[1])
+                r = possibleReplacements[replace]
+                sprite.lowtag = r.get('lowtag', sprite.lowtag)
+                xrepeat = r.get('xrepeat', sprite.texcoords[0])
+                yrepeat = r.get('yrepeat', sprite.texcoords[1])
+                palettes = r.get('palettes', [0])
+                sprite.palette = rng.choice(palettes)
                 sprite.texcoords = [xrepeat, yrepeat, 0, 0]
             sprite.picnum = replace
         for i in range(20):
@@ -446,8 +449,8 @@ class MapV6(MapFile):
 
     def CreateSpritePacker(self):
         self.spritePacker = FancyPacker('<', OrderedDict(
-            pos='iii', cstat='h', gfxstuff='bBB', texcoords='BBbb',
-            picnum='h', angle='h', velocity='hhh', owner='h',
+            pos='iii', cstat='h', shade='b', palette='B', clipdist='B',
+            texcoords='BBbb', picnum='h', angle='h', velocity='hhh', owner='h',
             sectnum='h', statnum='h', lowtag='h', hightag='h', extra='h')
         )
 
