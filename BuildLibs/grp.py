@@ -157,9 +157,17 @@ class GrpBase(metaclass=abc.ABCMeta):
         return ret
 
     def ShuffleMaps(self, seed, restricted, maps) -> dict:
+        maps = maps.copy()
+        for m in self.mapSettings.reorderMapsBlacklist:
+            if m in maps:
+                maps.remove(m)
+        if len(maps) == 0:
+            return {}
+
         if not restricted:
             rng = random.Random(crc32('grp reorder maps', seed))
             return dict(zip(maps, rng.sample(maps, k=len(maps))))
+
         episodes = {}
         mapRenames = {}
         # categorize the maps

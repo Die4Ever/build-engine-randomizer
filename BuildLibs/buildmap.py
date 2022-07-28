@@ -296,6 +296,8 @@ class MapFile:
             settings = triggerSettings.get(sprite.picnum)
             if not settings:
                 continue
+            if sprite.hightag in settings.get('not_hightags', []):
+                continue
             hightags = settings.get('hightags')
             if hightags:
                 sprite.hightag = rng.choice([*hightags, sprite.hightag])
