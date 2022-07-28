@@ -147,7 +147,7 @@ class RandoSettings:
         settings['conFile.scale'] = 1.0
         settings['conFile.difficulty'] = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Extreme': 0.75, unavail: 0.4}[self.difficultyVar.get()]
 
-        settings['grp.reorderMaps'] = enabled[self.reorderMapsVar.get()]
+        settings['grp.reorderMaps'] = {**enabled, 'Restricted': 'restricted'}[self.reorderMapsVar.get()]
         settings['useRandomizerFolder'] = enabled[self.randomizerFolderVar.get()]
         self.grp.game.useRandomizerFolder = settings['useRandomizerFolder']
         return settings
@@ -252,7 +252,7 @@ class RandoSettings:
         row+=1
 
         self.reorderMapsVar = StringVar(self.win, 'Disabled')
-        reorderMaps:OptionMenu = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Enabled')
+        reorderMaps:OptionMenu = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Restricted', 'Enabled')
         row+=1
 
         # TODO: option to enable/disable loading external files?

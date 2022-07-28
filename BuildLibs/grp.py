@@ -156,6 +156,29 @@ class GrpBase(metaclass=abc.ABCMeta):
         ret.sort(key=str.casefold)
         return ret
 
+    def ShuffleMaps(self, seed, restricted, maps) -> dict:
+        if not restricted:
+            rng = random.Random(crc32('grp reorder maps', seed))
+            return dict(zip(maps, rng.sample(maps, k=len(maps))))
+        episodes = {}
+        mapRenames = {}
+        # categorize the maps
+        for map in maps:
+            match = re.match('\w(\d+)\w(\d+)\.MAP$', map, flags=re.IGNORECASE)
+            episode = 'other'
+            if match:
+                episode = match.group(1)
+            if episode not in episodes:
+                episodes[episode] = [map]
+            else:
+                episodes[episode].append(map)
+        # shuffle each episode
+        for k,v in episodes.items():
+            rng = random.Random(crc32('grp reorder maps', k, seed))
+            d = dict(zip(v, rng.sample(v, k=len(v))))
+            mapRenames.update(d)
+        return mapRenames
+
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:Path, spoilerlog, filehandle) -> None:
         spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
@@ -178,8 +201,9 @@ class GrpBase(metaclass=abc.ABCMeta):
         maps = self.GetAllFilesEndsWith('.map')
         mapRenames = {}
         if settings.get('grp.reorderMaps'):
-            rng = random.Random(crc32('grp reorder maps', seed))
-            mapRenames = dict(zip(maps, rng.sample(maps, k=len(maps))))
+            restricted = settings['grp.reorderMaps'] == 'restricted'
+            mapRenames = self.ShuffleMaps(seed, restricted, maps)
+
         for mapname in maps:
             map:MapFile = self.getmap(mapname, filehandle)
             map.Randomize(seed, settings, spoilerlog)
