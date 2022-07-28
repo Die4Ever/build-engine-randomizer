@@ -189,13 +189,13 @@ class RandoSettings:
             raise
 
 
-    def newInput(self, cls, label:str, tooltip:str, row:int, *args):
+    def newInput(self, cls, label:str, tooltip:str, row:int, *args, **kargs):
         label = Label(self.win,text=label,width=22,height=2,font=self.font, anchor='e', justify='left')
         label.grid(column=0,row=row, sticky='E')
         if cls == OptionMenu:
-            entry = cls(self.win, *args)
+            entry = cls(self.win, *args, **kargs)
         else:
-            entry = cls(self.win, *args, width=18,font=self.font)
+            entry = cls(self.win, *args, width=18,font=self.font, **kargs)
         entry.grid(column=1,row=row, sticky='W')
 
         myTip = Hovertip(label, tooltip)
@@ -220,7 +220,8 @@ class RandoSettings:
         infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
-        self.seedEntry:Entry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row)
+        self.seedVar = StringVar(self.win, random.randint(1, 999999))
+        self.seedEntry:Entry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row, textvariable=self.seedVar)
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
