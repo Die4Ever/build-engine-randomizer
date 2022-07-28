@@ -18,7 +18,7 @@ For PowerSlave (aka Exhumed) I suggest [PCExhumed](https://lerppu.net/wannabethe
 
 <img src="https://user-images.githubusercontent.com/30947252/180271921-a28fcd38-bd48-473d-b387-6f27b02ca3b6.png" alt="GUI" width="600"/>
 
-Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths.
+Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths. Be warned that putting every setting to Extreme will make the game nearly impossible. I suggest you start with the default settings. Also check out the Randomizer.html file that gets created in the output directory to see what's changed.
 
 ## Changes
 

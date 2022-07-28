@@ -9,9 +9,9 @@ For Ion Fury you can also use EDuke32, which allows you to enable the "Use Rando
 
 For Shadow Warrior, use [`voidsw.exe` from that same download as EDuke32](https://dukeworld.com/eduke32/eduke32_current.zip) (it's in the zip file). Shadow Warrior is freeware on [Steam](https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/) and [GOG](https://www.gog.com/game/shadow_warrior_complete).
 
-For Blood, I suggest using [NBlood](https://lerppu.net/wannabethesis/) to run it. NBlood has an option for "Custom game content directory", in this dropdown select "Randomizer".
+For Blood, I suggest using [NBlood](https://lerppu.net/wannabethesis/nblood/20220613-13229/nblood_win64_20220613-13229.zip) to run it. NBlood has an option for "Custom game content directory", in this dropdown select "Randomizer".
 
-For PowerSlave (aka Exhumed) I suggest [PCExhumed](https://lerppu.net/wannabethesis/) to run it. PCExhumed has an option for "Custom game content directory", in this dropdown select "Randomizer". You can get [the shareware demo here](https://dukeworld.com/2001-current/rtcm/powerslave-shareware/pwrslavesw.zip). This will not work with the Night Dive Studios 2022 release titled "PowerSlave Exhumed", as that is not based on the Build Engine.
+For PowerSlave (aka Exhumed) I suggest [PCExhumed](https://lerppu.net/wannabethesis/pcexhumed/20220613-13229/pcexhumed_win64_20220613-13229.zip) to run it. PCExhumed has an option for "Custom game content directory", in this dropdown select "Randomizer". You can get [the shareware demo here](https://dukeworld.com/2001-current/rtcm/powerslave-shareware/pwrslavesw.zip). This will not work with the Night Dive Studios 2022 release titled "PowerSlave Exhumed", as that is not based on the Build Engine.
 
 <img src="https://user-images.githubusercontent.com/30947252/178213934-88e4ef31-89b5-484e-839a-a50f5f88d00f.png" alt="Damn, I'm lookin' good!" width="900"/>
 
@@ -19,6 +19,6 @@ For PowerSlave (aka Exhumed) I suggest [PCExhumed](https://lerppu.net/wannabethe
 
 <img src="https://user-images.githubusercontent.com/30947252/180271921-a28fcd38-bd48-473d-b387-6f27b02ca3b6.png" alt="GUI" width="600"/>
 
-Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths.
+Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths. Be warned that putting every setting to Extreme will make the game nearly impossible. I suggest you start with the default settings. Also check out the Randomizer.html file that gets created in the output directory to see what's changed.
 
 [Join our Discord here!](https://discord.gg/QwjnYWhKsY)
