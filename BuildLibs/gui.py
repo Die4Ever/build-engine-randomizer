@@ -137,15 +137,15 @@ class RandoSettings:
         settings['MapFile.chanceDupeItem'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.enemiesVar.get()]
         settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.enemiesVar.get()]
 
-        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Extreme': 0.75}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Extreme': 0.15}[self.enemiesVar.get()]
+        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Impossible': 0.75}[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Impossible': 0.15}[self.enemiesVar.get()]
 
         settings['MapFile.itemVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.itemVarietyVar.get()]
         settings['MapFile.enemyVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.enemyVarietyVar.get()]
 
         settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0
-        settings['conFile.difficulty'] = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Extreme': 0.75, unavail: 0.4}[self.difficultyVar.get()]
+        settings['conFile.difficulty'] = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}[self.difficultyVar.get()]
 
         settings['grp.reorderMaps'] = {**enabled, 'Restricted': 'restricted'}[self.reorderMapsVar.get()]
         settings['useRandomizerFolder'] = enabled[self.randomizerFolderVar.get()]
@@ -231,7 +231,7 @@ class RandoSettings:
 
         # enemies add/reduce?
         self.enemiesVar = StringVar(self.win, 'Some')
-        enemies:OptionMenu = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.', row, self.enemiesVar, 'Few', 'Some', 'Many', 'Extreme')
+        enemies:OptionMenu = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.', row, self.enemiesVar, 'Few', 'Some', 'Many', 'Impossible')
         row+=1
 
         # values range
@@ -241,7 +241,7 @@ class RandoSettings:
 
         # difficulty? values difficulty?
         self.difficultyVar = StringVar(self.win, 'Medium')
-        self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge.\nThis affects the values in CON files.', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult', 'Extreme')
+        self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge.\nThis affects the values in CON files.', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult', 'Impossible')
         row+=1
 
         self.itemVarietyVar = StringVar(self.win, 'Normal')
