@@ -40,7 +40,7 @@ def AddGame(*args, **kargs) -> GameInfo:
 
 class GameMapSettings:
     def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9,
-            swappableItems:dict={}, swappableEnemies:dict={}, addableEnemies:list=[], triggers:dict={}, additions:dict={}, **kargs):
+            swappableItems:dict={}, swappableEnemies:dict={}, addableEnemies:list=[], triggers:dict={}, additions:dict={}, reorderMapsBlacklist:list=[], **kargs):
         self.gameName = gameName
         self.minMapVersion = minMapVersion
         self.maxMapVersion = maxMapVersion
@@ -49,6 +49,7 @@ class GameMapSettings:
         self.addableEnemies = addableEnemies
         self.triggers = triggers
         self.additions = additions
+        self.reorderMapsBlacklist = reorderMapsBlacklist
         self.__dict__.update(kargs)
 
     def __repr__(self):
@@ -131,8 +132,8 @@ def SpriteRange(min:int, max:int, value:dict):
         d[i] = value
     return d
 
-def ConVar(regex:str, difficulty:float=0, range:float=1) -> dict:
-    return { 'regexstr': regex, 'difficulty': difficulty, 'range': 1 }
+def ConVar(regex:str, difficulty:float=0, range:float=1, balance:float=1) -> dict:
+    return { 'regexstr': regex, 'difficulty': difficulty, 'range': range, 'balance': balance }
 
 
 
@@ -406,7 +407,7 @@ AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
     addableEnemies = [675, 1680, 1820, 1880, 1920, 1960, 1975, 2000, 2120, 2370, 4610,],
     triggers = {
         # 675 EGG doesn't work for spawning?
-        9: dict(name='RESPAWN', hightags=[1680, 1820, 1960, 2000, 2120, 2370], lowtags=[]),
+        9: dict(name='RESPAWN', hightags=[1680, 1820, 1960, 2000, 2120, 2370], lowtags=[], not_hightags=[2630, 2631, 2660, 2670, 2696, 2710, 2760, 4740, 4741]),
     },
     additions = {
         # lower case because python doesn't have case-insensitive dicts, maybe I should create these with a function
@@ -416,7 +417,8 @@ AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
                 dict(pos=[47864, 29653, 20480], sectnum=265, choices=[23,47]), # explosives near the end of the map
                 dict(pos=[47270, 25876, 34370], sectnum=272, texcoords=[8, 8, 0, 0], choices=[26]), # single pipe bomb near the end of the map
             ]
-    }
+    },
+    reorderMapsBlacklist = [ 'E1L7.MAP', 'E1L8.MAP', 'E3L10.MAP' ]
 )
 
 # https://forums.duke4.net/topic/11406-shadow-warrior-scriptset-for-mapster32/
@@ -698,6 +700,9 @@ AddConSettings('Ion Fury', conFiles = {
 
 AddConSettings('Duke Nukem 3D', conFiles = {
     'USER.CON': [
+        ConVar('TRIPBOMB_STRENGTH', -1, balance=1.5),
+        ConVar('HANDBOMB_WEAPON_STRENGTH', -1, balance=1.5),
+        ConVar('YELLHURTSOUNDSTRENGTH', 0, range=0),
         ConVar('SWEARFREQUENCY', 0),
         ConVar('.*HEALTH', -1, range=0.5),
         ConVar('MAX.*AMMO', -1),

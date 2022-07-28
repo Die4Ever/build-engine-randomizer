@@ -22,7 +22,7 @@ class ConFile:
                 return v
         return None
 
-    def RandomizeLine(self, l:str, seed:int, range:float, scale:float, difficulty:float) -> str:
+    def RandomizeLine(self, l:str, seed:int, range:float, balance_scale:float, difficulty:float) -> str:
         m = defineregex.match(l)
         if not m:
             return l
@@ -48,7 +48,7 @@ class ConFile:
 
         if rng.random() < recip_chance:
             r = 1/r
-        r *= scale
+        r *= balance_scale * var_settings.get('balance', 1)
         newval = round(oldval * r)
         self.spoilerlog.Change(name, oldval, newval)
         return 'define '+name+' '+str(newval)+theRest
