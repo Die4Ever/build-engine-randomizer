@@ -20,81 +20,78 @@ class CStat:
 
 class Sector:
 
-    def __init__(self, **kwargs):
+    def __init__(self, data):
+        self.wallptr: int = data.get('wallptr', 0)
+        self.wallnum: int = data.get('wallnum', 0)
+        self.ceilingz: int = data.get('ceilingz', 0)
+        self.floorz: int = data.get('floorz', 0)
+        self.ceilingstat: int = data.get('ceilingstat', 0)
+        self.floorstat: int = data.get('floorstat', 0)
+        self.ceilingpicnum: int = data.get('ceilingpicnum', 0)
+        self.ceilingheinum: int = data.get('ceilingheinum', 0)
+        self.ceilingshade: int = data.get('ceilingshade', 0)
+        self.ceiling_palette: int = data.get('ceiling_palette', 0)
+        self.ceiling_texcoords: list = data.get('ceiling_texcoords', [0, 0])
+        self.floorpicnum: int = data.get('floorpicnum', 0)
+        self.floorheinum: int = data.get('floorheinum', 0)
+        self.floorshade: int = data.get('floorshade', 0)
+        self.floor_palette: int = data.get('floor_palette', 0)
+        self.floor_texcoords: list = data.get('floor_texcoords', [0, 0])
+        self.visibility: int = data.get('visibility', 0)
+        self.filler: int = data.get('filler', 0)
+        self.lowtag: int = data.get('lowtag', 0)
+        self.hightag: int = data.get('hightag', 0)
+        self.extra: int = data.get('extra', -1)
+        self.length: int = data.get('length', 0)
+        self.ceilingxpanning: int = data.get('ceilingxpanning', 0)
+        self.floorxpanning: int = data.get('floorxpanning', 0)
+        self.ceilingypanning: int = data.get('ceilingypanning', 0)
+        self.floorypanning: int = data.get('floorypanning', 0)
 
-        self.wall: int = kwargs.get('wall', 0)
-        self.wallnum: int = kwargs.get('wallnum', 0)
-        self.ceilingz: int = kwargs.get('ceilingz', 0)
-        self.floorz: int = kwargs.get('floorz', 0)
-        self.ceilingstat: int = kwargs.get('ceilingstat', 0)
-        self.floorstat: int = kwargs.get('floorstat', 0)
-        self.ceilingpicnum: int = kwargs.get('ceilingpicnum', 0)
-        self.ceilingheinum: int = kwargs.get('ceilingheinum', 0)
-        self.ceilingshade: int = kwargs.get('ceilingshade', 0)
-        self.ceiling_palette: int = kwargs.get('ceiling_palette', 0)
-        self.ceiling_texcoords: list = kwargs.get('ceiling_texcoords', [0, 0])
-        self.floorpicnum: int = kwargs.get('floorpicnum', 0)
-        self.floorheinum: int = kwargs.get('floorheinum', 0)
-        self.floorshade: int = kwargs.get('floorshade', 0)
-        self.floor_palette: int = kwargs.get('floor_palette', 0)
-        self.floor_texcoords: list = kwargs.get('floor_texcoords', [0, 0])
-        self.visibility: int = kwargs.get('visibility', 0)
-        self.filler: int = kwargs.get('filler', 0)
-        self.lowtag: int = kwargs.get('lowtag', 0)
-        self.hightag: int = kwargs.get('hightag', 0)
-        self.extra: int = kwargs.get('extra', -1)
-        self.length: int = kwargs.get('length', 0)
-
-        # TODO: texcoords
-        self.ceilingxpanning: int = kwargs.get('ceilingxpanning', 0)
-        self.floorxpanning: int = kwargs.get('floorxpanning', 0)
-        self.ceilingypanning: int = kwargs.get('ceilingypanning', 0)
-        self.floorypanning: int = kwargs.get('floorypanning', 0)
-
-        self.walls: Union[list, None] = kwargs.get('walls', None)
-        self.nearbySectors: Union[set, None] = kwargs.get('nearbySectors', None)
-        self.shapes: Union[list, None] = kwargs.get('shapes', None)
+        self.walls: Union[list, None] = data.get('walls', None)
+        self.nearbySectors: Union[set, None] = data.get('nearbySectors', None)
+        self.shapes: Union[list, None] = data.get('shapes', None)
 
 
 class Wall:
 
-    def __init__(self, **kwargs):
-        self.pos: list = kwargs.get('pos', [0, 0])
-        self.point2: int = kwargs.get('point2', 0)
-        self.nextwall: int = kwargs.get('nextwall', -1)
-        self.nextsector: int = kwargs.get('nextsector', -1)
-        self.cstat: int = kwargs.get('cstat', 0)
-        self.picnum: int = kwargs.get('picnum', 0)
-        self.overpicnum: int = kwargs.get('overpicnum', 0)
-        self.shade: int = kwargs.get('shade', 0)
-        self.palette: int = kwargs.get('palette', 0)
-        self.texcoords: list = kwargs.get('texcoords', [0, 0, 0, 0])
-        self.lowtag: int = kwargs.get('lowtag', 0)
-        self.hightag: int = kwargs.get('hightag', 0)
-        self.extra: int = kwargs.get('extra', -1)
-        self.length: int = kwargs.get('length', 0)
+    def __init__(self, data):
+        self.pos: list = data.get('pos', [0, 0])
+        self.next_wall: int = data.get('next_wall', 0)
+        self.next_sector_wall: int = data.get('next_sector_wall', -1)
+        self.next_sector: int = data.get('next_sector', -1)
+        self.cstat: int = data.get('cstat', 0)
+        self.picnum: int = data.get('picnum', 0)
+        self.overpicnum: int = data.get('overpicnum', 0)
+        self.shade: int = data.get('shade', 0)
+        self.palette: int = data.get('palette', 0)
+        self.texcoords: list = data.get('texcoords', [0, 0, 0, 0])
+        self.lowtag: int = data.get('lowtag', 0)
+        self.hightag: int = data.get('hightag', 0)
+        self.extra: int = data.get('extra', -1)
+        self.length: int = data.get('length', 0)
 
 
 class Sprite:
 
-    def __init__(self, **kwargs):
-        self.pos: list = kwargs.get('pos', [0, 0, 0])
-        self.cstat: int = kwargs.get('cstat', 0)
-        self.picnum: int = kwargs.get('picnum', 0)
-        self.shade: int = kwargs.get('shade', 0)
-        self.palette: int = kwargs.get('palette', 0)
-        self.clipdist: int = kwargs.get('clipdist', 0)
-        self.filler: int = kwargs.get('filler', 0)
-        self.texcoords: list = kwargs.get('texcoords', [0, 0, 0, 0])
-        self.sectnum: int = kwargs.get('sectnum', 0)
-        self.statnum: int = kwargs.get('statnum', 0)
-        self.angle: int = kwargs.get('angle', 0)
-        self.owner: int = kwargs.get('owner', 0)
-        self.velocity: list = kwargs.get('velocity', [0, 0, 0])
-        self.lowtag: int = kwargs.get('lowtag', 0)
-        self.hightag: int = kwargs.get('hightag', 0)
-        self.extra: int = kwargs.get('extra', -1)
-        self.length: int = kwargs.get('length', 0)
+    def __init__(self, data):
+        self.pos: list = data.get('pos', [0, 0, 0])
+        self.cstat: int = data.get('cstat', 0)
+        self.picnum: int = data.get('picnum', 0)
+        self.shade: int = data.get('shade', 0)
+        self.palette: int = data.get('palette', 0)
+        self.clipdist: int = data.get('clipdist', 0)
+        self.filler: int = data.get('filler', 0)
+        self.texcoords: list = data.get('texcoords', [0, 0, 0, 0])
+        self.sectnum: int = data.get('sectnum', 0)
+        self.statnum: int = data.get('statnum', 0)
+        self.angle: int = data.get('angle', 0)
+        self.owner: int = data.get('owner', 0)
+        self.velocity: list = data.get('velocity', [0, 0, 0])
+        self.lowtag: int = data.get('lowtag', 0)
+        self.hightag: int = data.get('hightag', 0)
+        self.extra: int = data.get('extra', -1)
+        self.length: int = data.get('length', 0)
 
     def __copy__(self) -> 'Sprite':
         cls = self.__class__
@@ -117,9 +114,6 @@ class MapFile:
     SECTOR_SIZE = 40
     WALL_SIZE = 32
     SPRITE_SIZE = 44
-    X_SECTOR_SIZE = 0
-    X_WALL_SIZE = 0
-    X_SPRITE_SIZE = 0
 
     def __init__(self, gameSettings, name, data: bytearray = None):
         self.gameSettings = gameSettings
@@ -138,6 +132,9 @@ class MapFile:
         self.crypt = 0
 
         self.header2Len = 0
+        self.x_sector_size = 0
+        self.x_wall_size = 0
+        self.x_sprite_size = 0
 
         self.CreateHeaderPacker()
         self.CreateSectorPacker()
@@ -366,7 +363,7 @@ class MapFile:
         }
         del add['choices']
 
-        sprite = Sprite(**add)
+        sprite = Sprite(add)
         self.AppendSprite(sprite)
         spritetype = self.GetSpriteType(sprite)
         self.spoilerlog.AddSprite(spritetype, sprite)
@@ -406,45 +403,43 @@ class MapFile:
     def GetSector(self, pos) -> Sector:
         data = self.data[pos:pos + self.SECTOR_SIZE]
 
-        # TODO: Move to cryptic passage only map class..?
         if self.crypt and self.version == 7:
             data = MapCrypt(data, self.mapRevision * self.SECTOR_SIZE)
 
-        sector = Sector(**self.sectorPacker.unpack(data))
+        sector = Sector(self.sectorPacker.unpack(data))
         sector.length = self.SECTOR_SIZE
         if sector.extra > 0:
             pos += self.SECTOR_SIZE
-            sector.extraData = self.data[pos:pos + self.X_SECTOR_SIZE]
-            sector.length += self.X_SECTOR_SIZE
+            sector.extraData = self.data[pos:pos + self.x_sector_size]
+            sector.length += self.x_sector_size
         return sector
 
     def GetWall(self, pos) -> Wall:
         data = self.data[pos:pos + self.WALL_SIZE]
 
-        # TODO: Move to cryptic passage only map class..?
         if self.crypt and self.version == 7:
             data = MapCrypt(data, (self.mapRevision * self.SECTOR_SIZE) | 0x7474614d)
 
-        wall = Wall(**self.wallPacker.unpack(data))
+        wall = Wall(self.wallPacker.unpack(data))
         wall.length = self.WALL_SIZE
         if wall.extra > 0:
             pos += self.WALL_SIZE
-            wall.extraData = self.data[pos:pos + self.X_WALL_SIZE]
-            wall.length += self.X_WALL_SIZE
+            wall.extraData = self.data[pos:pos + self.x_wall_size]
+            wall.length += self.x_wall_size
         return wall
 
     def GetSprite(self, pos) -> Sprite:
         data = self.data[pos:pos + self.SPRITE_SIZE]
 
-        # TODO: Move to cryptic passage only map class..?
         if self.crypt and self.version == 7:
             data = MapCrypt(self.data[pos:pos + self.SPRITE_SIZE], (self.mapRevision * self.SPRITE_SIZE) | 0x7474614d)
 
-        sprite = Sprite(length=self.SPRITE_SIZE, **self.spritePacker.unpack(data))
+        sprite = Sprite(self.spritePacker.unpack(data))
+        sprite.length = self.SPRITE_SIZE
         if sprite.extra > 0:
             pos += self.SPRITE_SIZE
-            sprite.extraData = self.data[pos:pos + self.X_SPRITE_SIZE]
-            sprite.length += self.X_SPRITE_SIZE
+            sprite.extraData = self.data[pos:pos + self.x_sprite_size]
+            sprite.length += self.x_sprite_size
         return sprite
 
     def CreateHeaderPacker(self):
@@ -463,7 +458,7 @@ class MapFile:
         self.sectorPacker = FancyPacker(
             '<',
             OrderedDict(
-                wall='h',
+                wallptr='h',
                 wallnum='h',
                 ceilingz='i',
                 floorz='i',
@@ -493,9 +488,9 @@ class MapFile:
             '<',
             OrderedDict(
                 pos='ii',
-                point2='h',
-                nextwall='h',
-                nextsector='h',
+                next_wall='h',
+                next_sector_wall='h',
+                next_sector='h',
                 cstat='h',
                 picnum='h',
                 overpicnum='h',
@@ -621,7 +616,6 @@ class MapFile:
     def WriteSprite(self, sprite: Sprite):
         newdata = self.spritePacker.pack(sprite.__dict__)
 
-        # TODO: Move to cryptic passage only map class..?
         newdata = bytearray(newdata)
         if self.crypt and self.version == 7:
             newdata = MapCrypt(newdata, (self.mapRevision * self.SPRITE_SIZE) | 0x7474614d)
@@ -664,25 +658,25 @@ class MapFile:
         assert sector >= 0
         assert sector < len(self.sectors)
 
-        wall = self.sectors[sector].wall
+        wallptr = self.sectors[sector].wallptr
         numwalls = self.sectors[sector].wallnum
 
         walls = {}
         nearbySectors = set()
         shapes = [[]]
         for i in range(numwalls):
-            w = self.walls[wall]
-            nearbySectors.add(w.nextsector)
-            walls[wall] = w.pos
+            w = self.walls[wallptr]
+            nearbySectors.add(w.next_sector)
+            walls[wallptr] = w.pos
             shapes[-1].append(w.pos)
-            if w.point2 in walls:
+            if w.next_wall in walls:
                 shapes.append([])
-            wall += 1
+            wallptr += 1
 
         shapes.pop(-1)
         nearbySectors.discard(-1)
         nearbySectors.discard(sector)
-        sect = Sector(walls=walls, nearbySectors=nearbySectors, shapes=shapes)
+        sect = Sector({'walls': walls, 'nearbySectors': nearbySectors, 'shapes': shapes})
         self.sectorCache[sector] = sect
         return sect
 
@@ -707,7 +701,7 @@ class MapV6(MapFile):
         self.sectorPacker = FancyPacker(
             '<',
             OrderedDict(
-                wall='h',
+                wallptr='h',
                 wallnum='h',
                 ceilingpicnum='h',
                 floorpicnum='h',
@@ -738,9 +732,9 @@ class MapV6(MapFile):
             '<',
             OrderedDict(
                 pos='ii',
-                point2='h',
-                nextsector='h',
-                nextwall='h',
+                next_wall='h',
+                next_sector='h',
+                next_sector_wall='h',
                 picnum='h',
                 overpicnum='h',
                 shade='b',
@@ -820,20 +814,19 @@ class BloodMap(MapFile):
             if self.crypt:
                 header2data = MapCrypt(header2data, self.num_walls)
 
-            header2Packer = FancyPacker('<', OrderedDict(X_SPRITE_SIZE='i', X_WALL_SIZE='i', X_SECTOR_SIZE='i'))
+            header2Packer = FancyPacker('<', OrderedDict(x_sprite_size='i', x_wall_size='i', x_sector_size='i'))
             header2 = header2Packer.unpack(header2data[64:76]) # skip the 64 bytes starting padding
             self.__dict__.update(header2)
         else:
             self.header2Len = 0
-            self.X_SECTOR_SIZE = 60
-            self.X_SPRITE_SIZE = 56
-            self.X_WALL_SIZE = 24
+            self.x_sector_size = 60
+            self.x_sprite_size = 56
+            self.x_wall_size = 24
 
         self.hash = self.data[-4:]
         self.sky_start = self.HEADER_SIZE + self.header2Len
         self.sky_length = (1 << self.pskybits) * 2
-        self.sectors_start = self.sky_start + self.sky_length
-        return self.sectors_start
+        return self.sky_start + self.sky_length
 
     def WriteNumSprites(self, pos):
         header = self.headerPacker.pack(self.__dict__)
@@ -845,9 +838,6 @@ class BloodMap(MapFile):
 
     def ReadData(self):
         pos: int = self.ReadHeaders()
-        #pos = self.ReadNumSectors(pos)
-        #pos = self.ReadNumWalls(pos)
-        #pos = self.ReadNumSprites(pos)
         pos = self.ReadSectors(pos)
         pos = self.ReadWalls(pos)
         self.ReadSprites(pos)

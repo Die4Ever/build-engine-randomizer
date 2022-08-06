@@ -147,7 +147,6 @@ class BERandoTestCase(unittest.TestCase):
         finally:
             games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
-    @unittest.skip
     def test_other_grps(self):
         # optionally use the othertests folder for testing your own collection of games that aren't freeware
         files = glob.glob('othertests/*', recursive=True)
