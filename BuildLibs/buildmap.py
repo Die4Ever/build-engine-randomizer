@@ -32,7 +32,7 @@ class Sector:
         self.ceilingheinum: int = kwargs.get('ceilingheinum', 0)
         self.ceilingshade: int = kwargs.get('ceilingshade', 0)
         self.ceiling_palette: int = kwargs.get('ceiling_palette', 0)
-        self.ceiling_texcoords: list = kwargs.get('ceiling_texcoords', 0)
+        self.ceiling_texcoords: list = kwargs.get('ceiling_texcoords', [0, 0])
         self.floorpicnum: int = kwargs.get('floorpicnum', 0)
         self.floorheinum: int = kwargs.get('floorheinum', 0)
         self.floorshade: int = kwargs.get('floorshade', 0)
