@@ -1,17 +1,20 @@
+import cProfile
+import glob
+import os
+import shutil
+import unittest
+from hashlib import md5
+from mmap import mmap, ACCESS_READ
+from pathlib import Path
 from typeguard import typechecked, importhook
-profiling=0
+from unittest import case
+
+profiling = 0
 if not profiling:
     importhook.install_import_hook('BuildLibs')
+from BuildLibs import buildmap, crc32, games, trace, setVerbose
+from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile
 
-import shutil
-from BuildLibs import buildmap, games, confile, gui, SpoilerLog
-from BuildLibs.grp import *
-import cProfile, pstats
-import unittest
-from unittest import SkipTest, case, skip
-from hashlib import md5, sha1
-from mmap import mmap, ACCESS_READ
-import glob
 
 unittest.TestLoader.sortTestMethodsUsing = None
 temp:Path = Path('temp/')
@@ -118,6 +121,7 @@ class BERandoTestCase(unittest.TestCase):
 
         # now test randomizing with different seeds and settings, comparing MD5s each time
         grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False)
+        self.assertDictEqual(grp0451, {'E1L1.MAP': '92d3555d92495f1d158844def24d3653', 'E1L2.MAP': 'a1ff6de8e3ff85e7de201bf6f93d59a7', 'E1L3.MAP': '9fb5450bd3781d70fa3e95d70aa50b1a', 'E1L4.MAP': 'f3fd61103fe07e90afbf19f2b99a83fb', 'E1L5.MAP': '8affa9fe8ddb2ecc5951a87788629417', 'E1L6.MAP': 'c8d921798945faa9a9321ad018fc80d2', 'USER.CON': '9b1c55539cf34de3076cc7510b4eff50'})
         self.TestRandomize(zippath, 2052, grp0451, False)
         self.TestRandomize(tempgrp, 451, grp0451, True)
         self.TestRandomize(tempgrp, 451, grp0451, False, settings=different_settings)
@@ -143,6 +147,7 @@ class BERandoTestCase(unittest.TestCase):
         finally:
             games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
+    @unittest.skip
     def test_other_grps(self):
         # optionally use the othertests folder for testing your own collection of games that aren't freeware
         files = glob.glob('othertests/*', recursive=True)
@@ -254,6 +259,7 @@ class BERandoTestCase(unittest.TestCase):
 
 def runtests():
     unittest.main(verbosity=9, warnings="error", failfast=True)
+
 
 if __name__ == "__main__":
     try:

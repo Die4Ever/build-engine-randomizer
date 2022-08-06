@@ -1,17 +1,20 @@
-from datetime import datetime
+import abc
+import glob
+import locale
 import os
+import re
 import shutil
+import traceback
+from datetime import datetime
 from pathlib import Path
 from typing import OrderedDict
 from zipfile import ZipFile
-from BuildLibs import games
+
+from BuildLibs import debug, error, info, trace, warning
 from BuildLibs.buildmap import *
 from BuildLibs.confile import ConFile
 from BuildLibs.SpoilerLog import SpoilerLog
-import traceback
-import locale
-import glob
-import abc # for abstract methods
+
 
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -126,9 +129,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         if overridepath:
             with open(overridepath, 'rb') as file:
                 return file.read()
-
         return self._getfile(name, filehandle)
-
 
     def getmap(self, name, file) -> MapFile:
         data = bytearray(self.getfile(name, file))
@@ -219,10 +220,9 @@ class GrpBase(metaclass=abc.ABCMeta):
             out = Path(basepath, writename)
             out.parent.mkdir(parents=True, exist_ok=True)
             with open(out, 'wb') as f:
-                data = map.GetData()
-                size = locale.format_string('%d bytes', len(data), grouping=True)
+                size = locale.format_string('%d bytes', len(map.data), grouping=True)
                 spoilerlog.write(str(mapname) + ' writing to ' + str(out) + ', is ' + size)
-                f.write(map.GetData())
+                f.write(map.data)
 
         spoilerlog.write('\n')
         spoilerlog.write(repr(self.conSettings))
@@ -241,7 +241,7 @@ class GrpBase(metaclass=abc.ABCMeta):
                 os.remove(f)
 
         out = Path(basepath, 'Randomizer.html')
-        pathlib.Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+        Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
                 return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
@@ -273,13 +273,13 @@ class GrpFile(GrpBase):
         with open(self.filepath, 'rb') as f:
             f.seek(12)
             data = f.read(4)
-            (numFiles,) = unpack('<I', data)
+            (numFiles,) = struct.unpack('<I', data)
             trace('numFiles:', numFiles)
             offset = 16 + 16*numFiles
             for i in range(numFiles):
                 data = f.read(16)
                 name = data[:12].strip(b'\x00').decode('ascii')
-                (size,) = unpack('<I', data[12:16])
+                (size,) = struct.unpack('<I', data[12:16])
                 trace(name, size)
                 self.files[name] = {
                     'size': size,
@@ -394,14 +394,14 @@ class RffFile(GrpBase):
 def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
     outfile = open(outpath, 'wb')
     outfile.write(b'KenSilverman')
-    outfile.write(pack('<I', len(filenames)))
+    outfile.write(struct.pack('<I', len(filenames)))
 
     datas = []
     for name in filenames:
         with open(Path(frompath, name), 'rb') as f:
             d = f.read()
             datas.append(d)
-            outfile.write(pack('<12sI', str(name).encode('ascii'), len(d)))
+            outfile.write(struct.pack('<12sI', str(name).encode('ascii'), len(d)))
 
     for d in datas:
         outfile.write(d)
