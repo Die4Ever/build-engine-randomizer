@@ -9,10 +9,10 @@ from pathlib import Path
 from typeguard import typechecked, importhook
 from unittest import case
 
-profiling = 0
+profiling = False
 if not profiling:
     importhook.install_import_hook('BuildLibs')
-from BuildLibs import buildmap, crc32, games, trace, setVerbose
+from BuildLibs import buildmapbase, buildmap, crc32, games, trace, setVerbose
 from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile
 
 
@@ -114,7 +114,7 @@ class BERandoTestCase(unittest.TestCase):
     def test_rando(self):
         # first get vanilla MD5s
         with self.subTest('Open GRP File'):
-            grp: GrpFile = LoadGrpFile(tempgrp)
+            grp: GrpBase = LoadGrpFile(tempgrp)
         vanilla = self.Md5GameFiles('Vanilla', grp, temp)
         self.assertIsNotNone(vanilla, 'Vanilla MD5s')
         self.assertGreater(len(vanilla), 0, 'Vanilla MD5s')
@@ -239,8 +239,8 @@ class BERandoTestCase(unittest.TestCase):
     def test_walls(self):
         with self.subTest('test PointIsInShape'):
             walls = [(0,0), (10,0), (10,10), (0,10)]
-            self.assertEqual(buildmap.PointIsInShape(walls, (5,5), 0) % 2, 1)
-            self.assertEqual(buildmap.PointIsInShape(walls, (15,15), 0) % 2, 0)
+            self.assertEqual(buildmapbase.PointIsInShape(walls, (5,5), 0) % 2, 1)
+            self.assertEqual(buildmapbase.PointIsInShape(walls, (15,15), 0) % 2, 0)
 
     def test_encrypt_decrypt(self):
         # ensure it's reversible
