@@ -202,7 +202,7 @@ class GrpBase(metaclass=abc.ABCMeta):
             con.Randomize(seed, settings, spoilerlog)
             out = Path(basepath, conName)
             out.parent.mkdir(parents=True, exist_ok=True)
-            with open(out, 'w') as f:
+            with open(out, 'w', newline='\r\n') as f:
                 text = con.GetText()
                 size = locale.format_string('%d bytes', len(text), grouping=True)
                 spoilerlog.write(str(out) + ' is ' + size)
