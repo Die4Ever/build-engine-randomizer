@@ -73,7 +73,7 @@ class ConFile:
             l = l.strip()
             if l.startswith('define '):
                 l = self.RandomizeLine(l, seed, range, scale, difficulty)
-            out += l + '\n'
+            out += l + '\r\n'
         self.text = out
         info('\n')
 
