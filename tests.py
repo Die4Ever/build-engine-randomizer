@@ -1,6 +1,7 @@
 import cProfile
 import glob
 import os
+import random
 import shutil
 import unittest
 from hashlib import md5
@@ -111,6 +112,13 @@ class BERandoTestCase(unittest.TestCase):
             grp = LoadGrpFile(tempgrp)
             self.assertEqual(grp.game.type, 'Duke Nukem 3D')
 
+    def test_rng(self):
+        # ensure the rng is OS indepedent
+        rng = random.Random('0451')
+        self.assertEqual(rng.randint(1, 10), 8)
+        self.assertEqual(rng.choice(range(10)), 2)
+        self.assertEqual(int(rng.random()*1000), 433)
+
     def test_rando(self):
         # first get vanilla MD5s
         with self.subTest('Open GRP File'):
@@ -121,6 +129,7 @@ class BERandoTestCase(unittest.TestCase):
 
         # now test randomizing with different seeds and settings, comparing MD5s each time
         grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False)
+        print(repr(grp0451))
         self.assertDictEqual(grp0451, {'E1L1.MAP': '92d3555d92495f1d158844def24d3653', 'E1L2.MAP': 'a1ff6de8e3ff85e7de201bf6f93d59a7', 'E1L3.MAP': '9fb5450bd3781d70fa3e95d70aa50b1a', 'E1L4.MAP': 'f3fd61103fe07e90afbf19f2b99a83fb', 'E1L5.MAP': '8affa9fe8ddb2ecc5951a87788629417', 'E1L6.MAP': 'c8d921798945faa9a9321ad018fc80d2', 'USER.CON': '9b1c55539cf34de3076cc7510b4eff50'})
         self.TestRandomize(zippath, 2052, grp0451, False)
         self.TestRandomize(tempgrp, 451, grp0451, True)
@@ -147,6 +156,7 @@ class BERandoTestCase(unittest.TestCase):
         finally:
             games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
+    #@unittest.skip
     def test_other_grps(self):
         # optionally use the othertests folder for testing your own collection of games that aren't freeware
         files = glob.glob('othertests/*', recursive=True)
