@@ -1,9 +1,11 @@
-from BuildLibs.grp import *
-import BuildLibs.gui
 import argparse
+import sys
+
+import BuildLibs.gui
+from BuildLibs import GetVersion, setVerbose
+
 
 parser = argparse.ArgumentParser(description='Build Engine Randomizer')
-
 parser.add_argument('--version', action="store_true", help='Output version')
 parser.add_argument('--verbose', action="store_true", help="Output way more to the screen")
 args = parser.parse_args()

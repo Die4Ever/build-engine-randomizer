@@ -7,7 +7,7 @@ if sys.version_info[0] == 3 and sys.version_info[1] < 6:
 
 import os
 from typing import OrderedDict, Union
-from struct import unpack, pack
+import struct
 import binascii
 from collections import namedtuple
 import random
@@ -20,6 +20,7 @@ def GetVersion() -> str:
 
 packLengthRegex = re.compile('^(.*?)(\d+)(\w)(.*?)$')
 class FancyPacker:
+
     def __init__(self, endianness: str, mappings: OrderedDict):
         self.format = endianness
         self.keys = {}
@@ -33,9 +34,8 @@ class FancyPacker:
                 self.keys[k] = len(v)
             self.total_len += self.keys[k]
 
-
     def unpack(self, data: bytes) -> dict:
-        t = unpack(self.format, data)
+        t = struct.unpack(self.format, data)
         dict = {}
         i = 0
         for k, L in self.keys.items():
@@ -45,7 +45,6 @@ class FancyPacker:
                 continue
             dict[k] = list(t[i:i+L])
             i+=L
-
         return dict
 
     def pack(self, dict: dict) -> bytes:
@@ -58,7 +57,10 @@ class FancyPacker:
             else:
                 values[i] = v
             i+=L
-        return pack(self.format, *values)
+        return struct.pack(self.format, *values)
+
+    def calcsize(self) -> int:
+        return struct.calcsize(self.format)
 
 
 def crc32(*args):
