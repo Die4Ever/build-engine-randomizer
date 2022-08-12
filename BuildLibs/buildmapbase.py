@@ -62,11 +62,12 @@ class Wall:
         self.next_sector_wall: int = data.get('next_sector_wall', -1)
         self.next_sector: int = data.get('next_sector', -1)
         self.cstat: int = data.get('cstat', 0)
-        self.picnum: int = data.get('picnum', 0)
-        self.overpicnum: int = data.get('overpicnum', 0)
+        # self.picnum: int = data.get('picnum', 142)
+        self.picnum: int = data.get('picnum', 134)
+        self.overpicnum : int = data.get('overpicnum', 0)
         self.shade: int = data.get('shade', 0)
         self.palette: int = data.get('palette', 0)
-        self.texcoords: list = data.get('texcoords', [0, 0, 0, 0])
+        self.texcoords: list = data.get('texcoords', [1, 1, 0, 0])
         self.lowtag: int = data.get('lowtag', 0)
         self.hightag: int = data.get('hightag', 0)
         self.extra: int = data.get('extra', -1)
@@ -149,17 +150,18 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
         self.sectors = []
         self.walls = []
-        self.items = []
-        self.enemies = []
-        self.triggers = []
-        self.other_sprites = []
+        self.sprites = []
+        # self.items = []
+        # self.enemies = []
+        # self.triggers = []
+        # self.other_sprites = []
         self.sectorCache = {}
 
         if data is not None:
             self.ReadData()
             assert len(self.sectors) > 0
             assert len(self.walls) > 0
-            assert len(self.sprites) > 0
+            # assert len(self.sprites) > 0
 
     def __str__(self):
         lines = []
@@ -180,9 +182,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
         return '\n'.join(lines)
 
-    @property
-    def sprites(self):
-        return self.items + self.enemies + self.triggers + self.other_sprites
+    # @property
+    # def sprites(self):
+    #     return self.items + self.enemies + self.triggers + self.other_sprites
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
         try:
@@ -376,17 +378,18 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.walls.append(wall)
 
     def AppendSprite(self, sprite: Sprite) -> None:
-        cstat = CStat(sprite.cstat)
-        if sprite.picnum in self.gameSettings.swappableItems:
-            self.items.append(sprite)
-        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
-            self.items.append(sprite)
-        elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
-            self.enemies.append(sprite)
-        elif sprite.picnum in self.gameSettings.triggers:
-            self.triggers.append(sprite)
-        else:
-            self.other_sprites.append(sprite)
+        self.sprites.append(sprite)
+        # cstat = CStat(sprite.cstat)
+        # if sprite.picnum in self.gameSettings.swappableItems:
+        #     self.items.append(sprite)
+        # elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
+        #     self.items.append(sprite)
+        # elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
+        #     self.enemies.append(sprite)
+        # elif sprite.picnum in self.gameSettings.triggers:
+        #     self.triggers.append(sprite)
+        # else:
+        #     self.other_sprites.append(sprite)
 
     def GetSpriteType(self, sprite:Sprite) -> str:
         cstat = CStat(sprite.cstat)
