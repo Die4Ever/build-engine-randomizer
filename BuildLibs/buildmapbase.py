@@ -63,7 +63,7 @@ class Wall:
         self.next_sector: int = data.get('next_sector', -1)
         self.cstat: int = data.get('cstat', 0)
         # self.picnum: int = data.get('picnum', 142)
-        self.picnum: int = data.get('picnum', 134)
+        self.picnum: int = data.get('picnum', -1)
         self.overpicnum : int = data.get('overpicnum', 0)
         self.shade: int = data.get('shade', 0)
         self.palette: int = data.get('palette', 0)
@@ -85,9 +85,9 @@ class Sprite:
         self.clipdist: int = data.get('clipdist', 0)
         self.filler: int = data.get('filler', 0)
         self.texcoords: list = data.get('texcoords', [0, 0, 0, 0])
-        self.sectnum: int = data.get('sectnum', 0)
+        self.sectnum: int = data.get('sectnum', -1)
         self.statnum: int = data.get('statnum', 0)
-        self.angle: int = data.get('angle', 0)
+        self.angle: int = data.get('angle', -1)
         self.owner: int = data.get('owner', 0)
         self.velocity: list = data.get('velocity', [0, 0, 0])
         self.lowtag: int = data.get('lowtag', 0)
@@ -121,7 +121,6 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.gameSettings = gameSettings
         self.name = name
         self.data = data
-        info('\n', name, len(data) if data is not None else None)
 
         self.version = 0
         self.startPos = [0, 0, 0]
