@@ -13,8 +13,8 @@ class CStat:
 
     def __init__(self, cstat):
         self.blocking = bool(cstat & 1)
-        self.facing = cstat & 0x30
-        self.onesided = cstat & 0x40
+        self.facing = bool(cstat & 0x30)       # 48
+        self.onesided = bool(cstat & 0x40)
         self.blockingHitscan = bool(cstat & 0x800)
         self.invisible = bool(cstat & 0x8000)
 
@@ -88,7 +88,7 @@ class Sprite:
         self.sectnum: int = data.get('sectnum', -1)
         self.statnum: int = data.get('statnum', 0)
         self.angle: int = data.get('angle', -1)
-        self.owner: int = data.get('owner', 0)
+        self.owner: int = data.get('owner', -1)
         self.velocity: list = data.get('velocity', [0, 0, 0])
         self.lowtag: int = data.get('lowtag', 0)
         self.hightag: int = data.get('hightag', 0)
@@ -550,7 +550,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
         return pos
 
     def WriteSprite(self, sprite: Sprite):
-        newdata = self.spritePacker.pack(sprite.__dict__)
+        try:
+            newdata = self.spritePacker.pack(sprite.__dict__)
+        except:
+            print('FAILD:', sprite.__dict__)
+            raise
 
         newdata = bytearray(newdata)
         if self.crypt and self.version == 7:
