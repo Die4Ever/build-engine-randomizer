@@ -87,7 +87,7 @@ class Sprite:
         self.texcoords: list = data.get('texcoords', [0, 0, 0, 0])
         self.sectnum: int = data.get('sectnum', -1)
         self.statnum: int = data.get('statnum', 0)
-        self.angle: int = data.get('angle', -1)
+        self.angle: int = data.get('angle', 0)
         self.owner: int = data.get('owner', -1)
         self.velocity: list = data.get('velocity', [0, 0, 0])
         self.lowtag: int = data.get('lowtag', 0)
