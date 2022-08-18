@@ -149,11 +149,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
         self.sectors = []
         self.walls = []
-        self.sprites = []
-        # self.items = []
-        # self.enemies = []
-        # self.triggers = []
-        # self.other_sprites = []
+        #self.sprites = []
+        self.items = []
+        self.enemies = []
+        self.triggers = []
+        self.other_sprites = []
         self.sectorCache = {}
 
         if data is not None:
@@ -181,9 +181,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
         return '\n'.join(lines)
 
-    # @property
-    # def sprites(self):
-    #     return self.items + self.enemies + self.triggers + self.other_sprites
+    @property
+    def sprites(self):
+        return self.items + self.enemies + self.triggers + self.other_sprites
 
     def Randomize(self, seed:int, settings:dict, spoilerlog):
         try:
@@ -377,18 +377,17 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.walls.append(wall)
 
     def AppendSprite(self, sprite: Sprite) -> None:
-        self.sprites.append(sprite)
-        # cstat = CStat(sprite.cstat)
-        # if sprite.picnum in self.gameSettings.swappableItems:
-        #     self.items.append(sprite)
-        # elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
-        #     self.items.append(sprite)
-        # elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
-        #     self.enemies.append(sprite)
-        # elif sprite.picnum in self.gameSettings.triggers:
-        #     self.triggers.append(sprite)
-        # else:
-        #     self.other_sprites.append(sprite)
+        cstat = CStat(sprite.cstat)
+        if sprite.picnum in self.gameSettings.swappableItems:
+            self.items.append(sprite)
+        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
+            self.items.append(sprite)
+        elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
+            self.enemies.append(sprite)
+        elif sprite.picnum in self.gameSettings.triggers:
+            self.triggers.append(sprite)
+        else:
+            self.other_sprites.append(sprite)
 
     def GetSpriteType(self, sprite:Sprite) -> str:
         cstat = CStat(sprite.cstat)
