@@ -211,6 +211,8 @@ AddGame('NAM.GRP',                            'NAM',                    43448927
 AddGame('WW2GI.GRP',                          'WWII GI',                77939508, '907B82BF', '27E927BEBA43447DB3951EAADEDB4709', 'FD0208A55EAEF3937C126E1FFF474FB4DFBDA6F5') # WW2GI.GRP
 #AddGame('WW2GI.RTS',                         'WWII GI',                  259214, '79D16760', '759F66C9F3C70AEDCAE29473AADE9966', 'CE352EF4C22F85869FDCB060A64EBC263ACEA6B0') # WW2GI.RTS
 
+AddGame('A.W.O.L. v0.91',                     'AWOL',                  252384950, '894F0199', '0161F85CEE80E1A60A28F40643BF02B2', 'C797F9D3BED6BADAD62C4C9C14D78F34058D97A8', useRandomizerFolder=False) # AWOL.GRP
+
 # build these GameMapSettings using this regex find/replace
 # define ([\w_]+) (\d+)
 # $2: '$1',
@@ -720,4 +722,16 @@ AddConSettings('Duke Nukem 3D', conFiles = {
         ConVar('LIZEATINGPLAYER', 0),
         ConVar('NEWBEASTSCRATCHAMOUNT', 0),
     ]
+})
+
+AddMapSettings('AWOL', minMapVersion=7, maxMapVersion=9,
+    swappableItems = {
+    },
+    swappableEnemies = {
+    },
+    addableEnemies = [],
+    triggers={}
+)
+# ['awol.con', 'data/awol_aibot.con', 'data/awol_astar.con', 'data/awol_choreo.con', 'data/awol_choreo_scripts.con', 'data/awol_common.con', 'data/awol_customize.con', 'data/awol_cutscene_script1.con', 'data/awol_cutscene_script10.con', 'data/awol_cutscene_script11.con', 'data/awol_cutscene_script2.con', 'data/awol_cutscene_script3.con', 'data/awol_cutscene_script4.con', 'data/awol_cutscene_script5.con', 'data/awol_cutscene_script6.con', 'data/awol_cutscene_script7.con', 'data/awol_cutscene_script8.con', 'data/awol_cutscene_script9.con', 'data/awol_cutscenes.con', 'data/awol_env.con', 'data/awol_ghost.con', 'data/awol_interactables.con', 'data/awol_inventory.con', 'data/awol_levels.con', 'data/awol_main.con', 'data/awol_materials.con', 'data/awol_materials_defs.con', 'data/awol_materials_init.con', 'data/awol_names.con', 'data/awol_nodegraph.con', 'data/awol_objective_scripts.con', 'data/awol_pickups.con', 'data/awol_player.con', 'data/awol_scripted.con', 'data/awol_sounds.con', 'data/awol_subtitles.con', 'data/awol_text.con', 'data/awol_tokens.con', 'data/awol_ui.con', 'data/awol_vfx.con', 'data/awol_weapons.con', 'data/awol_weather.con', 'data/enemy_arctic.con', 'data/enemy_arena.con', 'data/enemy_flyers.con', 'data/enemy_guerrilla.con', 'data/enemy_insurgent.con', 'data/enemy_jungle.con', 'data/enemy_legacy.con', 'data/enemy_security.con', 'data/enemy_shared.con', 'data/mikko.con']
+AddConSettings('AWOL', conFiles = {
 })

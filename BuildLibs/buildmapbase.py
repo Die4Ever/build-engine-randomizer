@@ -159,7 +159,8 @@ class MapFileBase(metaclass=abc.ABCMeta):
             self.ReadData()
             assert len(self.sectors) > 0
             assert len(self.walls) > 0
-            assert len(self.sprites) > 0
+            if name != 'maps/null.map':
+                assert len(self.sprites) > 0
 
     def __str__(self):
         lines = []
