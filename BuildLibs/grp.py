@@ -144,7 +144,7 @@ class GrpBase(metaclass=abc.ABCMeta):
             basepath = Path(basepath, 'Randomizer')
         return Path(basepath)
 
-    def GetDeleteFolders(self, basepath:Path) -> list:
+    def GetDeleteFolders(self, basepath:Path) -> list[Path]:
         if self.game.useRandomizerFolder:
             return [basepath]
 
@@ -238,9 +238,9 @@ class GrpBase(metaclass=abc.ABCMeta):
 
     def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
         basepath:Path = self.GetOutputPath(basepath)
-        deleteFolders = self.GetDeleteFolders(basepath)
+        deleteFolders:list[Path] = self.GetDeleteFolders(basepath)
+        f : Path
         for f in deleteFolders:
-            f = Path(f)
             if f.is_dir():
                 shutil.rmtree(f)
             elif f.is_file():
