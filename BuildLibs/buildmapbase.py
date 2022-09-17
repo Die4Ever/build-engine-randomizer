@@ -21,7 +21,10 @@ class CStat:
 
 class Sector:
 
-    def __init__(self, data):
+    def __init__(self, data:dict):
+        self.__dict__ = data.copy()
+
+    def defaults(self, data:dict):
         self.wallptr: int = data.get('wallptr', 0)
         self.wallnum: int = data.get('wallnum', 0)
         self.ceilingz: int = data.get('ceilingz', 0)
@@ -56,7 +59,10 @@ class Sector:
 
 class Wall:
 
-    def __init__(self, data):
+    def __init__(self, data:dict):
+        self.__dict__ = data.copy()
+
+    def defaults(self, data:dict):
         self.pos: list = data.get('pos', [0, 0])
         self.next_wall: int = data.get('next_wall', 0)
         self.next_sector_wall: int = data.get('next_sector_wall', -1)
@@ -75,7 +81,10 @@ class Wall:
 
 class Sprite:
 
-    def __init__(self, data):
+    def __init__(self, data:dict):
+        self.__dict__ = data.copy()
+
+    def defaults(self, data:dict):
         self.pos: list = data.get('pos', [0, 0, 0])
         self.cstat: int = data.get('cstat', 0)
         self.picnum: int = data.get('picnum', 0)
