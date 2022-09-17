@@ -702,7 +702,7 @@ AddConSettings('Ion Fury', conFiles = {
 
 AddConSettings('Duke Nukem 3D', conFiles = {
     'USER.CON': [
-        ConVar('BOSS\dSTRENGTH', 1, range=0.5, balance=0.9),
+        ConVar('BOSS.*STRENGTH', 1, range=0.5, balance=0.9), # prevent bosses from being crazy strong
         ConVar('TRIPBOMB_STRENGTH', -1, balance=1.5),
         ConVar('HANDBOMB_WEAPON_STRENGTH', -1, balance=1.5),
         ConVar('YELLHURTSOUNDSTRENGTH', 0, range=0),
