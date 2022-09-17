@@ -98,16 +98,22 @@ class MapFile(MapFileBase):
         pos = self.ReadSectors(pos)
         pos = self.ReadNumWalls(pos)
         pos = self.ReadWalls(pos)
+        self.start_num_sprites = pos
         pos = self.ReadNumSprites(pos)
         self.ReadSprites(pos)
 
     def WriteData(self):
-        self.data = bytearray()
-        pos: int = self.WriteHeaders()
-        pos = self.WriteNumSectors(pos)
-        pos = self.WriteSectors(pos)
-        pos = self.WriteNumWalls(pos)
-        pos = self.WriteWalls(pos)
+        pos: int
+        if self.full_rewrite:
+            self.data = bytearray()
+            pos = self.WriteHeaders()
+            pos = self.WriteNumSectors(pos)
+            pos = self.WriteSectors(pos)
+            pos = self.WriteNumWalls(pos)
+            pos = self.WriteWalls(pos)
+        else:
+            pos = self.start_num_sprites
+            self.data = self.data[:pos]
         pos = self.WriteNumSprites(pos)
         self.WriteSprites(pos)
 
@@ -214,6 +220,8 @@ class BloodMap(MapFile):
                 num_sprites='H',
             )
         )
+        self.header2Packer = FancyPacker('<', OrderedDict(x_sprite_size='i', x_wall_size='i', x_sector_size='i'))
+
 
     def ReadHeaders(self) -> int:
         super().ReadHeaders()
@@ -230,13 +238,12 @@ class BloodMap(MapFile):
         if self.version == 7: # if (byte_1A76C8)
             self.header2Len = 128
             header2Start = self.HEADER_SIZE
-            header2data = self.data[header2Start:header2Start + 128]
-            self.header2data = header2data
+            header2data = self.data[header2Start:header2Start + self.header2Len]
+            self.header2data = header2data.copy()
             if self.crypt:
                 header2data = MapCrypt(header2data, self.num_walls)
 
-            header2Packer = FancyPacker('<', OrderedDict(x_sprite_size='i', x_wall_size='i', x_sector_size='i'))
-            header2 = header2Packer.unpack(header2data[64:76]) # skip the 64 bytes starting padding
+            header2 = self.header2Packer.unpack(header2data[64:76]) # skip the 64 bytes starting padding
             self.__dict__.update(header2)
         else:
             self.header2Len = 0
@@ -251,8 +258,10 @@ class BloodMap(MapFile):
         return self.sky_start + self.sky_length
 
     def WriteHeaders(self):
+        # get the version ready for writing
         version = self.version
         self.version = self.exactVersion
+
         self.num_sprites = len(self.sprites)
         header = self.headerPacker.pack(self.__dict__)
         if self.crypt:
@@ -262,19 +271,28 @@ class BloodMap(MapFile):
         if self.header2Len:
             self.data.extend(self.header2data)
         self.data.extend(self.sky_data)
+
+        # put the version back to how we use it internally
+        self.version = version
         return len(self.data)
 
     def ReadData(self):
         pos: int = self.ReadHeaders()
         pos = self.ReadSectors(pos)
         pos = self.ReadWalls(pos)
+        self.start_sprites = pos
         self.ReadSprites(pos)
 
     def WriteData(self):
+        old_data = self.data
         self.data = bytearray()
-        pos: int = self.WriteHeaders()
-        pos = self.WriteSectors(pos)
-        pos = self.WriteWalls(pos)
+        pos:int = self.WriteHeaders()
+        if self.full_rewrite:
+            pos = self.WriteSectors(pos)
+            pos = self.WriteWalls(pos)
+        else:
+            self.data.extend(old_data[pos:self.start_sprites])
+            pos = self.start_sprites
         self.WriteSprites(pos)
 
     def WriteSprites(self, pos):

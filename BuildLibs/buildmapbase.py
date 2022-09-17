@@ -126,6 +126,7 @@ class MapFileBase(metaclass=abc.ABCMeta):
     SPRITE_SIZE = 44
 
     def __init__(self, gameSettings, name, data: bytearray = None):
+        self.full_rewrite:bool = False
         self.gameSettings = gameSettings
         self.name = name
         self.data = data
@@ -443,7 +444,7 @@ class MapFileBase(metaclass=abc.ABCMeta):
         data = self.data[pos:pos + self.SPRITE_SIZE]
 
         if self.crypt and self.version == 7:
-            data = MapCrypt(self.data[pos:pos + self.SPRITE_SIZE], (self.mapRevision * self.SPRITE_SIZE) | 0x7474614d)
+            data = MapCrypt(data, (self.mapRevision * self.SPRITE_SIZE) | 0x7474614d)
 
         sprite = Sprite(self.spritePacker.unpack(data))
         sprite.length = self.SPRITE_SIZE
@@ -521,6 +522,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
     def WriteSector(self, sector: Sector):
         newdata = self.sectorPacker.pack(sector.__dict__)
+
+        if self.crypt and self.version == 7:
+            newdata = bytearray(newdata)
+            newdata = MapCrypt(newdata, self.mapRevision * self.SECTOR_SIZE)
+
         if sector.extra > 0:
             newdata += sector.extraData
         self.data.extend(newdata)
@@ -540,6 +546,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
     def WriteWall(self, wall: Wall):
         newdata = self.wallPacker.pack(wall.__dict__)
+
+        if self.crypt and self.version == 7:
+            newdata = bytearray(newdata)
+            newdata = MapCrypt(newdata, (self.mapRevision * self.SECTOR_SIZE) | 0x7474614d)
+
         if wall.extra > 0:
             newdata += wall.extraData
         self.data.extend(newdata)
