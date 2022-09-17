@@ -8,7 +8,7 @@ import shutil
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import OrderedDict
+from typing import List, OrderedDict
 from zipfile import ZipFile
 
 from BuildLibs import debug, error, info, trace, warning
@@ -144,7 +144,7 @@ class GrpBase(metaclass=abc.ABCMeta):
             basepath = Path(basepath, 'Randomizer')
         return Path(basepath)
 
-    def GetDeleteFolders(self, basepath:Path) -> list[Path]:
+    def GetDeleteFolders(self, basepath:Path) -> List[Path]:
         if self.game.useRandomizerFolder:
             return [basepath]
 
@@ -238,7 +238,7 @@ class GrpBase(metaclass=abc.ABCMeta):
 
     def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
         basepath:Path = self.GetOutputPath(basepath)
-        deleteFolders:list[Path] = self.GetDeleteFolders(basepath)
+        deleteFolders:List[Path] = self.GetDeleteFolders(basepath)
         f : Path
         for f in deleteFolders:
             if f.is_dir():
