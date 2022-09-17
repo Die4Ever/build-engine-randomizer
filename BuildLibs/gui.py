@@ -155,17 +155,19 @@ class RandoSettings:
     def _Randomize(self, settings):
         seed = settings['seed']
         self.grp.Randomize(seed, settings=settings)
-        messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed))
+        path = Path(self.grp.GetOutputPath(), 'Randomizer.html').absolute()
+        messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed) + '\n\nCheck out\n\n'+str(path)+'\n\nto see all the changes that have been made!')
         self.closeWindow()
 
     def WarnOverwrites(self) -> bool:
         deleting = self.grp.GetDeleteFolders(self.grp.GetOutputPath())
         deletingstrs = []
+        d : Path
         for d in deleting:
-            deletingstrs.append(str(d))
+            deletingstrs.append(str(d.absolute()))
         return messagebox.askokcancel(
             title='Will DELETE files!',
-            message='This may take a minute.\nWILL DELETE/OVERWRITE THE FOLLOWING:\n'
+            message='This may take a minute.\nWILL DELETE/OVERWRITE THE FOLLOWING:\n\n'
             + '\n'.join(deletingstrs)
         )
 

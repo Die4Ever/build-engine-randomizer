@@ -153,9 +153,14 @@ class GrpBase(metaclass=abc.ABCMeta):
         f:str
         for f in self.files:
             if f in self.conSettings.conFiles or f in mapFiles:
-                folders.add(Path(f).parts[0])
-        ret = list(folders)
-        ret.sort(key=str.casefold)
+                part:str = Path(f).parts[0]
+                folders.add(part)
+        folders = list(folders)
+        folders.sort(key=str.casefold)
+        ret = []
+        for f in folders:
+            p:Path = Path(basepath, f)
+            ret.append(p)
         return ret
 
     def ShuffleMaps(self, seed, restricted, maps) -> dict:
