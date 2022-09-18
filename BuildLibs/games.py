@@ -702,12 +702,15 @@ AddConSettings('Ion Fury', conFiles = {
 
 AddConSettings('Duke Nukem 3D', conFiles = {
     'USER.CON': [
+        # more specific things first
         ConVar('STEROID_AMOUNT', 0, range=0), # STEROID_AMOUNT less than 400 causes it to be used immediately, greater than 400 causes it to be unusable
         ConVar('BOSS.*STRENGTH', 1, range=0.5, balance=0.9), # prevent bosses from being crazy strong
         ConVar('TRIPBOMB_STRENGTH', -1, balance=1.5),
         ConVar('HANDBOMB_WEAPON_STRENGTH', -1, balance=1.5),
         ConVar('YELLHURTSOUNDSTRENGTH', 0, range=0),
         ConVar('SWEARFREQUENCY', 0),
+        ConVar('PIG_SHIELD_AMOUNT\d', 1),
+
         ConVar('.*HEALTH', -1, range=0.5),
         ConVar('MAX.*AMMO', -1),
         ConVar('.*AMMOAMOUNT', -1),
@@ -716,7 +719,6 @@ AddConSettings('Duke Nukem 3D', conFiles = {
         ConVar('.*_WEAPON_STRENGTH', -1),
 
         ConVar('.*\wSTRENGTH', 1),
-        ConVar('PIG_SHIELD_AMOUNT\d', 1),
 
         # idk what these do
         ConVar('OCTASCRATCHINGPLAYER', 0),

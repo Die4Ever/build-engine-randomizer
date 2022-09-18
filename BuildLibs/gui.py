@@ -53,6 +53,22 @@ class ScrollableFrame:
         if self.mousescroll:
             self.canvas.unbind_all("<MouseWheel>")
 
+unavail = 'Unavailable for this game'
+enabledOptions = {'Disabled': False, 'Enabled': True, unavail: False}
+chanceDupeItem = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}
+chanceDeleteItem = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}
+chanceDupeEnemy = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Impossible': 0.75}
+chanceDeleteEnemy = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Impossible': 0.15}
+spriteVariety = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}
+rangeOptions = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}
+difficultyOptions = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}
+reorderMapsOptions = {**enabledOptions, 'Restricted': 'restricted'}
+
+def OptionsList(ops:dict):
+    ops = ops.copy()
+    ops.pop(unavail, None)
+    return ops.keys()
+
 class RandoSettings:
     def __init__(self):
         self.width=480
@@ -108,12 +124,12 @@ class RandoSettings:
         if not self.isWindowOpen():
             return
         if not self.grp.conSettings.conFiles:
-            self.rangeVar.set('Unavailable for this game')
+            self.rangeVar.set(unavail)
             self.range['state'] = 'disabled'
-            self.difficultyVar.set('Unavailable for this game')
+            self.difficultyVar.set(unavail)
             self.difficulty['state'] = 'disabled'
         if not self.grp.mapSettings.addableEnemies:
-            self.enemyVarietyVar.set('Unavailable for this game')
+            self.enemyVarietyVar.set(unavail)
             self.enemyVariety['state'] = 'disabled'
         if self.grp.game.useRandomizerFolder:
             self.randomizerFolderVar.set('Enabled')
@@ -131,24 +147,21 @@ class RandoSettings:
             seed = random.randint(1, 999999)
         settings['seed'] = seed
 
-        unavail = 'Unavailable for this game'
-        enabled = {'Disabled': False, 'Enabled': True, 'Unavailable for this game': False}
+        settings['MapFile.chanceDupeItem'] = chanceDupeItem[self.itemsVar.get()]
+        settings['MapFile.chanceDeleteItem'] = chanceDeleteItem[self.itemsVar.get()]
 
-        settings['MapFile.chanceDupeItem'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.7, 'Extreme': 0.9}[self.itemsVar.get()]
-        settings['MapFile.chanceDeleteItem'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}[self.itemsVar.get()]
+        settings['MapFile.chanceDupeEnemy'] = chanceDupeEnemy[self.enemiesVar.get()]
+        settings['MapFile.chanceDeleteEnemy'] = chanceDeleteEnemy[self.enemiesVar.get()]
 
-        settings['MapFile.chanceDupeEnemy'] = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Impossible': 0.75}[self.enemiesVar.get()]
-        settings['MapFile.chanceDeleteEnemy'] = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Impossible': 0.15}[self.enemiesVar.get()]
+        settings['MapFile.itemVariety'] = spriteVariety[self.itemVarietyVar.get()]
+        settings['MapFile.enemyVariety'] = spriteVariety[self.enemyVarietyVar.get()]
 
-        settings['MapFile.itemVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.itemVarietyVar.get()]
-        settings['MapFile.enemyVariety'] = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}[self.enemyVarietyVar.get()]
-
-        settings['conFile.range'] = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}[self.rangeVar.get()]
+        settings['conFile.range'] = rangeOptions[self.rangeVar.get()]
         settings['conFile.scale'] = 1.0
-        settings['conFile.difficulty'] = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}[self.difficultyVar.get()]
+        settings['conFile.difficulty'] = difficultyOptions[self.difficultyVar.get()]
 
-        settings['grp.reorderMaps'] = {**enabled, 'Restricted': 'restricted'}[self.reorderMapsVar.get()]
-        settings['useRandomizerFolder'] = enabled[self.randomizerFolderVar.get()]
+        settings['grp.reorderMaps'] = reorderMapsOptions[self.reorderMapsVar.get()]
+        settings['useRandomizerFolder'] = enabledOptions[self.randomizerFolderVar.get()]
         self.grp.game.useRandomizerFolder = settings['useRandomizerFolder']
         return settings
 
@@ -218,50 +231,78 @@ class RandoSettings:
         self.linkfont = font.Font(size=12, underline=True)
 
         row=0
-        infoLabel = Label(self.win,text='Make sure you have a backup of your game files!\nRandomizer might overwrite files\ninside the game directory.',width=40,height=4,font=self.font)
+        infoLabel = Label(self.win,
+            text='Make sure you have a backup of your game files!\nRandomizer might overwrite files\ninside the game directory.',
+            width=40,height=4,font=self.font
+        )
         infoLabel.grid(column=0,row=row,columnspan=2,rowspan=1)
         row+=1
 
         self.seedVar = StringVar(self.win, random.randint(1, 999999))
-        self.seedEntry:Entry = self.newInput(Entry, 'Seed: ', 'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.', row, textvariable=self.seedVar)
+        self.seedEntry:Entry = self.newInput(Entry, 'Seed: ',
+            'RNG Seed. Each seed is a different game!\nLeave blank for a random seed.',
+            row, textvariable=self.seedVar
+        )
         row+=1
 
         # items add/reduce? maybe combine them into presets so it's simpler to understand
         self.itemsVar = StringVar(self.win, 'Some')
-        items:OptionMenu = self.newInput(OptionMenu, 'Items: ', 'How many items.\n"Some" is a similar amount to vanilla.', row, self.itemsVar, 'Few', 'Some', 'Many', 'Extreme')
+        items:OptionMenu = self.newInput(OptionMenu, 'Items: ', 'How many items.\n"Some" is a similar amount to vanilla.',
+            row, self.itemsVar, *OptionsList(chanceDupeItem)
+        )
         row+=1
 
         # enemies add/reduce?
         self.enemiesVar = StringVar(self.win, 'Some')
-        enemies:OptionMenu = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.', row, self.enemiesVar, 'Few', 'Some', 'Many', 'Impossible')
+        enemies:OptionMenu = self.newInput(OptionMenu, 'Enemies: ', 'How many enemies.\n"Some" is a similar amount to vanilla.',
+            row, self.enemiesVar, *OptionsList(chanceDupeEnemy)
+        )
         row+=1
 
         # values range
         self.rangeVar = StringVar(self.win, 'Medium')
-        self.range:OptionMenu = self.newInput(OptionMenu, 'Randomization Range: ', 'How wide the range of values can be randomized.\nThis affects the values in CON files.', row, self.rangeVar, 'Low', 'Medium', 'High', 'Extreme')
+        self.range:OptionMenu = self.newInput(OptionMenu, 'Randomization Range: ',
+            'How wide the range of values can be randomized.\nThis affects the values in CON files.',
+            row, self.rangeVar, *OptionsList(rangeOptions)
+        )
         row+=1
 
         # difficulty? values difficulty?
         self.difficultyVar = StringVar(self.win, 'Medium')
-        self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ', 'Increase the difficulty for more challenge.\nThis affects the values in CON files.', row, self.difficultyVar, 'Easy', 'Medium', 'Difficult', 'Impossible')
+        self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ',
+            'Increase the difficulty for more challenge.\nThis affects the values in CON files.',
+            row, self.difficultyVar, *OptionsList(difficultyOptions)
+        )
         row+=1
 
-        self.itemVarietyVar = StringVar(self.win, 'Normal')
-        self.itemVariety:OptionMenu = self.newInput(OptionMenu, 'Item Variety: ', 'Chance to add items that shouldn\'t be on the map.', row, self.itemVarietyVar, 'Normal', 'Increased', 'Extreme')
+        self.itemVarietyVar = StringVar(self.win, 'Increased')
+        self.itemVariety:OptionMenu = self.newInput(OptionMenu, 'Item Variety: ',
+            'Chance to add items that shouldn\'t be on the map.',
+            row, self.itemVarietyVar, *OptionsList(spriteVariety)
+        )
         row+=1
 
-        self.enemyVarietyVar = StringVar(self.win, 'Normal')
-        self.enemyVariety:OptionMenu = self.newInput(OptionMenu, 'Enemy Variety: ', 'Chance to add enemies that shouldn\'t be on the map.\nThis can create difficult situations.', row, self.enemyVarietyVar, 'Normal', 'Increased', 'Extreme')
+        self.enemyVarietyVar = StringVar(self.win, 'Increased')
+        self.enemyVariety:OptionMenu = self.newInput(OptionMenu, 'Enemy Variety: ',
+            'Chance to add enemies that shouldn\'t be on the map.\nThis can create difficult situations.',
+            row, self.enemyVarietyVar, *OptionsList(spriteVariety)
+        )
         row+=1
 
         self.reorderMapsVar = StringVar(self.win, 'Disabled')
-        reorderMaps:OptionMenu = self.newInput(OptionMenu, 'Reorder Maps: ', 'Shuffle the order of the maps.', row, self.reorderMapsVar, 'Disabled', 'Restricted', 'Enabled')
+        reorderMaps:OptionMenu = self.newInput(OptionMenu, 'Reorder Maps: ',
+            'Shuffle the order of the maps.',
+            row, self.reorderMapsVar, *OptionsList(reorderMapsOptions)
+        )
         row+=1
 
         # TODO: option to enable/disable loading external files?
 
         self.randomizerFolderVar = StringVar(self.win, '')
-        self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Use Randomizer Folder: ', 'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.', row, self.randomizerFolderVar, 'Disabled', 'Enabled')
+        self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Use Randomizer Folder: ',
+            'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.',
+            row, self.randomizerFolderVar, *OptionsList(enabledOptions)
+        )
         row+=1
 
         #self.progressbar = Progressbar(self.win, maximum=1)
