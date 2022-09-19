@@ -13,9 +13,10 @@ from unittest import case
 profiling = False
 if not profiling:
     importhook.install_import_hook('BuildLibs')
-from BuildLibs import buildmapbase, buildmap, crc32, games, trace, setVerbose
+    importhook.install_import_hook('BuildGames')
+from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose
 from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile
-
+import BuildGames
 
 unittest.TestLoader.sortTestMethodsUsing = None
 temp:Path = Path('temp/')
@@ -47,7 +48,7 @@ different_settings = {
 }
 
 # zipped for tests
-games.AddGame('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
+BuildGames.AddGame('ZIPPED Shareware DUKE3D.GRP v1.3D', 'Duke Nukem 3D', 4570468, 'BFC91225', '9eacbb74e107fa0b136f189217ce41c7', '4bdf21e32ec6a3fc43092a50a51fce3e4ad6600d') # ZIPPED Shareware DUKE3D.GRP v1.3D for tests
 
 # we need the correct file order so we can match the md5
 original_order = [
@@ -158,14 +159,14 @@ class BERandoTestCase(unittest.TestCase):
                     file.write(testdata)
 
             with self.subTest('Open GRP File'):
-                games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=True, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
+                BuildGames.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=True, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
                 grp: GrpZipFile = LoadGrpFile(tempgrp)
 
             with self.subTest('Read External File'):
                t = grp.getfile(extname).decode()
                self.assertEqual(t, testdata, 'Got external file path override')
         finally:
-            games.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
+            BuildGames.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
     #@unittest.skip
     def test_other_grps(self):

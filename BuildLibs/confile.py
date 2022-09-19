@@ -1,5 +1,5 @@
 from BuildLibs import *
-from BuildLibs import games
+import BuildGames
 from pathlib import Path
 import re
 

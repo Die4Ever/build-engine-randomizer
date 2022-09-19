@@ -1,7 +1,7 @@
 import binascii
 import struct
 from typing import OrderedDict, Union
-from BuildLibs import crc32, error, games, info, swapobjkey, trace, warning, FancyPacker
+from BuildLibs import crc32, error, info, swapobjkey, trace, warning, FancyPacker
 from BuildLibs.buildmapbase import CStat, Sector, Wall, Sprite, MapFileBase, MapCrypt
 
 class MapFile(MapFileBase):
@@ -303,13 +303,12 @@ class BloodMap(MapFile):
 
 
 def LoadMap(gameName, name, data: bytearray) -> 'MapFile':
-    gameSettings = games.GetGameMapSettings(gameName)
     # Blood has a signature at the front of map files
     if data[:4] == b'BLM\x1a':
-        return BloodMap(gameSettings, name, data)
+        return BloodMap(gameName, name, data)
     else:
         (version,) = struct.unpack('<i', data[:4])
         if version <= 6:
             # https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6
-            return MapV6(gameSettings, name, data)
-        return MapFile(gameSettings, name, data)
+            return MapV6(gameName, name, data)
+        return MapFile(gameName, name, data)

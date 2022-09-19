@@ -15,6 +15,7 @@ from BuildLibs import debug, error, info, trace, warning
 from BuildLibs.buildmap import *
 from BuildLibs.confile import ConFile
 from BuildLibs.SpoilerLog import SpoilerLog
+import BuildGames
 
 
 try:
@@ -25,7 +26,7 @@ except Exception as e:
 
 def LoadGrpFile(filepath:Path) -> 'GrpBase':
     info(filepath)
-    game:games.GameInfo = games.GetGame(filepath)
+    game:BuildGames.GameInfo = BuildGames.GetGame(filepath)
     filesize = os.path.getsize(filepath)
     with open(filepath, 'rb') as f:
         sig = f.read(12)
@@ -61,7 +62,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         self.filepath = filepath
         info(filepath)
         self.files = {}
-        self.game:games.GameInfo = game
+        self.game:BuildGames.GameInfo = game
         self.filesize = filesize
 
         self.GetFilesInfo()
@@ -71,7 +72,7 @@ class GrpBase(metaclass=abc.ABCMeta):
             info(repr(cons))
             raise Exception('unidentified game')
 
-        self.conSettings = games.GetGameConSettings(self.game)
+        self.conSettings = BuildGames.GetGameConSettings(self.game)
         if not self.conSettings:
             raise Exception('missing GameConSettings', self.game, filepath)
         elif not self.conSettings.conFiles:
@@ -84,7 +85,7 @@ class GrpBase(metaclass=abc.ABCMeta):
                 if con not in cons:
                     warning('file not found', con)
 
-        self.mapSettings = games.GetGameMapSettings(self.game)
+        self.mapSettings = BuildGames.GetGameMapSettings(self.game)
         if not self.mapSettings.swappableItems:
             warning("This game doesn't have any swappableItems", self.game, filepath)
         if not self.mapSettings.swappableEnemies:

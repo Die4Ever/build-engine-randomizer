@@ -6,8 +6,8 @@ import struct
 from pathlib import Path
 from typing import OrderedDict, Union
 
-from BuildLibs import crc32, error, games, info, swapobjkey, trace, warning, FancyPacker
-
+from BuildLibs import crc32, error, info, swapobjkey, trace, warning, FancyPacker
+import BuildGames
 
 class CStat:
 
@@ -125,9 +125,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
     WALL_SIZE = 32
     SPRITE_SIZE = 44
 
-    def __init__(self, gameSettings, name, data: bytearray = None):
+    def __init__(self, gameName, name, data: bytearray = None):
         self.full_rewrite:bool = False
-        self.gameSettings = gameSettings
+        self.gameSettings = BuildGames.GetGameMapSettings(gameName)
         self.name = name
         self.data = data
         info('\n', name, len(data) if data is not None else None)
