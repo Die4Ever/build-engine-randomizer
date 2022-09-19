@@ -120,11 +120,6 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
     """
 
-    HEADER_SIZE = 20
-    SECTOR_SIZE = 40
-    WALL_SIZE = 32
-    SPRITE_SIZE = 44
-
     def __init__(self, gameName, name, data: bytearray = None):
         self.full_rewrite:bool = False
         self.gameSettings = BuildGames.GetGameMapSettings(gameName)

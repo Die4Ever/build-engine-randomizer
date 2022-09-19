@@ -4,7 +4,14 @@ from typing import OrderedDict, Union
 from BuildLibs import crc32, error, info, swapobjkey, trace, warning, FancyPacker
 from BuildLibs.buildmapbase import CStat, Sector, Wall, Sprite, MapFileBase, MapCrypt
 
+
 class MapFile(MapFileBase):
+    """ https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build) """
+    HEADER_SIZE = 20
+    SECTOR_SIZE = 40
+    WALL_SIZE = 32
+    SPRITE_SIZE = 44
+
     def CreateHeaderPacker(self):
         self.headerPacker = FancyPacker(
             '<',
@@ -117,8 +124,9 @@ class MapFile(MapFileBase):
         pos = self.WriteNumSprites(pos)
         self.WriteSprites(pos)
 
-class MapV6(MapFile):
 
+class MapV6(MapFile):
+    """ https://moddingwiki.shikadi.net/wiki/MAP_Format_(Build)#Version_6 """
     SECTOR_SIZE = 37
     SPRITE_SIZE = 43
 
@@ -198,7 +206,7 @@ class MapV6(MapFile):
 
 
 class BloodMap(MapFile):
-
+    """ https://github.com/nukeykt/NBlood/blob/master/source/blood/src/resource.cpp#L85 """
     HEADER_SIZE = 43
 
     def CreateHeaderPacker(self):
