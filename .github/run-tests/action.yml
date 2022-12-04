@@ -22,5 +22,8 @@ runs:
     - run: ls -lah dist
       shell: bash
 
+    # make sure we don't need the .app folder, specifically for MacOS
+    - run: rm -rf dist/build-engine-randomizer.app
+      shell: bash
     - run: ./dist/build-engine-randomizer --version
       shell: bash
