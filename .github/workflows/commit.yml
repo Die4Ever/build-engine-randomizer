@@ -7,25 +7,15 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - run: cd ${{ github.workspace }}
 
-      - run: pip3 install pyinstaller tk typeguard
-
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
-      - run: dir dist
-
-      - run: dist/build-engine-randomizer.exe --version
+      - uses: ./.github/run-tests
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-engine-randomizer
+          name: build-engine-randomizer.exe
           path: dist/build-engine-randomizer.exe
 
   Linux-Commit:
@@ -37,28 +27,19 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - run: cd ${{ github.workspace }}
 
       - run: sudo apt-get update -y
       - run: sudo apt-get install -y python3-tk idle3
-      - run: pip3 install pyinstaller tk typeguard
 
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-linux
-      - run: ls -lah dist
-
-      - run: dist/build-engine-randomizer-linux --version
+      - uses: ./.github/run-tests
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-engine-randomizer-linux
-          path: dist/build-engine-randomizer-linux
+          path: dist/build-engine-randomizer
 
 
   MacOS-Commit:
@@ -70,25 +51,15 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - run: cd ${{ github.workspace }}
 
       - run: brew install python-tk
-      - run: pip3 install pyinstaller tk typeguard
 
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-macos
-      - run: ls -lah dist
-
-      - run: rm -rf dist/build-engine-randomizer-macos.app
-      - run: dist/build-engine-randomizer-macos --version
+      - uses: ./.github/run-tests
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-engine-randomizer-macos
-          path: dist/build-engine-randomizer-macos
+          path: dist/build-engine-randomizer

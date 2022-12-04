@@ -1,0 +1,29 @@
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
+
+    - run: pip3 install -r requirements.txt
+      shell: bash
+
+    - run: python3 -m compileall -q .
+      shell: bash
+    - run: python3 tests.py
+      shell: bash
+    - run: echo "🍏 This job's status is ${{ job.status }}."
+      shell: bash
+
+    - name: Build
+      run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
+      shell: bash
+    - run: ls -lah dist
+      shell: bash
+
+    # make sure we don't need the .app folder, specifically for MacOS
+    - run: rm -rf dist/build-engine-randomizer.app
+      shell: bash
+    - run: ./dist/build-engine-randomizer --version
+      shell: bash

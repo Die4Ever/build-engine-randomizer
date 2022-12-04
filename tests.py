@@ -1,6 +1,7 @@
 import cProfile
 import glob
 import os
+import sys
 import random
 import shutil
 import unittest
@@ -11,10 +12,11 @@ from typeguard import typechecked, importhook
 from unittest import case
 
 profiling = False
-if not profiling:
+typechecks = not profiling
+if typechecks:
     importhook.install_import_hook('BuildLibs')
     importhook.install_import_hook('BuildGames')
-from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose
+from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
 from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile
 import BuildGames
 
@@ -95,6 +97,10 @@ class BERandoTestCase(unittest.TestCase):
         # GitHub Actions doesn't show STDERR
         print('Finished '+ str(cls.__name__))
         super().tearDownClass()
+
+    def test_get_version(self):
+        print(GetVersion())
+        print('Python version:', sys.version_info)
 
     def test_1_extract_zipgrp(self):
         # I zipped the GRP file to save space in the repo
