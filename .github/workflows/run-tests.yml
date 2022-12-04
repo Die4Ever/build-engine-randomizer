@@ -1,0 +1,19 @@
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip' # caching pip dependencies
+
+    - run: pip3 install -r requirements.txt
+
+    - run: python3 -m compileall -q .
+    - run: python3 tests.py
+    - run: echo "🍏 This job's status is ${{ job.status }}."
+
+    - name: Build
+      run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
+    - run: dir dist
+
+    - run: dist/build-engine-randomizer --version

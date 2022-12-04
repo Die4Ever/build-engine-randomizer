@@ -10,27 +10,12 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
-      - run: pip3 install -r requirements.txt
-
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
-      - run: dir dist
-
-      - run: dist/build-engine-randomizer.exe --version
+      - uses: ./.github/workflows/run-tests.yml
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-engine-randomizer
+          name: build-engine-randomizer.exe
           path: dist/build-engine-randomizer.exe
 
   Linux-Commit:
@@ -47,29 +32,13 @@ jobs:
 
       - run: sudo apt-get update -y
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
-      - run: sudo apt-get install -y python3-tk idle3
-      - run: pip3 install -r requirements.txt
-
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-linux
-      - run: ls -lah dist
-
-      - run: dist/build-engine-randomizer-linux --version
+      - uses: ./.github/workflows/run-tests.yml
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-engine-randomizer-linux
-          path: dist/build-engine-randomizer-linux
+          path: dist/build-engine-randomizer
 
 
   MacOS-Commit:
@@ -84,27 +53,16 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
       - run: brew install python-tk
-      - run: pip3 install -r requirements.txt
 
-      - run: python3 -m compileall -q .
-      - run: python3 tests.py
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - uses: ./.github/workflows/run-tests.yml
 
-      - name: Build
-        run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer-macos
-      - run: ls -lah dist
-
-      - run: rm -rf dist/build-engine-randomizer-macos.app
-      - run: dist/build-engine-randomizer-macos --version
+      # make sure we don't need the .app folder
+      - run: rm -rf dist/build-engine-randomizer.app
+      - run: dist/build-engine-randomizer --version
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-engine-randomizer-macos
-          path: dist/build-engine-randomizer-macos
+          path: dist/build-engine-randomizer
