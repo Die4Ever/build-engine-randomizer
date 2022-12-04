@@ -15,6 +15,7 @@ if args.verbose:
 
 if args.version:
     print(GetVersion())
+    print('Python version:', sys.version_info)
     sys.exit(0)
 
 BuildLibs.gui.main()
