@@ -5,6 +5,11 @@ jobs:
   Windows-Commit:
     runs-on: windows-latest
     steps:
+      - uses: actions/setup-python
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
+
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -35,6 +40,11 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
+      - uses: actions/setup-python
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
+
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -68,6 +78,11 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
+      - uses: actions/setup-python
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
+
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
