@@ -7,15 +7,15 @@ jobs:
   Windows-Release:
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
 
       - run: pip3 install -r requirements.txt
 
@@ -47,17 +47,18 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
       - run: sudo apt-get update -y
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
+
       - run: sudo apt-get install -y python3-tk idle3
       - run: pip3 install -r requirements.txt
 
@@ -89,15 +90,15 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
-
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
 
       - run: brew install python-tk
       - run: pip3 install -r requirements.txt
