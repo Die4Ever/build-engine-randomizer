@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
       - run: cd ${{ github.workspace }}
 
-      - uses: ./.github/workflows/run-tests.yml
+      - uses: ./.github/run-tests
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -40,7 +40,7 @@ jobs:
       - run: sudo apt-get update -y
       - run: sudo apt-get install -y python3-tk idle3
 
-      - uses: ./.github/workflows/run-tests.yml
+      - uses: ./.github/run-tests
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -67,7 +67,7 @@ jobs:
 
       - run: brew install python-tk
 
-      - uses: ./.github/workflows/run-tests.yml
+      - uses: ./.github/run-tests
 
       # make sure we don't need the .app folder
       - run: rm -rf dist/build-engine-randomizer.app
