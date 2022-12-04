@@ -7,13 +7,20 @@ runs:
         cache: 'pip' # caching pip dependencies
 
     - run: pip3 install -r requirements.txt
+      shell: bash
 
     - run: python3 -m compileall -q .
+      shell: bash
     - run: python3 tests.py
+      shell: bash
     - run: echo "🍏 This job's status is ${{ job.status }}."
+      shell: bash
 
     - name: Build
       run: pyinstaller buildrandomizer.py --onefile --noconsole --name build-engine-randomizer
-    - run: dir dist
+      shell: bash
+    - run: ls -lah dist
+      shell: bash
 
-    - run: dist/build-engine-randomizer --version
+    - run: ./dist/build-engine-randomizer --version
+      shell: bash
