@@ -12,7 +12,7 @@ from typeguard import typechecked, importhook
 from unittest import case
 
 profiling = False
-typechecks = False #not profiling
+typechecks = not profiling
 if typechecks:
     importhook.install_import_hook('BuildLibs')
     importhook.install_import_hook('BuildGames')
