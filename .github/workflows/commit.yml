@@ -5,7 +5,7 @@ jobs:
   Windows-Commit:
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-python@latest
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip' # caching pip dependencies
@@ -40,7 +40,7 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
-      - uses: actions/setup-python@latest
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip' # caching pip dependencies
@@ -78,7 +78,7 @@ jobs:
         # Must be explicit for proper pipefail support
         shell: bash
     steps:
-      - uses: actions/setup-python@latest
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip' # caching pip dependencies
