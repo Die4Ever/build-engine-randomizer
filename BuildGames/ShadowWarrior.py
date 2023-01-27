@@ -40,7 +40,7 @@ AddMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
         1829: SpriteInfo('caltrop'),
         1810: SpriteInfo('cookie'),
         #1766: SpriteInfo('techkey'),
-        1765: SpriteInfo('oldkey'),
+        #1765: SpriteInfo('oldkey'),
         # 2520: SpriteInfo('flag1'),
         # 2521: SpriteInfo('flag2'),
         # 2522: SpriteInfo('flag3'),
@@ -71,19 +71,21 @@ AddMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
         4096: SpriteInfo('EVIL_NINJA'),
         4162: SpriteInfo('EVIL_NINJA_CROUCHING'),
         4320: SpriteInfo('BIG_RIPPER'),
-        1210: SpriteInfo('SUMO_BOSS'),
-        1300: SpriteInfo('SERPENT_BOSS'),
         1400: SpriteInfo('COOLIE'),
         1441: SpriteInfo('COOLIE_GHOST'),
         1469: SpriteInfo('GREEN_GUARDIAN'),
-        5426: SpriteInfo('ZILLA_BOSS'),
         5162: SpriteInfo('FEMALE_WARRIOR'),
         1580: SpriteInfo('LITTLE_RIPPER'),
         #3780: SpriteInfo('FISH'),
         800: SpriteInfo('HORNET'),
     },
-    addableEnemies = [4096, 4320, 1210, 1300, 1400, 1441, 1469, 5426, 5162, 1580, 800,],
-    triggers={}
+    addableEnemies = [4096, 4320, 1400, 1441, 1469, 5162, 1580, 800,],
+    triggers={},
+    bosses={
+        1210: SpriteInfo('SUMO_BOSS'),
+        1300: SpriteInfo('SERPENT_BOSS'),
+        5426: SpriteInfo('ZILLA_BOSS')
+    }
 )
 # Keys (picnums 1765-1779)
 # Locks 1846-1854
