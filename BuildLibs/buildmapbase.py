@@ -101,6 +101,7 @@ class Sprite:
         self.lowtag: int = data.get('lowtag', 0)
         self.hightag: int = data.get('hightag', 0)
         self.extra: int = data.get('extra', -1)
+        self.extraData = data.get('extraData')
         self.length: int = data.get('length', 0)
 
     def __copy__(self) -> 'Sprite':
@@ -228,6 +229,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.ReduceSprites(rng, self.items, chanceDeleteItem, 'item')
         trace('\n')
 
+        if self.gameSettings.gameName == 'Blood':
+            # TODO: need to parse the extraData to determine if an enemy is important
+            chanceDupeEnemy = max(chanceDupeEnemy - chanceDeleteEnemy, 0)
+            chanceDeleteEnemy = 0
+
         rng = random.Random(crc32('map dupe enemies', self.name, seed))
         enemiesReplacements = {}
         for i in self.gameSettings.addableEnemies:
@@ -276,6 +282,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
         swapobjkey(a, b, 'angle')
         #swapobjkey(a, b, 'hightag')
         #swapobjkey(a, b, 'lowtag')# this seems to cause problems with shadow warrior enemies changing types?
+        a.length, b.length = b.length, a.length
+        a.extra, b.extra = b.extra, a.extra
+        a.extraData, b.extraData = b.extraData, a.extraData
 
     def DupeSprite(self, rng: random.Random, sprite:Sprite, spacing: float, possibleReplacements:dict, replacementChance:float, spritetype: str) -> Union[Sprite,None]:
         sprite = copy.copy(sprite)
@@ -443,6 +452,7 @@ class MapFileBase(metaclass=abc.ABCMeta):
 
         sprite = Sprite(self.spritePacker.unpack(data))
         sprite.length = self.SPRITE_SIZE
+        sprite.extraData = None
         if sprite.extra > 0:
             pos += self.SPRITE_SIZE
             sprite.extraData = self.data[pos:pos + self.x_sprite_size]
