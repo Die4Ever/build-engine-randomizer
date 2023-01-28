@@ -80,7 +80,8 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
         #2820: SpriteInfo('Beast Cultist', 'monsters', lowtag=201, xrepeat=40, yrepeat=40),
         #2820: SpriteInfo('Beast Cultist', 'monsters', lowtag=247, xrepeat=40, yrepeat=40),
         #2820: SpriteInfo('Beast Cultist', 'monsters', lowtag=248, xrepeat=40, yrepeat=40),
-        2820: SpriteInfo('Beast Cultist', 'monsters', lowtag=249, xrepeat=40, yrepeat=40),
+        2820: SpriteInfo('Cultist', 'monsters', lowtag=249, xrepeat=40, yrepeat=40),# 249 is Beast Cultist
+        2825: SpriteInfo('Cultist', 'monsters', lowtag=202, xrepeat=40, yrepeat=40),# 202 is Cultist with Shotgun
         3054: SpriteInfo('Earth Zombie', 'monsters', lowtag=205, xrepeat=40, yrepeat=40),
         3060: SpriteInfo('Phantasm', 'monsters', lowtag=210, xrepeat=40, yrepeat=40),# really tough lol, leave out of addableEnemies?
         #3385: SpriteInfo('Shotgun Cultist Prone', 'monsters', lowtag=230, xrepeat=40, yrepeat=40),
@@ -88,7 +89,7 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
         3798: SpriteInfo('Innocent', 'monsters', lowtag=245, xrepeat=40, yrepeat=40),
         3870: SpriteInfo('Tiny Caleb', 'monsters', lowtag=250, xrepeat=4, yrepeat=4),
     },
-    addableEnemies=[1170, 1209, 1270, 1370, 1570, 1745, 1870, 1920, 1980, 3054, 3385, 3870],
+    addableEnemies=[1170, 1209, 1270, 1370, 1570, 1745, 1870, 1920, 1980, 2825, 3054, 3385, 3870],
     keyItems={
         2552: SpriteInfo('Skull Key', 'keys', lowtag=100, xrepeat=8, yrepeat=8),
         2553: SpriteInfo('Eye Key', 'keys', lowtag=101, xrepeat=8, yrepeat=8),
