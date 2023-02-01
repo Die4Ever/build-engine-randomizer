@@ -49,13 +49,26 @@ def AddGame(*args, **kargs) -> GameInfo:
     return game
 
 class GameMapSettings:
-    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9,
-            swappableItems:dict={}, swappableEnemies:dict={}, addableEnemies:list=[], triggers:dict={}, additions:dict={}, reorderMapsBlacklist:list=[], **kargs):
+    def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, idType:str='picnum',
+            swappableItems:dict={}, swappableEnemies:dict={}, addableEnemies:list=[],
+            triggers:dict={}, additions:dict={}, reorderMapsBlacklist:list=[], **kargs):
         self.gameName = gameName
         self.minMapVersion = minMapVersion
         self.maxMapVersion = maxMapVersion
-        self.swappableItems = swappableItems
-        self.swappableEnemies = swappableEnemies
+        self.idType = idType
+
+        if idType == 'lowtag':
+            self.swappableItems = {v[idType]: {'picnum':k, **v} for(k,v) in swappableItems.items()}
+            self.swappableEnemies = {v[idType]: {'picnum':k, **v} for(k,v) in swappableEnemies.items()}
+        elif idType == 'picnum':
+            self.swappableItems = swappableItems
+            self.swappableEnemies = swappableEnemies
+        else:
+            raise Exception('unknown idType: '+repr(idType))
+
+        assert len(self.swappableItems) == len(swappableItems)
+        assert len(self.swappableEnemies) == len(swappableEnemies)
+
         self.addableEnemies = addableEnemies
         self.triggers = triggers
         self.additions = additions

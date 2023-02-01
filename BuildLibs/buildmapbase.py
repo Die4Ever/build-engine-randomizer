@@ -22,7 +22,7 @@ class CStat:
 class Sector:
 
     def __init__(self, data:dict):
-        self.__dict__ = data.copy()
+        self.__dict__ = data
 
     def defaults(self, data:dict):
         self.wallptr: int = data.get('wallptr', 0)
@@ -60,7 +60,7 @@ class Sector:
 class Wall:
 
     def __init__(self, data:dict):
-        self.__dict__ = data.copy()
+        self.__dict__ = data
 
     def defaults(self, data:dict):
         self.pos: list = data.get('pos', [0, 0])
@@ -82,7 +82,7 @@ class Wall:
 class Sprite:
 
     def __init__(self, data:dict):
-        self.__dict__ = data.copy()
+        self.__dict__ = data
 
     def defaults(self, data:dict):
         self.pos: list = data.get('pos', [0, 0, 0])
@@ -160,6 +160,17 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.triggers = []
         self.other_sprites = []
         self.sectorCache = {}
+
+        if self.gameSettings.idType == 'lowtag':
+            self.AppendSprite = self.AppendSpriteLowtag
+            self.GetSpriteType = self.GetSpriteTypeLowtag
+        elif self.gameSettings.swappableItems or self.gameSettings.swappableEnemies:
+            self.AppendSprite = self.AppendSpriteId
+            self.GetSpriteType = self.GetSpriteTypeId
+        else:
+            self.AppendSprite = self.BasicAppendSprite
+            self.GetSpriteType = self.BasicGetSpriteType
+            warning('using fallback sprite identification methods!')
 
         if data is not None:
             self.ReadData()
@@ -390,29 +401,57 @@ class MapFileBase(metaclass=abc.ABCMeta):
     def AppendWall(self, wall: Wall) -> None:
         self.walls.append(wall)
 
-    def AppendSprite(self, sprite: Sprite) -> None:
+    def BasicAppendSprite(self, sprite: Sprite) -> None:
         cstat = CStat(sprite.cstat)
-        if sprite.picnum in self.gameSettings.swappableItems:
+        if self.IsItem(sprite, cstat):
             self.items.append(sprite)
-        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
-            self.items.append(sprite)
-        elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
-            self.enemies.append(sprite)
-        elif sprite.picnum in self.gameSettings.triggers:
-            self.triggers.append(sprite)
         else:
             self.other_sprites.append(sprite)
 
-    def GetSpriteType(self, sprite:Sprite) -> str:
+    def AppendSpriteId(self, sprite: Sprite) -> None:
+        if sprite.picnum in self.gameSettings.swappableItems:
+            self.items.append(sprite)
+        elif sprite.picnum in self.gameSettings.triggers:
+            self.triggers.append(sprite)
+        elif sprite.picnum in self.gameSettings.swappableEnemies and not CStat(sprite.cstat).invisible:
+            self.enemies.append(sprite)
+        else:
+            self.other_sprites.append(sprite)
+
+    def AppendSpriteLowtag(self, sprite: Sprite) -> None:
+        if sprite.lowtag in self.gameSettings.swappableItems:
+            self.items.append(sprite)
+        elif sprite.lowtag in self.gameSettings.triggers:
+            self.triggers.append(sprite)
+        elif sprite.lowtag in self.gameSettings.swappableEnemies and not CStat(sprite.cstat).invisible:
+            self.enemies.append(sprite)
+        else:
+            self.other_sprites.append(sprite)
+
+    def BasicGetSpriteType(self, sprite:Sprite) -> str:
         cstat = CStat(sprite.cstat)
+        if self.IsItem(sprite, cstat):
+            return 'item'
+        else:
+            return 'other'
+
+    def GetSpriteTypeId(self, sprite:Sprite) -> str:
         if sprite.picnum in self.gameSettings.swappableItems:
             return 'item'
-        elif not self.gameSettings.swappableItems and self.IsItem(sprite, cstat):
-            return 'item'
-        elif sprite.picnum in self.gameSettings.swappableEnemies and not cstat.invisible:
-            return 'enemy'
         elif sprite.picnum in self.gameSettings.triggers:
             return 'trigger'
+        elif sprite.picnum in self.gameSettings.swappableEnemies and not CStat(sprite.cstat).invisible:
+            return 'enemy'
+        else:
+            return 'other'
+
+    def GetSpriteTypeLowtag(self, sprite:Sprite) -> str:
+        if sprite.lowtag in self.gameSettings.swappableItems:
+            return 'item'
+        elif sprite.lowtag in self.gameSettings.triggers:
+            return 'trigger'
+        elif sprite.lowtag in self.gameSettings.swappableEnemies and not CStat(sprite.cstat).invisible:
+            return 'enemy'
         else:
             return 'other'
 
@@ -519,9 +558,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
         return pos + len(new_data)
 
     def ReadSectors(self, pos) -> int:
+        GetSector = self.GetSector
+        AppendSector = self.AppendSector
         for i in range(self.num_sectors):
-            sector = self.GetSector(pos)
-            self.AppendSector(sector)
+            sector = GetSector(pos)
+            AppendSector(sector)
             pos += sector.length
         return pos
 
@@ -537,15 +578,18 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.data.extend(newdata)
 
     def WriteSectors(self, pos) -> int:
+        WriteSector = self.WriteSector
         for sector in self.sectors:
-            self.WriteSector(sector)
+            WriteSector(sector)
             pos += sector.length
         return pos
 
     def ReadWalls(self, pos) -> int:
+        GetWall = self.GetWall
+        AppendWall = self.AppendWall
         for i in range(self.num_walls):
-            wall = self.GetWall(pos)
-            self.AppendWall(wall)
+            wall = GetWall(pos)
+            AppendWall(wall)
             pos += wall.length
         return pos
 
@@ -567,9 +611,11 @@ class MapFileBase(metaclass=abc.ABCMeta):
         return pos
 
     def ReadSprites(self, pos) -> int:
+        GetSprite = self.GetSprite
+        AppendSprite = self.AppendSprite
         for i in range(self.num_sprites):
-            sprite = self.GetSprite(pos)
-            self.AppendSprite(sprite)
+            sprite = GetSprite(pos)
+            AppendSprite(sprite)
             pos += sprite.length
         return pos
 
@@ -585,8 +631,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.data.extend(newdata)
 
     def WriteSprites(self, pos) -> int:
+        WriteSprite = self.WriteSprite
         for sprite in self.sprites:
-            self.WriteSprite(sprite)
+            WriteSprite(sprite)
             pos += sprite.length
         return pos
 

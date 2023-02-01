@@ -4,7 +4,7 @@ AddGame('Blood',                              'Blood',                   9570681
 AddGame('Blood DOS',                          'Blood',                   8200353, 'B291418F', '7c77e3ca23960fe7dcad9ff7de054566', '9246062a9573639c69ec369efd56a0e7e7ffc8e0') # blood.rff
 
 # https://github.com/thomasrogers03/bloom/blob/master/bloom/resources/sprite_types.yaml
-AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
+AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7, idType='lowtag',
     swappableItems={
         518: SpriteInfo('Tome', 'items', lowtag=136, xrepeat=40, yrepeat=40),
         519: SpriteInfo('Doctor\'s Bag', 'items', lowtag=107, xrepeat=48, yrepeat=48),
@@ -89,7 +89,7 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7,
         3798: SpriteInfo('Innocent', 'monsters', lowtag=245, xrepeat=40, yrepeat=40),
         3870: SpriteInfo('Tiny Caleb', 'monsters', lowtag=250, xrepeat=4, yrepeat=4),
     },
-    addableEnemies=[1170, 1209, 1270, 1370, 1570, 1745, 1870, 1920, 1980, 2825, 3054, 3385, 3870],
+    addableEnemies=[203, 244, 211, 204, 217, 220, 218, 213, 212, 202, 205, 246, 250],
     keyItems={
         2552: SpriteInfo('Skull Key', 'keys', lowtag=100, xrepeat=8, yrepeat=8),
         2553: SpriteInfo('Eye Key', 'keys', lowtag=101, xrepeat=8, yrepeat=8),
