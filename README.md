@@ -1,6 +1,11 @@
 # Build Engine Randomizer
 Build Engine Randomizer currently supports: Duke Nukem 3D, Ion Fury, Shadow Warrior (1997), Blood, and PowerSlave/Exhumed (and maybe more in the future!)
 
+# Trailer
+
+<a href="https://youtu.be/ARZhfS1SLVE" target="_blank">
+<img src="https://img.youtube.com/vi/ARZhfS1SLVE/0.jpg" alt="Build Engine Randomizer Trailer" height="300"/></a>
+
 Download build-engine-randomizer.exe from [the Releases page](https://github.com/Die4Ever/build-engine-randomizer/releases). Run it, point it to the game's GRP file, choose your settings, and click Randomize! Make sure you have a backup of your game files first just in case.
 
 For info on where to get the games and how to run them, [check out our wiki here](https://github.com/Die4Ever/build-engine-randomizer/wiki).
