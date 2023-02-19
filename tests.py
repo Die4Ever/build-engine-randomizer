@@ -175,8 +175,21 @@ class BERandoTestCase(unittest.TestCase):
             BuildGames.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=False, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
 
     def test_game_settings(self):
-        # TODO: ensure that all addableEnemies can be found, and all items additions.choices can be found
-        pass
+        for game in BuildGames.gamesList.values():
+            self.CheckGame(game)
+
+    def CheckGame(self, game: BuildGames.GameInfo):
+        try:
+            mapSettings: BuildGames.GameMapSettings = BuildGames.GetGameMapSettings(game)
+        except Exception as e:
+            trace(e)
+            return
+        for e in mapSettings.addableEnemies:
+            self.assertIn(e, mapSettings.swappableEnemies)
+        for map in mapSettings.additions.values():
+            for addition in map:
+                for sprite in addition['choices']:
+                    self.assertIn(sprite, mapSettings.swappableItems)
 
     #@unittest.skip
     def test_other_grps(self):
