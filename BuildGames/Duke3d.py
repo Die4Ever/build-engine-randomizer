@@ -137,6 +137,9 @@ AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
     },
     additions = {
         # lower case because python doesn't have case-insensitive dicts, maybe I should create these with a function
+        'e1l2.map': [
+                dict(pos=[-658, 37872, -12166], sectnum=214, choices=[57]),
+            ],
         'e1l3.map': [ # ensure the player gets weapons to start with
                 dict(pos=[24160, 52032, 45056], sectnum=296, choices=[21,22,23,24,25,26,27,28,29]), # under the chair
                 dict(pos=[28096, 50688, 22528], sectnum=297, choices=[21,22,23,24,25,26,27,28,29]), # in the locker
