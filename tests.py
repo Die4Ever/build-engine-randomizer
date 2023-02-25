@@ -138,16 +138,17 @@ class BERandoTestCase(unittest.TestCase):
         grp0451 = self.TestRandomize(tempgrp, 451, vanilla, False)
         print(repr(grp0451))
         # update these when making behavioral changes, but otherwise they should stay the same
-        self.assertDictEqual(grp0451,
+        self.assertDictEqual(
             {
                 'E1L1.MAP': '92d3555d92495f1d158844def24d3653',
-                'E1L2.MAP': 'a1ff6de8e3ff85e7de201bf6f93d59a7',
+                'E1L2.MAP': 'f58855a55af234be8d1de4f145dc07fa',
                 'E1L3.MAP': '9fb5450bd3781d70fa3e95d70aa50b1a',
                 'E1L4.MAP': 'f3fd61103fe07e90afbf19f2b99a83fb',
                 'E1L5.MAP': '8affa9fe8ddb2ecc5951a87788629417',
                 'E1L6.MAP': 'c8d921798945faa9a9321ad018fc80d2',
                 'USER.CON': '24e6c7ce98064e633528d92380002d55'
-            }
+            },
+            grp0451
         )
         self.TestRandomize(zippath, 2052, grp0451, False)
         self.TestRandomize(tempgrp, 451, grp0451, True)
