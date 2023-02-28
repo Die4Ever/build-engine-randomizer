@@ -10,7 +10,7 @@ gamesMapSettings = {}
 gamesConSettings = {}
 
 class GameInfo():
-    def __init__(self, name='', type='', size:int=0, crc:str='', md5:str='', sha1:str='', externalFiles:bool=False, useRandomizerFolder=True, **kargs):
+    def __init__(self, name='', type='', size:int=0, crc:str='', md5:str='', sha1:str='', externalFiles:bool=False, canUseRandomizerFolder=True, canUseGrpFile=False, **kargs):
         self.name = name
         self.type = type
         self.size = size
@@ -20,9 +20,10 @@ class GameInfo():
             self.crc = int(crc, 16)
         self.sha1 = sha1.lower()
         self.externalFiles = externalFiles
-        self.useRandomizerFolder = useRandomizerFolder
+        self.canUseRandomizerFolder = canUseRandomizerFolder
+        self.canUseGrpFile = canUseGrpFile
         # can't use external files without also using the randomizer folder, otherwise we're reading from the same files we're writing to
-        assert not (self.externalFiles and not self.useRandomizerFolder)
+        assert not (self.externalFiles and not self.canUseRandomizerFolder)
 
     def __repr__(self):
         return repr(self.__dict__)

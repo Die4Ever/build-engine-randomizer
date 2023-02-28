@@ -10,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, OrderedDict
 from zipfile import ZipFile
+import binascii
+from mmap import mmap, ACCESS_READ
 
 from BuildLibs import debug, error, info, trace, warning
 from BuildLibs.buildmap import *
@@ -137,20 +139,27 @@ class GrpBase(metaclass=abc.ABCMeta):
         data = bytearray(self.getfile(name, file))
         return LoadMap(self.game, name, data)
 
-    def GetOutputPath(self, basepath:Path=Path('')) -> Path:
+    def GetOutputPath(self, basepath:Path, outputMethod) -> Path:
         gamedir = os.path.dirname(self.filepath)
         if not basepath:
             basepath = gamedir
-        if self.game.useRandomizerFolder:
+        if outputMethod=='folder':
             basepath = Path(basepath, 'Randomizer')
         return Path(basepath)
 
-    def GetDeleteFolders(self, basepath:Path) -> List[Path]:
-        if self.game.useRandomizerFolder:
+    def GetDeleteFolders(self, basepath:Path, outputMethod) -> List[Path]:
+        if outputMethod=='folder':
             return [basepath]
 
+        if outputMethod=='grp':
+            return [
+                Path(basepath, self.game.type + ' Randomizer.html'),
+                Path(basepath, self.game.type + ' Randomizer.grp'),
+                Path(basepath, self.game.type + ' Randomizer.grpinfo'),
+            ]
+
         mapFiles = self.GetAllFilesEndsWith('.map')
-        folders = set(['Randomizer.html'])
+        folders = set([self.game.type + ' Randomizer.html'])
         f:str
         for f in self.files:
             if f in self.conSettings.conFiles or f in mapFiles:
@@ -201,35 +210,64 @@ class GrpBase(metaclass=abc.ABCMeta):
         spoilerlog.write(str(self.filepath))
         spoilerlog.write(repr(self.game) + '\n\n')
 
+        outputMethod = settings['outputMethod']
+        grpOut = None
+        if outputMethod == 'grp':
+            grpOut = GrpOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, len(self.files))
+            grpOut.open()
+
+        # randomize CON files
         for (conName,conSettings) in self.conSettings.conFiles.items():
             data = self.getfile(conName, filehandle)
             text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
             con.Randomize(seed, settings, spoilerlog)
-            out = Path(basepath, conName)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            with open(out, 'wb') as f:
-                text = con.GetText()
-                size = locale.format_string('%d bytes', len(text), grouping=True)
-                spoilerlog.write(str(out) + ' is ' + size)
-                f.write(text.encode('iso_8859_1'))
 
+            out = Path(basepath, conName)
+            text = con.GetText()
+            size = locale.format_string('%d bytes', len(text), grouping=True)
+            spoilerlog.write(str(out) + ' is ' + size)
+
+            if grpOut:
+                grpOut.write(conName, text.encode('iso_8859_1'))
+            else:
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.touch(exist_ok=False)
+                with open(out, 'wb') as f:
+                    f.write(text.encode('iso_8859_1'))
+
+        # MAP shuffling
         maps = self.GetAllFilesEndsWith('.map')
         mapRenames = {}
         if settings.get('grp.reorderMaps'):
             restricted = settings['grp.reorderMaps'] == 'restricted'
             mapRenames = self.ShuffleMaps(seed, restricted, maps)
 
+        # randomize MAP files
         for mapname in maps:
             map:MapFile = self.getmap(mapname, filehandle)
             map.Randomize(seed, settings, spoilerlog)
+
             writename = mapRenames.get(mapname, mapname)
             out = Path(basepath, writename)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            with open(out, 'wb') as f:
-                size = locale.format_string('%d bytes', len(map.data), grouping=True)
-                spoilerlog.write(str(mapname) + ' writing to ' + str(out) + ', is ' + size)
-                f.write(map.data)
+            size = locale.format_string('%d bytes', len(map.data), grouping=True)
+            spoilerlog.write(str(mapname) + ' writing to ' + str(out) + ', is ' + size)
+
+            if grpOut:
+                grpOut.write(writename, map.data)
+            else:
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.touch(exist_ok=False)
+                with open(out, 'wb') as f:
+                    f.write(map.data)
+
+        # write the remaining files to the GRP
+        if grpOut:
+            for f in self.files.keys():
+                if f in self.conSettings.conFiles or f in maps:
+                    continue
+                grpOut.write(f, self.getfile(f, filehandle))
+            grpOut.close()
 
         spoilerlog.write('\n')
         spoilerlog.write(repr(self.conSettings))
@@ -238,17 +276,20 @@ class GrpBase(metaclass=abc.ABCMeta):
 
 
     def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
-        basepath:Path = self.GetOutputPath(basepath)
-        deleteFolders:List[Path] = self.GetDeleteFolders(basepath)
+        outputMethod = settings['outputMethod']
+        basepath:Path = self.GetOutputPath(basepath, outputMethod)
+        deleteFolders:List[Path] = self.GetDeleteFolders(basepath, outputMethod)
         f : Path
         for f in deleteFolders:
+            info('Deleting: ', f)
             if f.is_dir():
                 shutil.rmtree(f)
             elif f.is_file():
                 os.remove(f)
 
-        out = Path(basepath, 'Randomizer.html')
-        Path(os.path.dirname(out)).mkdir(parents=True, exist_ok=True)
+        out = Path(basepath, self.game.type + ' Randomizer.html')
+        out.parent.mkdir(parents=True, exist_ok=True)
+        assert not out.exists()
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
                 return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
@@ -360,7 +401,7 @@ class RffFile(GrpBase):
             raise NotImplementedError(self.filepath + ' ' + repr(header))
 
         if self.crypt:
-            data = RffDecrypt(data, self.offset + (self.version & 0xff) * self.offset)
+            data = RffCrypt(data, self.offset + (self.version & 0xff) * self.offset)
 
         for i in range(self.fileNum):
             d = directoryPack.unpack(data[i*itemSize:(i+1)*itemSize])
@@ -390,7 +431,7 @@ class RffFile(GrpBase):
         if info['flags'] & DICT_CRYPT:
             data = bytearray(data)
             decryptSize = min(info['size'], 0x100)
-            data[:decryptSize] = RffDecrypt(data[:decryptSize], 0)
+            data[:decryptSize] = RffCrypt(data[:decryptSize], 0)
         return data
 
 
@@ -398,24 +439,78 @@ class RffFile(GrpBase):
         return open(self.filepath, 'rb')
 
 
+class GrpOutput(metaclass=abc.ABCMeta):
+    def __init__(self, outpath: Path, gamename: str, num_files: int):
+        self.num_files = num_files
+        self.outpath = outpath
+        self.gamename = gamename
+        self.num_saved_files = 0
+        self.files = dict()
+
+    def __enter__(self):
+        return self.open()
+
+    def __exit__(self, *args):
+        self.close()
+
+    def open(self):
+        filepath = self.outpath
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        filepath.touch(exist_ok=False)
+        self.outfile = open(filepath, 'w+b')
+        self.outfile.write(b'KenSilverman')
+        self.outfile.write(struct.pack('<I', self.num_files))
+        for i in range(self.num_files):
+            self.outfile.write(struct.pack('<12sI', "".encode('ascii'), 0))
+        return self
+
+    def close(self):
+        # get size, calculate crc, and close the grp file
+        crc = None
+        end = self.outfile.seek(0, 2)
+        self.outfile.seek(0)
+        self.outfile.flush()
+        with mmap(self.outfile.fileno(), 0, access=ACCESS_READ) as file:
+            crc = binascii.crc32(file)
+        self.outfile.close()
+
+        # grpinfo file so eDuke32 knows what to do with it
+        grpinfo_path = Path(self.outpath.parent, self.outpath.name + 'info')
+        info = "grpinfo\n{\n"
+        info += '        name "' + self.gamename + ' Randomizer"\n'
+        info += '        scriptname "GAME.CON"\n'
+        info += '        size ' + str(end) + '\n'
+        info += "        crc  " + str(crc) + "\n"
+        info += '        flags 0\n'
+        info += '        dependency 0\n'
+        info += "}\n"
+        grpinfo_path.parent.mkdir(parents=True, exist_ok=True)
+        grpinfo_path.touch(exist_ok=False)
+        with open(grpinfo_path, 'wb') as i:
+            i.write(info.encode('ascii'))
+
+    def write(self, name: str, data: bytes):
+        self.num_saved_files += 1
+        # seek to write header
+        # KenSilverman is 12 bytes and number of files is 4 bytes for a 16 byte block, filename and filesize are the same
+        headerpos = self.outfile.seek(16 * self.num_saved_files)
+        self.outfile.write(struct.pack('<12sI', name.encode('ascii'), len(data)))
+
+        # seek to the end to write data
+        pos = self.outfile.seek(0, 2)
+        self.outfile.write(data)
+        self.files[name] = dict(headerpos=headerpos, pos=pos, len=len(data))
+
+
 def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
-    outfile = open(outpath, 'wb')
-    outfile.write(b'KenSilverman')
-    outfile.write(struct.pack('<I', len(filenames)))
+    with GrpOutput(outpath, 'test', len(filenames)) as out:
+        for name in filenames:
+            with open(Path(frompath, name), 'rb') as f:
+                d = f.read()
+                out.write(str(name), d)
 
-    datas = []
-    for name in filenames:
-        with open(Path(frompath, name), 'rb') as f:
-            d = f.read()
-            datas.append(d)
-            outfile.write(struct.pack('<12sI', str(name).encode('ascii'), len(d)))
 
-    for d in datas:
-        outfile.write(d)
-
-    outfile.close()
-
-def RffDecrypt(data:bytearray, key:int) -> bytearray:
+def RffCrypt(data:bytearray, key:int) -> bytearray:
     for i in range(len(data)):
         data[i] = data[i] ^ ((key>>1) & 0xff)
         key += 1

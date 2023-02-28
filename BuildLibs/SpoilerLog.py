@@ -10,6 +10,7 @@ class SpoilerLog:
         self.FinishRandomizingFile()
 
     def __enter__(self):
+        assert not self.filename.exists()
         self.file = open(self.filename, 'w')
         self.WriteHeader()
         return self

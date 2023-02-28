@@ -17,7 +17,7 @@ if typechecks:
     importhook.install_import_hook('BuildLibs')
     importhook.install_import_hook('BuildGames')
 from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
-from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile
+from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile, RffCrypt
 import BuildGames
 
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -35,6 +35,7 @@ settings = {
     'conFile.range': 1,
     'conFile.scale': 1,
     'conFile.difficulty': 0.5,
+    'outputMethod': 'folder',
 }
 
 different_settings = {
@@ -47,6 +48,7 @@ different_settings = {
     'conFile.range': 1.5,
     'conFile.scale': 0.8,
     'conFile.difficulty': 0.7,
+    'outputMethod': 'folder',
 }
 
 # zipped for tests
@@ -154,6 +156,12 @@ class BERandoTestCase(unittest.TestCase):
         self.TestRandomize(tempgrp, 451, grp0451, True)
         self.TestRandomize(tempgrp, 451, grp0451, False, settings=different_settings)
 
+    def test_grp_output(self):
+        settings_grp = settings.copy()
+        settings_grp['outputMethod'] = 'grp'
+        grp:GrpBase = LoadGrpFile(tempgrp)
+        grp.Randomize(451, settings=settings_grp, basepath=Path(tempgrp.parent, 'test_grp_output'))
+
 
     def test_external_files(self):
         try:
@@ -226,8 +234,9 @@ class BERandoTestCase(unittest.TestCase):
         with self.subTest('Randomize '+testname):
             grp:GrpBase = LoadGrpFile(grppath)
             grp.Randomize(seed, settings=settings, basepath=basepath)
+            gametype = grp.game.type
 
-            if grp.game.useRandomizerFolder:
+            if settings['outputMethod'] == 'folder':
                 basepath = Path(basepath, 'Randomizer')
             newMd5s = self.Md5GameFiles(testname, grp, basepath)
             self.assertIsNotNone(newMd5s, 'New MD5s')
@@ -243,7 +252,7 @@ class BERandoTestCase(unittest.TestCase):
                     for k in oldMd5s.keys():
                         self.assertNotEqual(oldMd5s[k], newMd5s[k], k)
 
-            with open(Path(basepath, 'Randomizer.html')) as spoilerlog:
+            with open(Path(basepath, gametype + ' Randomizer.html')) as spoilerlog:
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
@@ -288,16 +297,20 @@ class BERandoTestCase(unittest.TestCase):
             self.assertEqual(buildmapbase.PointIsInShape(walls, (5,5), 0) % 2, 1)
             self.assertEqual(buildmapbase.PointIsInShape(walls, (15,15), 0) % 2, 0)
 
-    def test_encrypt_decrypt(self):
+    def test_blood_crypt(self):
         # ensure it's reversible
         data = bytearray(b'123456')
         d2 = buildmap.MapCrypt(data, 451)
         d2 = buildmap.MapCrypt(d2, 451)
+        d2 = RffCrypt(d2, 451)
+        d2 = RffCrypt(d2, 451)
         self.assertEqual(data, d2)
 
         data = bytearray(b'dfgdfghcvbngertguhyrtujityr3456436fdghsdfgxcvb')
         d2 = buildmap.MapCrypt(data, 0x7474614d)
         d2 = buildmap.MapCrypt(d2, 0x7474614d)
+        d2 = RffCrypt(d2, 451)
+        d2 = RffCrypt(d2, 451)
         self.assertEqual(data, d2)
 
 

@@ -63,6 +63,7 @@ spriteVariety = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}
 rangeOptions = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}
 difficultyOptions = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}
 reorderMapsOptions = {**enabledOptions, 'Restricted': 'restricted'}
+outputMethodOptions = {'GRP File': 'grp', 'Randomizer Folder': 'folder', 'Simple': 'simple'}
 
 def OptionsList(ops:dict):
     ops = ops.copy()
@@ -131,10 +132,14 @@ class RandoSettings:
         if not self.grp.mapSettings.addableEnemies:
             self.enemyVarietyVar.set(unavail)
             self.enemyVariety['state'] = 'disabled'
-        if self.grp.game.useRandomizerFolder:
-            self.randomizerFolderVar.set('Enabled')
+
+        if self.grp.game.canUseGrpFile:
+            self.outputMethodVar.set('GRP File')
+        elif self.grp.game.canUseRandomizerFolder:
+            self.outputMethodVar.set('Randomizer Folder')
         else:
-            self.randomizerFolderVar.set('Disabled')
+            self.outputMethodVar.set('Simple')
+
         if self.grp.game.externalFiles:
             self.randomizerFolder['state'] = 'disabled'
         else:
@@ -161,27 +166,39 @@ class RandoSettings:
         settings['conFile.difficulty'] = difficultyOptions[self.difficultyVar.get()]
 
         settings['grp.reorderMaps'] = reorderMapsOptions[self.reorderMapsVar.get()]
-        settings['useRandomizerFolder'] = enabledOptions[self.randomizerFolderVar.get()]
-        self.grp.game.useRandomizerFolder = settings['useRandomizerFolder']
+        settings['outputMethod'] = outputMethodOptions[self.outputMethodVar.get()]
         return settings
 
     def _Randomize(self, settings):
         seed = settings['seed']
         self.grp.Randomize(seed, settings=settings)
-        path = Path(self.grp.GetOutputPath(), 'Randomizer.html').absolute()
+        outputMethod = settings['outputMethod']
+        basepath = self.grp.GetOutputPath(None, outputMethod)
+        path = Path(basepath, self.grp.game.type + ' Randomizer.html').absolute()
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed) + '\n\nCheck out\n\n'+str(path)+'\n\nto see all the changes that have been made!')
         self.closeWindow()
 
-    def WarnOverwrites(self) -> bool:
-        deleting = self.grp.GetDeleteFolders(self.grp.GetOutputPath())
+    def WarnOverwrites(self, settings) -> bool:
+        outputMethod = settings['outputMethod']
+        basepath = self.grp.GetOutputPath(None, outputMethod)
+        deleting = self.grp.GetDeleteFolders(basepath, outputMethod)
         deletingstrs = []
         d : Path
+        maps = {}
         for d in deleting:
-            deletingstrs.append(str(d.absolute()))
+            s = str(d.absolute())
+            if s.lower().endswith('.map'):
+                key = str(Path(d.absolute().parent, '*.map'))
+                maps[key] = maps.get(key, 0) + 1
+            else:
+                deletingstrs.append(s)
+        for (k,v) in maps.items():
+                deletingstrs.append(k + ' (' + str(v) + ' map files)')
+
         return messagebox.askokcancel(
             title='Will DELETE files!',
             message='This may take a minute.\nWILL DELETE/OVERWRITE THE FOLLOWING:\n\n'
-            + '\n'.join(deletingstrs)
+            + '\n\n'.join(deletingstrs)
         )
 
     def Randomize(self):
@@ -190,7 +207,7 @@ class RandoSettings:
             self.update()
             settings = self.ReadSettings()
 
-            if not self.WarnOverwrites():
+            if not self.WarnOverwrites(settings):
                 info('Declined overwrite warning, not randomizing')
                 if self.isWindowOpen():
                     self.randoButton["state"]='normal'
@@ -298,10 +315,10 @@ class RandoSettings:
 
         # TODO: option to enable/disable loading external files?
 
-        self.randomizerFolderVar = StringVar(self.win, '')
-        self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Use Randomizer Folder: ',
-            'Put randomized files inside Randomizer folder.\nWorks great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nJust use the default setting.',
-            row, self.randomizerFolderVar, *OptionsList(enabledOptions)
+        self.outputMethodVar = StringVar(self.win, 'GRP File')
+        self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Output Method: ',
+            'GRP File: Usually the preferred method.\nRandomizer Folder: Works great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nSimple: Just put the files in the game folder.\nUsually just use the default setting.',
+            row, self.outputMethodVar, *OptionsList(outputMethodOptions)
         )
         row+=1
 

@@ -1,6 +1,6 @@
 from BuildGames import *
 
-AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', useRandomizerFolder=False) # Steam version
+AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', canUseRandomizerFolder=False) # Steam version
 
 
 AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,

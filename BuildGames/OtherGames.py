@@ -11,8 +11,8 @@ AddGame('NAM.GRP',                            'NAM',                    43448927
 AddGame('WW2GI.GRP',                          'WWII GI',                77939508, '907B82BF', '27E927BEBA43447DB3951EAADEDB4709', 'FD0208A55EAEF3937C126E1FFF474FB4DFBDA6F5') # WW2GI.GRP
 #AddGame('WW2GI.RTS',                         'WWII GI',                  259214, '79D16760', '759F66C9F3C70AEDCAE29473AADE9966', 'CE352EF4C22F85869FDCB060A64EBC263ACEA6B0') # WW2GI.RTS
 
-AddGame('A.W.O.L. v0.91',                     'AWOL',                  252384950, '894F0199', '0161F85CEE80E1A60A28F40643BF02B2', 'C797F9D3BED6BADAD62C4C9C14D78F34058D97A8', useRandomizerFolder=False) # AWOL.GRP
-AddGame('A.W.O.L.',                           'AWOL',                  244458025, 'DA99945F', '11812e4a50f6151c14df64bf0caae33a', '44393A5DC91BFC59533C679575A5ECD977B416C2', useRandomizerFolder=False) # AWOL.GRP r9597-bb01a1394
+AddGame('A.W.O.L. v0.91',                     'AWOL',                  252384950, '894F0199', '0161F85CEE80E1A60A28F40643BF02B2', 'C797F9D3BED6BADAD62C4C9C14D78F34058D97A8', canUseRandomizerFolder=False) # AWOL.GRP
+AddGame('A.W.O.L.',                           'AWOL',                  244458025, 'DA99945F', '11812e4a50f6151c14df64bf0caae33a', '44393A5DC91BFC59533C679575A5ECD977B416C2', canUseRandomizerFolder=False) # AWOL.GRP r9597-bb01a1394
 
 
 AddMapSettings('AWOL', minMapVersion=7, maxMapVersion=9,
