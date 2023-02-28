@@ -6,6 +6,7 @@ import random
 import re
 import shutil
 import traceback
+import ctypes
 from datetime import datetime
 from pathlib import Path
 from typing import List, OrderedDict
@@ -191,14 +192,17 @@ class GrpBase(metaclass=abc.ABCMeta):
         spoilerlog.write(str(self.filepath))
         spoilerlog.write(repr(self.game) + '\n\n')
 
+        maps = self.GetAllFilesEndsWith('.map')
+        cons = self.conSettings.conFiles
+
         outputMethod = settings['outputMethod']
         grpOut = None
         if outputMethod == 'grp':
-            grpOut = self.GetGrpOutput(basepath, len(self.files))
+            grpOut = self.GetGrpOutput(basepath, len(maps) + len(cons), seed)
             grpOut.open()
 
         # randomize CON files
-        for (conName,conSettings) in self.conSettings.conFiles.items():
+        for (conName,conSettings) in cons.items():
             data = self.getfile(conName, filehandle)
             text = data.decode('iso_8859_1')
             con:ConFile = ConFile(self.game, conSettings, conName, text)
@@ -218,7 +222,6 @@ class GrpBase(metaclass=abc.ABCMeta):
                     f.write(text.encode('iso_8859_1'))
 
         # MAP shuffling
-        maps = self.GetAllFilesEndsWith('.map')
         mapRenames = {}
         if settings.get('grp.reorderMaps'):
             restricted = settings['grp.reorderMaps'] == 'restricted'
@@ -244,10 +247,6 @@ class GrpBase(metaclass=abc.ABCMeta):
 
         # write the remaining files to the GRP
         if grpOut:
-            for f in self.files.keys():
-                if f in self.conSettings.conFiles or f in maps:
-                    continue
-                grpOut.write(f, self.getfile(f, filehandle))
             grpOut.close()
 
         spoilerlog.write('\n')
@@ -297,12 +296,17 @@ class GrpBase(metaclass=abc.ABCMeta):
 
 
 class GrpOutputBase(metaclass=abc.ABCMeta):
-    def __init__(self, outpath: Path, gamename: str, num_files: int):
+    def __init__(self, outpath: Path, gamename: str, num_files: int, extraname: str, scriptname: Union[None,str], defName: Union[None,str], flags: int, depend: int):
         self.num_files = num_files
         self.outpath = outpath
         self.gamename = gamename
         self.num_saved_files = 0
         self.files = dict()
+        self.extraname = extraname
+        self.scriptname = scriptname
+        self.defName = defName
+        self.flags = flags
+        self.depend = depend
 
     def __enter__(self):
         return self.open()
@@ -324,14 +328,21 @@ class GrpOutputBase(metaclass=abc.ABCMeta):
 
     def write_info(self, size: int, crc: int):
         # grpinfo file so eDuke32 knows what to do with it
+        crc = ctypes.c_int32(crc).value
+        depend = ctypes.c_int32(self.depend).value
+        if self.extraname:
+            self.extraname = ' ' + self.extraname
         grpinfo_path = Path(self.outpath.parent, self.outpath.name + 'info')
         info = "grpinfo\n{\n"
-        info += '    name "' + self.gamename + ' Randomizer"\n'
-        info += '    scriptname "GAME.CON"\n'
+        info += '    name "' + self.gamename + ' Randomizer' + self.extraname + '"\n'
+        if self.scriptname:
+            info += '    scriptname "' + self.scriptname + '"\n'
+        if self.defName:
+            info += '    defname "' + self.defName + '"\n'
         info += '    size ' + str(size) + '\n'
         info += "    crc  " + str(crc) + "\n"
-        info += '    flags 0\n'
-        info += '    dependency 0\n'
+        info += '    flags ' + str(self.flags) + '\n'
+        info += '    dependency ' + str(depend) + '\n'
         info += "}\n"
         grpinfo_path.parent.mkdir(parents=True, exist_ok=True)
         grpinfo_path.touch(exist_ok=False)

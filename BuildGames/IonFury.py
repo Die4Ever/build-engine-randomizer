@@ -106,7 +106,7 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
     triggers={}
 )
 
-AddConSettings('Ion Fury', conFiles = {
+AddConSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128, conFiles = {
     'scripts/customize.con': [
         ConVar('.*\wHEALTH', -1, range=0.5),
         ConVar('MEDKIT_HEALTHAMOUNT', -1, range=0.5),

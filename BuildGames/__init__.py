@@ -95,8 +95,11 @@ def AddMapSettings(*args, **kargs) -> GameMapSettings:
     return gms
 
 class GameConSettings:
-    def __init__(self, gameName=None, conFiles={}):
+    def __init__(self, gameName: Union[None,str]=None, mainScript: Union[None,str]=None, flags: int=0, defName: Union[None,str]=None, conFiles: dict={}):
         self.gameName = gameName
+        self.mainScript = mainScript
+        self.flags = flags
+        self.defName = defName
         self.conFiles = conFiles
 
     def __repr__(self):

@@ -60,8 +60,18 @@ class GrpFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int):
-        return GrpOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, num_files)
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
+        p = Path(basepath, self.game.type + ' Randomizer.grp')
+        extraname = str(seed)
+        scriptname = None
+        defName = None
+        flags = 0
+        if self.conSettings:
+            scriptname = self.conSettings.mainScript
+            defName = self.conSettings.defName
+            flags = self.conSettings.flags
+        depend = self.game.crc
+        return GrpOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 
 # idk what to call these, but Ion Fury uses one
@@ -86,8 +96,18 @@ class GrpZipFile(GrpBase):
     def getFileHandle(self):
         return ZipFile(self.filepath, 'r')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int):
-        return GrpZipOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, num_files)
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
+        p = Path(basepath, self.game.type + ' Randomizer.grp')
+        extraname = str(seed)
+        scriptname = None
+        defName = None
+        flags = 0
+        if self.conSettings:
+            scriptname = self.conSettings.mainScript
+            defName = self.conSettings.defName
+            flags = self.conSettings.flags
+        depend = self.game.crc
+        return GrpZipOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 
 # used by Blood https://github.com/Die4Ever/build-engine-randomizer/issues/21
@@ -153,8 +173,18 @@ class RffFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int):
-        return RffOutput(Path(basepath, self.game.type + ' Randomizer.rff'), self.game.type, num_files)
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
+        p = Path(basepath, self.game.type + ' Randomizer.grp')
+        extraname = str(seed)
+        scriptname = None
+        defName = None
+        flags = 0
+        if self.conSettings:
+            scriptname = self.conSettings.mainScript
+            defName = self.conSettings.defName
+            flags = self.conSettings.flags
+        depend = self.game.crc
+        return RffOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 
 class GrpOutput(GrpOutputBase):
@@ -219,14 +249,6 @@ class GrpZipOutput(GrpOutputBase):
             crc:int = binascii.crc32(file)
 
         self.write_info(size, crc)
-
-
-def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
-    with GrpOutput(outpath, 'test', len(filenames)) as out:
-        for name in filenames:
-            with open(Path(frompath, name), 'rb') as f:
-                d = f.read()
-                out.write(str(name), d)
 
 
 def RffCrypt(data:bytearray, key:int) -> bytearray:

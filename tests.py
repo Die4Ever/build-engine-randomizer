@@ -17,7 +17,8 @@ if typechecks:
     importhook.install_import_hook('BuildLibs')
     importhook.install_import_hook('BuildGames')
 from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
-from BuildLibs.grp import CreateGrpFile, GrpBase, GrpZipFile, LoadGrpFile, RffCrypt
+from BuildLibs.grpbase import GrpBase
+from BuildLibs.grp import GrpZipFile, LoadGrpFile, RffCrypt, GrpOutput
 import BuildGames
 
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -314,6 +315,12 @@ class BERandoTestCase(unittest.TestCase):
         self.assertEqual(data, d2)
 
 
+def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
+    with GrpOutput(outpath, 'test', len(filenames), '', 'GAME.CON', None, 0, 0) as out:
+        for name in filenames:
+            with open(Path(frompath, name), 'rb') as f:
+                d = f.read()
+                out.write(str(name), d)
 
 def runtests():
     unittest.main(verbosity=9, warnings="error", failfast=True)
