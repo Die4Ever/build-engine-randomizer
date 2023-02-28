@@ -204,6 +204,10 @@ class GrpBase(metaclass=abc.ABCMeta):
             mapRenames.update(d)
         return mapRenames
 
+    @abc.abstractmethod
+    def GetGrpOutput(self, basepath: Path, num_files: int):
+        raise NotImplementedError()
+
     # basepath is only used by tests
     def _Randomize(self, seed:int, settings:dict, basepath:Path, spoilerlog, filehandle) -> None:
         spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
@@ -213,7 +217,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         outputMethod = settings['outputMethod']
         grpOut = None
         if outputMethod == 'grp':
-            grpOut = GrpOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, len(self.files))
+            grpOut = self.GetGrpOutput(basepath, len(self.files))
             grpOut.open()
 
         # randomize CON files
@@ -351,6 +355,9 @@ class GrpFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
+    def GetGrpOutput(self, basepath: Path, num_files: int):
+        return GrpOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, num_files)
+
 
 # idk what to call these, but Ion Fury uses one
 class GrpZipFile(GrpBase):
@@ -373,6 +380,9 @@ class GrpZipFile(GrpBase):
 
     def getFileHandle(self):
         return ZipFile(self.filepath, 'r')
+
+    def GetGrpOutput(self, basepath: Path, num_files: int):
+        return GrpZipOutput(Path(basepath, self.game.type + ' Randomizer.grp'), self.game.type, num_files)
 
 
 # used by Blood https://github.com/Die4Ever/build-engine-randomizer/issues/21
@@ -438,8 +448,11 @@ class RffFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
+    def GetGrpOutput(self, basepath: Path, num_files: int):
+        return RffOutput(Path(basepath, self.game.type + ' Randomizer.rff'), self.game.type, num_files)
 
-class GrpOutput(metaclass=abc.ABCMeta):
+
+class GrpOutputBase(metaclass=abc.ABCMeta):
     def __init__(self, outpath: Path, gamename: str, num_files: int):
         self.num_files = num_files
         self.outpath = outpath
@@ -453,6 +466,36 @@ class GrpOutput(metaclass=abc.ABCMeta):
     def __exit__(self, *args):
         self.close()
 
+    @abc.abstractmethod
+    def open(self):
+        return self
+
+    @abc.abstractmethod
+    def write(self, name: str, data: bytes):
+        return
+
+    @abc.abstractmethod
+    def close(self):
+        return
+
+    def write_info(self, size: int, crc: int):
+        # grpinfo file so eDuke32 knows what to do with it
+        grpinfo_path = Path(self.outpath.parent, self.outpath.name + 'info')
+        info = "grpinfo\n{\n"
+        info += '    name "' + self.gamename + ' Randomizer"\n'
+        info += '    scriptname "GAME.CON"\n'
+        info += '    size ' + str(size) + '\n'
+        info += "    crc  " + str(crc) + "\n"
+        info += '    flags 0\n'
+        info += '    dependency 0\n'
+        info += "}\n"
+        grpinfo_path.parent.mkdir(parents=True, exist_ok=True)
+        grpinfo_path.touch(exist_ok=False)
+        with open(grpinfo_path, 'wb') as i:
+            i.write(info.encode('ascii'))
+
+
+class GrpOutput(GrpOutputBase):
     def open(self):
         filepath = self.outpath
         filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -463,31 +506,6 @@ class GrpOutput(metaclass=abc.ABCMeta):
         for i in range(self.num_files):
             self.outfile.write(struct.pack('<12sI', "".encode('ascii'), 0))
         return self
-
-    def close(self):
-        # get size, calculate crc, and close the grp file
-        crc = None
-        end = self.outfile.seek(0, 2)
-        self.outfile.seek(0)
-        self.outfile.flush()
-        with mmap(self.outfile.fileno(), 0, access=ACCESS_READ) as file:
-            crc = binascii.crc32(file)
-        self.outfile.close()
-
-        # grpinfo file so eDuke32 knows what to do with it
-        grpinfo_path = Path(self.outpath.parent, self.outpath.name + 'info')
-        info = "grpinfo\n{\n"
-        info += '        name "' + self.gamename + ' Randomizer"\n'
-        info += '        scriptname "GAME.CON"\n'
-        info += '        size ' + str(end) + '\n'
-        info += "        crc  " + str(crc) + "\n"
-        info += '        flags 0\n'
-        info += '        dependency 0\n'
-        info += "}\n"
-        grpinfo_path.parent.mkdir(parents=True, exist_ok=True)
-        grpinfo_path.touch(exist_ok=False)
-        with open(grpinfo_path, 'wb') as i:
-            i.write(info.encode('ascii'))
 
     def write(self, name: str, data: bytes):
         self.num_saved_files += 1
@@ -500,6 +518,45 @@ class GrpOutput(metaclass=abc.ABCMeta):
         pos = self.outfile.seek(0, 2)
         self.outfile.write(data)
         self.files[name] = dict(headerpos=headerpos, pos=pos, len=len(data))
+
+    def close(self):
+        # get size, calculate crc, and close the grp file
+        crc = None
+        end = self.outfile.seek(0, 2)
+        self.outfile.seek(0)
+        self.outfile.flush()
+        with mmap(self.outfile.fileno(), 0, access=ACCESS_READ) as file:
+            crc = binascii.crc32(file)
+        self.outfile.close()
+
+        self.write_info(end, crc)
+
+
+class RffOutput(GrpOutput):
+    def open(self):
+        raise NotImplementedError("RffOutput")
+
+
+class GrpZipOutput(GrpOutputBase):
+    def open(self):
+        filepath = self.outpath
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        assert not filepath.exists()
+        self.outfile = ZipFile(filepath, mode='x')
+
+    def write(self, name: str, data: bytes):
+        self.outfile.writestr(name, data)
+
+    def close(self):
+        # get size, calculate crc, and close the zip file
+        self.outfile.close()
+        filepath = self.outpath
+        size = os.path.getsize(filepath)
+        crc = None
+        with open(filepath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
+            crc:int = binascii.crc32(file)
+
+        self.write_info(size, crc)
 
 
 def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:
