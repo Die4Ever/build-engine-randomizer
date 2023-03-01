@@ -159,11 +159,7 @@ class SpoilerLog:
                 + '</div></div>\n'
             )
         self.currentFile = None
-        self.conSettings = {}
         self.gameMapSettings = {}
-
-    def SetConSettings(self, conSettings):
-        self.conSettings = conSettings
 
     def SetGameMapSettings(self, gameMapSettings):
         self.gameMapSettings = gameMapSettings

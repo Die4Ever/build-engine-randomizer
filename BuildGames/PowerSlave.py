@@ -53,3 +53,6 @@ AddMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
         **SpriteRange(3151, 3181, SpriteInfo('Kilmaatikahn')),
     }
 )
+
+AddGameSettings('PowerSlave',
+)

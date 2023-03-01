@@ -150,7 +150,13 @@ AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
     reorderMapsBlacklist = [ 'E1L7.MAP', 'E1L8.MAP', 'E3L10.MAP' ]
 )
 
-AddConSettings('Duke Nukem 3D', mainScript='GAME.CON', flags=0, conFiles = {
+AddGameSettings('Duke Nukem 3D', mainScript='GAME.CON', flags=0,
+commands = dict( # https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
+    grp={'eduke32.exe': '-g'},
+    folder={'eduke32.exe': '-nosetup -j '},
+    simple={}
+),
+conFiles = {
     'USER.CON': [
         # more specific things first
         ConVar('STEROID_AMOUNT', 0, range=0), # STEROID_AMOUNT less than 400 causes it to be used immediately, greater than 400 causes it to be unusable

@@ -89,3 +89,10 @@ AddMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
 )
 # Keys (picnums 1765-1779)
 # Locks 1846-1854
+
+AddGameSettings('Shadow Warrior',
+commands = dict( # https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
+    grp={'voidsw.exe': '-nosetup -g'},
+    folder={'voidsw.exe': '-nosetup -j '},
+    simple={}
+))

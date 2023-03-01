@@ -56,7 +56,6 @@ class ConFile:
     def Randomize(self, seed:int, settings:dict, spoilerlog):
         try:
             spoilerlog.SetFilename(Path(self.name))
-            spoilerlog.SetConSettings(self.conSettings)
             self.spoilerlog = spoilerlog
             self._Randomize(seed, settings)
         finally:

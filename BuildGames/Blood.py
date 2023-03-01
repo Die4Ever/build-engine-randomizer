@@ -128,3 +128,10 @@ AddMapSettings('Blood', minMapVersion=7, maxMapVersion=7, idType='lowtag',
         3140: SpriteInfo('Tchernobog', 'monsters', lowtag=229, xrepeat=64, yrepeat=64),
     }
 )
+
+AddGameSettings('Blood',
+    commands= dict( # https://github.com/nukeykt/NBlood/blob/master/source/rr/src/cmdline.cpp#L39
+        grp={'nblood.exe': '-nosetup -ini blood.ini -g'},
+        folder={'nblood.exe': '-nosetup -j '},
+        simple={}
+))

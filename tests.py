@@ -5,6 +5,7 @@ import sys
 import random
 import shutil
 import unittest
+from typing import OrderedDict, Union
 from hashlib import md5
 from mmap import mmap, ACCESS_READ
 from pathlib import Path
@@ -104,6 +105,14 @@ class BERandoTestCase(unittest.TestCase):
     def test_get_version(self):
         print(GetVersion())
         print('Python version:', sys.version_info)
+
+        d = OrderedDict(zero=0, one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8, nine=9, ten=10)
+        l = list(d.values())
+        self.assertListEqual(l, list(range(0, 11)), 'OrderedDict kargs init ordering')
+
+        d = OrderedDict({'zero':0, 'one':1, 'two':2, 'three':3, 'four':4, 'five':5, 'six':6, 'seven':7, 'eight':8, 'nine':9, 'ten':10})
+        l = list(d.values())
+        self.assertListEqual(l, list(range(0, 11)), 'OrderedDict dict init ordering')
 
     def test_1_extract_zipgrp(self):
         # I zipped the GRP file to save space in the repo
@@ -257,7 +266,7 @@ class BERandoTestCase(unittest.TestCase):
                 logs = spoilerlog.read()
                 self.assertGreater(len(logs), 10, 'found spoiler logs')
                 self.assertInLogs('Randomizing with seed: '+str(seed), logs)
-                for con in grp.conSettings.conFiles.keys():
+                for con in grp.gameSettings.conFiles.keys():
                     con = str(Path(con))
                     self.assertInLogs('Finished randomizing file: '+con, logs)
                 for map in grp.GetAllFilesEndsWith('.map'):
@@ -276,7 +285,7 @@ class BERandoTestCase(unittest.TestCase):
     def Md5GameFiles(self, testname:str, grp:GrpBase, basepath:Path) -> dict:
         with self.subTest('MD5 '+testname):
             maps = grp.GetAllFilesEndsWith('.map')
-            cons = list(grp.conSettings.conFiles.keys())
+            cons = list(grp.gameSettings.conFiles.keys())
             return self.Md5Files(basepath, (maps+cons))
 
     def Md5Files(self, basepath: Path, filenames: list) -> dict:

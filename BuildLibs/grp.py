@@ -60,17 +60,17 @@ class GrpFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int, full: bool):
         p = Path(basepath, self.game.type + ' Randomizer.grp')
         extraname = str(seed)
         scriptname = None
         defName = None
         flags = 0
-        if self.conSettings:
-            scriptname = self.conSettings.mainScript
-            defName = self.conSettings.defName
-            flags = self.conSettings.flags
-        depend = self.game.crc
+        if self.gameSettings:
+            scriptname = self.gameSettings.mainScript
+            defName = self.gameSettings.defName
+            flags = self.gameSettings.flags
+        depend = 0 if full else self.game.crc
         return GrpOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 
@@ -96,17 +96,17 @@ class GrpZipFile(GrpBase):
     def getFileHandle(self):
         return ZipFile(self.filepath, 'r')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int, full: bool):
         p = Path(basepath, self.game.type + ' Randomizer.grp')
         extraname = str(seed)
         scriptname = None
         defName = None
         flags = 0
-        if self.conSettings:
-            scriptname = self.conSettings.mainScript
-            defName = self.conSettings.defName
-            flags = self.conSettings.flags
-        depend = self.game.crc
+        if self.gameSettings:
+            scriptname = self.gameSettings.mainScript
+            defName = self.gameSettings.defName
+            flags = self.gameSettings.flags
+        depend = 0 if full else self.game.crc
         return GrpZipOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 
@@ -173,17 +173,17 @@ class RffFile(GrpBase):
     def getFileHandle(self):
         return open(self.filepath, 'rb')
 
-    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int):
-        p = Path(basepath, self.game.type + ' Randomizer.grp')
+    def GetGrpOutput(self, basepath: Path, num_files: int, seed: int, full: bool):
+        p = Path(basepath, self.game.type + ' Randomizer.rff')
         extraname = str(seed)
         scriptname = None
         defName = None
         flags = 0
-        if self.conSettings:
-            scriptname = self.conSettings.mainScript
-            defName = self.conSettings.defName
-            flags = self.conSettings.flags
-        depend = self.game.crc
+        if self.gameSettings:
+            scriptname = self.gameSettings.mainScript
+            defName = self.gameSettings.defName
+            flags = self.gameSettings.flags
+        depend = 0 if full else self.game.crc
         return RffOutput(p, self.game.type, num_files, extraname, scriptname, defName, flags, depend)
 
 

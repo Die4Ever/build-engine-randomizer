@@ -52,16 +52,16 @@ class GrpBase(metaclass=abc.ABCMeta):
             info(repr(cons))
             raise Exception('unidentified game')
 
-        self.conSettings = BuildGames.GetGameConSettings(self.game)
-        if not self.conSettings:
-            raise Exception('missing GameConSettings', self.game, filepath)
-        elif not self.conSettings.conFiles:
+        self.gameSettings = BuildGames.GetGameSettings(self.game)
+        if not self.gameSettings:
+            raise Exception('missing GameSettings', self.game, filepath)
+        elif not self.gameSettings.conFiles:
             warning("This game is missing CON file randomization", self.game, filepath)
             for con in cons:
                 warning(con)
                 # self.ExtractFile('temp/', con)
         else:
-            for con in self.conSettings.conFiles:
+            for con in self.gameSettings.conFiles:
                 if con not in cons:
                     warning('file not found', con)
 
@@ -140,7 +140,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         folders = set([self.game.type + ' Randomizer.html'])
         f:str
         for f in self.files:
-            if f in self.conSettings.conFiles or f in mapFiles:
+            if f in self.gameSettings.conFiles or f in mapFiles:
                 part:str = Path(f).parts[0]
                 folders.add(part)
         folders = list(folders)
@@ -183,7 +183,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         return mapRenames
 
     @abc.abstractmethod
-    def GetGrpOutput(self, basepath: Path, num_files: int):
+    def GetGrpOutput(self, basepath: Path, num_files: int, full: bool):
         raise NotImplementedError()
 
     # basepath is only used by tests
@@ -193,12 +193,17 @@ class GrpBase(metaclass=abc.ABCMeta):
         spoilerlog.write(repr(self.game) + '\n\n')
 
         maps = self.GetAllFilesEndsWith('.map')
-        cons = self.conSettings.conFiles
+        cons = self.gameSettings.conFiles
 
         outputMethod = settings['outputMethod']
         grpOut = None
-        if outputMethod == 'grp':
-            grpOut = self.GetGrpOutput(basepath, len(maps) + len(cons), seed)
+        full = False
+        if outputMethod in ('grp', 'grpfull'):
+            num_files = len(maps) + len(cons)
+            if outputMethod == 'grpfull':
+                num_files = len(self.files)
+                full = True
+            grpOut = self.GetGrpOutput(basepath, num_files, seed, full)
             grpOut.open()
 
         # randomize CON files
@@ -246,11 +251,16 @@ class GrpBase(metaclass=abc.ABCMeta):
                     f.write(map.data)
 
         # write the remaining files to the GRP
+        if grpOut and full:
+            for f in self.files.keys():
+                if f in cons or f in maps:
+                    continue
+                grpOut.write(f, self.getfile(f, filehandle))
         if grpOut:
             grpOut.close()
 
         spoilerlog.write('\n')
-        spoilerlog.write(repr(self.conSettings))
+        spoilerlog.write(repr(self.gameSettings))
         spoilerlog.write('\n')
         spoilerlog.write(repr(self.mapSettings))
 

@@ -106,7 +106,13 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
     triggers={}
 )
 
-AddConSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128, conFiles = {
+AddGameSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128,
+commands = dict(# https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
+    grp=OrderedDict(eduke32='-g', fury='-nosetup -g'),
+    folder=OrderedDict(eduke32='-nosetup -j ', fury='-nosetup -j '),
+    simple=OrderedDict(eduke32='-nosetup', fury='-nosetup')
+),
+conFiles = {
     'scripts/customize.con': [
         ConVar('.*\wHEALTH', -1, range=0.5),
         ConVar('MEDKIT_HEALTHAMOUNT', -1, range=0.5),

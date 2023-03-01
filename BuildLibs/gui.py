@@ -124,7 +124,7 @@ class RandoSettings:
         self._ChooseFile()
         if not self.isWindowOpen():
             return
-        if not self.grp.conSettings.conFiles:
+        if not self.grp.gameSettings.conFiles:
             self.rangeVar.set(unavail)
             self.range['state'] = 'disabled'
             self.difficultyVar.set(unavail)

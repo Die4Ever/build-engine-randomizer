@@ -7,7 +7,7 @@ from pathlib import Path
 
 gamesList = {}
 gamesMapSettings = {}
-gamesConSettings = {}
+gamesSettings = {}
 
 class GameInfo():
     def __init__(self, name='', type='', size:int=0, crc:str='', md5:str='', sha1:str='', externalFiles:bool=False, canUseRandomizerFolder=True, canUseGrpFile=False, **kargs):
@@ -94,27 +94,28 @@ def AddMapSettings(*args, **kargs) -> GameMapSettings:
     gamesMapSettings[gms.gameName] = gms
     return gms
 
-class GameConSettings:
-    def __init__(self, gameName: Union[None,str]=None, mainScript: Union[None,str]=None, flags: int=0, defName: Union[None,str]=None, conFiles: dict={}):
+class GameSettings:
+    def __init__(self, gameName: Union[None,str]=None, mainScript: Union[None,str]=None, flags: int=0, defName: Union[None,str]=None, commands: dict={}, conFiles: dict={}):
         self.gameName = gameName
         self.mainScript = mainScript
         self.flags = flags
         self.defName = defName
+        self.commands = commands
         self.conFiles = conFiles
 
     def __repr__(self):
         return repr(self.__dict__)
 
-    def copy(self) -> 'GameConSettings':
+    def copy(self) -> 'GameSettings':
         return copyobj(self)
 
 # difficulty > 0 means higher number makes the game harder
-def AddConSettings(*args, **kargs) -> GameConSettings:
-    global gamesConSettings
-    gcs: GameConSettings = GameConSettings(*args, **kargs)
-    assert gcs.gameName not in gamesConSettings, repr(gcs.__dict__)
-    gamesConSettings[gcs.gameName] = gcs
-    return gcs
+def AddGameSettings(*args, **kargs) -> GameSettings:
+    global gamesSettings
+    gs: GameSettings = GameSettings(*args, **kargs)
+    assert gs.gameName not in gamesSettings, repr(gs.__dict__)
+    gamesSettings[gs.gameName] = gs
+    return gs
 
 def GetGame(grppath:Path) -> GameInfo:
     global gamesList
@@ -143,9 +144,11 @@ def GetGameMapSettings(game: GameInfo) -> GameMapSettings:
     g:GameMapSettings = gamesMapSettings[game.type]
     return g.copy()
 
-def GetGameConSettings(game: GameInfo) -> GameConSettings:
-    global gamesConSettings
-    g:GameConSettings = gamesConSettings.get(game.type, GameConSettings())
+def GetGameSettings(game: GameInfo) -> GameSettings:
+    global gamesSettings
+    g:GameSettings = gamesSettings.get(game.type)
+    if not g:
+        raise KeyError('GetGameSettings cannot find game', game.type)
     return g.copy()
 
 def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0, palettes=None) -> dict:
