@@ -172,16 +172,13 @@ class RandoSettings:
     def _Randomize(self, settings):
         seed = settings['seed']
         self.grp.Randomize(seed, settings=settings)
-        outputMethod = settings['outputMethod']
-        basepath = self.grp.GetOutputPath(None, outputMethod)
-        path = Path(basepath, self.grp.game.type + ' Randomizer.html').absolute()
+        path = self.grp.spoilerlogpath.absolute()
         messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed) + '\n\nCheck out\n\n'+str(path)+'\n\nto see all the changes that have been made!')
         self.closeWindow()
 
     def WarnOverwrites(self, settings) -> bool:
         outputMethod = settings['outputMethod']
-        basepath = self.grp.GetOutputPath(None, outputMethod)
-        deleting = self.grp.GetDeleteFolders(basepath, outputMethod)
+        deleting = self.grp.GetDeletes(None, outputMethod)
         deletingstrs = []
         d : Path
         maps = {}

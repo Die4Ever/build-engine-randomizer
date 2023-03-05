@@ -1,6 +1,6 @@
 from BuildGames import *
 
-AddGame('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425', canUseRandomizerFolder=False) # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
+AddGame('Shadow Warrior',                     'Shadow Warrior',         47536148, '7545319F', '9d200b5fb4ace8797e7f8638c4f96af2', '4863226c01d0850c65ac0a3e20831e072b285425', canUseGrpFile=True) # Steam "Classic" version https://store.steampowered.com/app/238070/Shadow_Warrior_Classic_1997/
 
 # https://forums.duke4.net/topic/11406-shadow-warrior-scriptset-for-mapster32/
 # using find and replace regex on duke3d.def from the above link
@@ -92,7 +92,7 @@ AddMapSettings('Shadow Warrior', minMapVersion=7, maxMapVersion=7,
 
 AddGameSettings('Shadow Warrior',
 commands = dict( # https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
-    grp={'voidsw.exe': '-nosetup -g'},
-    folder={'voidsw.exe': '-nosetup -j '},
+    grp={'voidsw': '-nosetup -g'},
+    folder={'voidsw': '-nosetup -j '},
     simple={}
 ))

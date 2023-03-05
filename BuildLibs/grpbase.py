@@ -44,6 +44,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         self.files = {}
         self.game:BuildGames.GameInfo = game
         self.filesize = filesize
+        self.deletes = None
 
         self.GetFilesInfo()
         self.GetExternalFiles()
@@ -125,30 +126,47 @@ class GrpBase(metaclass=abc.ABCMeta):
             basepath = Path(basepath, 'Randomizer')
         return Path(basepath)
 
-    def GetDeleteFolders(self, basepath:Path, outputMethod) -> List[Path]:
+    def GetDeletes(self, basepath:Path, outputMethod) -> List[Path]:
+        if self.deletes:
+            return self.deletes
+
+        outpath:Path = self.GetOutputPath(basepath, outputMethod)
+        maybedeletes = self._GetDeletes(outpath, outputMethod)
+        self.deletes = []
+        for f in maybedeletes:
+            if f.exists():
+                self.deletes.append(f)
+        return self.deletes
+
+
+    def _GetDeletes(self, outpath:Path, outputMethod) -> List[Path]:
+        ret = []
         if outputMethod=='folder':
-            return [basepath]
+            ret = [outpath]
+            # let's clean up the plain files in the parent folder too
+            outpath = outpath.parent
 
         if outputMethod=='grp':
-            return [
-                Path(basepath, self.game.type + ' Randomizer.html'),
-                Path(basepath, self.game.type + ' Randomizer.grp'),
-                Path(basepath, self.game.type + ' Randomizer.grpinfo'),
+            ret = [
+                Path(outpath, self.game.type + ' Randomizer.html'),
+                Path(outpath, self.game.type + ' Randomizer.grp'),
+                Path(outpath, self.game.type + ' Randomizer.grpinfo'),
             ]
 
-        mapFiles = self.GetAllFilesEndsWith('.map')
-        folders = set([self.game.type + ' Randomizer.html'])
+        cons = self.gameSettings.conFiles
+        maps = self.GetAllFilesEndsWith('.map')
+        paths = set([self.game.type + ' Randomizer.html', 'Randomizer.html', self.game.type + ' Randomizer.bat'])
         f:str
         for f in self.files:
-            if f in self.gameSettings.conFiles or f in mapFiles:
+            if f in cons or f in maps:
                 part:str = Path(f).parts[0]
-                folders.add(part)
-        folders = list(folders)
-        folders.sort(key=str.casefold)
-        ret = []
-        for f in folders:
-            p:Path = Path(basepath, f)
-            ret.append(p)
+                paths.add(part)
+        paths = list(paths)
+        paths.sort(key=str.casefold)
+        for f in paths:
+            p:Path = Path(outpath, f)
+            if p not in ret:
+                ret.append(p)
         return ret
 
     def ShuffleMaps(self, seed, restricted, maps) -> dict:
@@ -267,27 +285,55 @@ class GrpBase(metaclass=abc.ABCMeta):
 
     def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
         outputMethod = settings['outputMethod']
-        basepath:Path = self.GetOutputPath(basepath, outputMethod)
-        deleteFolders:List[Path] = self.GetDeleteFolders(basepath, outputMethod)
-        f : Path
-        for f in deleteFolders:
+        outpath:Path = self.GetOutputPath(basepath, outputMethod)
+        deletes:List[Path] = self.GetDeletes(basepath, outputMethod)
+        for f in deletes:
             info('Deleting: ', f)
             if f.is_dir():
                 shutil.rmtree(f)
             elif f.is_file():
                 os.remove(f)
 
-        out = Path(basepath, self.game.type + ' Randomizer.html')
+        out = Path(outpath, self.game.type + ' Randomizer.html')
         out.parent.mkdir(parents=True, exist_ok=True)
+        self.spoilerlogpath = out
         assert not out.exists()
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
-                return self._Randomize(seed, settings, basepath, spoilerlog, filehandle)
+                self._Randomize(seed, settings, outpath, spoilerlog, filehandle)
+                self.WriteBat(outpath, outputMethod)
             except:
                 error(str(self.filepath))
-                error(self.game, ', seed: ', seed, ', settings: ', settings, ', basepath: ', basepath)
+                error(self.game, ', seed: ', seed, ', settings: ', settings, ', outpath: ', outpath)
                 error('\n  == files: ', self.files, ' == end of files listing ==\n')
                 raise
+
+
+    def WriteBat(self, outpath:Path, outputMethod:str):
+        if os.name != 'nt':
+            return None
+        basepath = outpath
+        if outputMethod=='folder':
+            basepath = outpath.parent
+
+        commands = self.gameSettings.commands.get(outputMethod)
+        if not commands:
+            return
+        for (k,v) in commands.items():
+            exe = Path(basepath, k+'.exe')
+            if not exe.exists():
+                continue
+            bat = Path(basepath, self.game.type + ' Randomizer.bat')
+            cmd = k+' '+v
+            if outputMethod in ['grp', 'grpfull']:
+                cmd += '"' + self.game.type + ' Randomizer.grp"'
+            elif outputMethod == 'folder':
+                cmd += 'Randomizer'
+            bat.touch(exist_ok=False)
+            with open(bat, 'w') as file:
+                file.write(cmd)
+            return cmd
+        warning('Unable to create bat file, unrecognized source port')
 
     def ExtractFile(self, outpath:Path, name, filehandle=None) -> None:
         outfile = Path(outpath, name)

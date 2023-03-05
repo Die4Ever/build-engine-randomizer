@@ -1,6 +1,6 @@
 from BuildGames import *
 
-AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', canUseRandomizerFolder=False) # Steam version
+AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam version
 
 
 AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
@@ -108,7 +108,7 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
 
 AddGameSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128,
 commands = dict(# https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
-    grp=OrderedDict(eduke32='-g', fury='-nosetup -g'),
+    grp=OrderedDict(eduke32='-nosetup -g', fury='-nosetup -g'),
     folder=OrderedDict(eduke32='-nosetup -j ', fury='-nosetup -j '),
     simple=OrderedDict(eduke32='-nosetup', fury='-nosetup')
 ),

@@ -152,8 +152,8 @@ AddMapSettings('Duke Nukem 3D', minMapVersion=7, maxMapVersion=9,
 
 AddGameSettings('Duke Nukem 3D', mainScript='GAME.CON', flags=0,
 commands = dict( # https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
-    grp={'eduke32.exe': '-g'},
-    folder={'eduke32.exe': '-nosetup -j '},
+    grp={'eduke32': '-nosetup -g'},
+    folder={'eduke32': '-nosetup -j '},
     simple={}
 ),
 conFiles = {
