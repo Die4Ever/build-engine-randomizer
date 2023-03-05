@@ -179,6 +179,8 @@ class RandoSettings:
         if batpath:
             batpath = batpath.absolute()
             dialogtext += '\n\nTo play, run:\n\n'+str(batpath)
+        elif os.name == 'nt':
+            dialogtext += '\n\nUnable to automatically create bat file. You may be using an untested source port. Please report this on GitHub, Discord, or find me on social media.'
 
         messagebox.showinfo('Randomization Complete!', dialogtext)
         self.closeWindow()
