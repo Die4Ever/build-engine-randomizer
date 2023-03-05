@@ -45,6 +45,8 @@ class GrpBase(metaclass=abc.ABCMeta):
         self.game:BuildGames.GameInfo = game
         self.filesize = filesize
         self.deletes = None
+        self.spoilerlogpath = None
+        self.batpath = None
 
         self.GetFilesInfo()
         self.GetExternalFiles()
@@ -142,16 +144,18 @@ class GrpBase(metaclass=abc.ABCMeta):
     def _GetDeletes(self, outpath:Path, outputMethod) -> List[Path]:
         ret = []
         if outputMethod=='folder':
-            ret = [outpath]
+            ret += [outpath]
             # let's clean up the plain files in the parent folder too
             outpath = outpath.parent
+        else:
+            ret += [Path(outpath, 'Randomizer')]
 
-        if outputMethod=='grp':
-            ret = [
-                Path(outpath, self.game.type + ' Randomizer.html'),
-                Path(outpath, self.game.type + ' Randomizer.grp'),
-                Path(outpath, self.game.type + ' Randomizer.grpinfo'),
-            ]
+        #if outputMethod=='grp': # we check if these exist anyways, might as well always add them to the list and have safer cleanups
+        ret += [
+            Path(outpath, self.game.type + ' Randomizer.html'),
+            Path(outpath, self.game.type + ' Randomizer.grp'),
+            Path(outpath, self.game.type + ' Randomizer.grpinfo'),
+        ]
 
         cons = self.gameSettings.conFiles
         maps = self.GetAllFilesEndsWith('.map')
@@ -332,7 +336,9 @@ class GrpBase(metaclass=abc.ABCMeta):
             bat.touch(exist_ok=False)
             with open(bat, 'w') as file:
                 file.write(cmd)
+            self.batpath = bat
             return cmd
+        self.batpath = None
         warning('Unable to create bat file, unrecognized source port')
 
     def ExtractFile(self, outpath:Path, name, filehandle=None) -> None:

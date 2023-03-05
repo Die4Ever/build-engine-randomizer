@@ -1,9 +1,9 @@
 from BuildGames import *
 
-AddGame('PowerSlave',                         'PowerSlave',             26904012, 'AC80ECB6', '4ae5cbe10396147ae042463b7df8010f', '548751e10f5c25f80d95321565b13f4664434981') # STUFF.DAT
-AddGame('PowerSlave',                         'PowerSlave',             27108170, 'E3B172F1', 'b51391e08a17e5c46e25f6cf46f892eb', 'b84fd656be67271910e5eba4caf69bc81192c174') # STUFF.DAT
-AddGame('PowerSlave Demo',                    'PowerSlave',             15904838, '1D8C7645', '61f5b2871e57e757932f338adefbc878', '6bb4b2974da3d90e70c6b4dc56b296f907c180f0') # STUFF.DAT shareware
-AddGame('Exhumed Demo',                       'PowerSlave',             16481687, '1A6E27FA', 'e368de92d99e4fb85ebe5f188eb175e3', '2062fec5d513850b3c3dc66c7d44c4b0f91296db') # STUFF.DAT shareware
+AddGame('PowerSlave',                         'PowerSlave',             26904012, 'AC80ECB6', '4ae5cbe10396147ae042463b7df8010f', '548751e10f5c25f80d95321565b13f4664434981', canUseGrpFile=True) # STUFF.DAT
+AddGame('PowerSlave',                         'PowerSlave',             27108170, 'E3B172F1', 'b51391e08a17e5c46e25f6cf46f892eb', 'b84fd656be67271910e5eba4caf69bc81192c174', canUseGrpFile=True) # STUFF.DAT
+AddGame('PowerSlave Demo',                    'PowerSlave',             15904838, '1D8C7645', '61f5b2871e57e757932f338adefbc878', '6bb4b2974da3d90e70c6b4dc56b296f907c180f0', canUseGrpFile=True) # STUFF.DAT shareware
+AddGame('Exhumed Demo',                       'PowerSlave',             16481687, '1A6E27FA', 'e368de92d99e4fb85ebe5f188eb175e3', '2062fec5d513850b3c3dc66c7d44c4b0f91296db', canUseGrpFile=True) # STUFF.DAT shareware
 
 AddMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
     swappableItems={
@@ -55,4 +55,8 @@ AddMapSettings('PowerSlave', minMapVersion=6, maxMapVersion=6,
 )
 
 AddGameSettings('PowerSlave',
+    commands= dict(
+        grp={'pcexhumed': '-nosetup -g'},
+        folder={'pcexhumed': '-nosetup -j '}
+    )
 )

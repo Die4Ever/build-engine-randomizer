@@ -172,8 +172,15 @@ class RandoSettings:
     def _Randomize(self, settings):
         seed = settings['seed']
         self.grp.Randomize(seed, settings=settings)
-        path = self.grp.spoilerlogpath.absolute()
-        messagebox.showinfo('Randomization Complete!', 'All done! Seed: ' + str(seed) + '\n\nCheck out\n\n'+str(path)+'\n\nto see all the changes that have been made!')
+        spoilerpath = self.grp.spoilerlogpath.absolute()
+        batpath = self.grp.batpath
+        dialogtext = 'All done! Seed: ' + str(seed)
+        dialogtext += '\n\nTo see all the changes made, check out:\n\n'+str(spoilerpath)
+        if batpath:
+            batpath = batpath.absolute()
+            dialogtext += '\n\nTo play, run:\n\n'+str(batpath)
+
+        messagebox.showinfo('Randomization Complete!', dialogtext)
         self.closeWindow()
 
     def WarnOverwrites(self, settings) -> bool:
