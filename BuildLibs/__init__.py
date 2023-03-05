@@ -96,7 +96,10 @@ def checkCleanupErrorLog():
             with open("errorlog.txt") as file:
                 doCleanup = False
                 firstLine = file.readline()
+                end = file.seek(0, 2)
                 if firstLine.strip() != GetVersion():
+                    doCleanup = True
+                elif end > 1024 * 1024 * 10:# max of 10 MB
                     doCleanup = True
 
         if doCleanup:
