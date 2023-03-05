@@ -7,7 +7,6 @@ from idlelib.tooltip import Hovertip
 from BuildLibs import GetVersion
 from BuildLibs.grp import *
 
-
 # from https://stackoverflow.com/a/68701602
 class ScrollableFrame:
     """

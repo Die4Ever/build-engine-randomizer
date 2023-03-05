@@ -17,10 +17,12 @@ typechecks = not profiling
 if typechecks:
     importhook.install_import_hook('BuildLibs')
     importhook.install_import_hook('BuildGames')
+    importhook.install_import_hook('GUI')
 from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
 from BuildLibs.grpbase import GrpBase
 from BuildLibs.grp import GrpZipFile, LoadGrpFile, RffCrypt, GrpOutput
 import BuildGames
+from GUI import gui, guibase, launcher
 
 unittest.TestLoader.sortTestMethodsUsing = None
 temp:Path = Path('temp/')
