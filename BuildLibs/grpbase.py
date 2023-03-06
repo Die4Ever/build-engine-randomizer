@@ -9,7 +9,7 @@ import traceback
 import ctypes
 from datetime import datetime
 from pathlib import Path
-from typing import List, OrderedDict
+from typing import List, OrderedDict, Callable, Optional
 
 from BuildLibs import debug, error, info, trace, warning
 from BuildLibs.buildmap import *
@@ -209,7 +209,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     # basepath is only used by tests
-    def _Randomize(self, seed:int, settings:dict, basepath:Path, spoilerlog, filehandle) -> None:
+    def _Randomize(self, seed:int, settings:dict, basepath:Path, spoilerlog, filehandle, progressCallback:Optional[Callable]) -> None:
         spoilerlog.write(datetime.now().strftime('%c') + ': Randomizing with seed: ' + str(seed) + ', settings:\n    ' + repr(settings) + '\n')
         spoilerlog.write(str(self.filepath))
         spoilerlog.write(repr(self.game) + '\n\n')
@@ -256,6 +256,8 @@ class GrpBase(metaclass=abc.ABCMeta):
 
         # randomize MAP files
         for mapname in maps:
+            if progressCallback:
+                progressCallback(mapname, maps, 0)
             map:MapFile = self.getmap(mapname, filehandle)
             map.Randomize(seed, settings, spoilerlog)
 
@@ -287,7 +289,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         spoilerlog.write(repr(self.mapSettings))
 
 
-    def Randomize(self, seed:int, settings:dict={}, basepath:Path='') -> None:
+    def Randomize(self, seed:int, settings:dict={}, basepath:Path='', progressCallback:Optional[Callable]=None) -> None:
         outputMethod = settings['outputMethod']
         outpath:Path = self.GetOutputPath(basepath, outputMethod)
         deletes:List[Path] = self.GetDeletes(basepath, outputMethod)
@@ -304,7 +306,7 @@ class GrpBase(metaclass=abc.ABCMeta):
         assert not out.exists()
         with self.getFileHandle() as filehandle, SpoilerLog(out) as spoilerlog:
             try:
-                self._Randomize(seed, settings, outpath, spoilerlog, filehandle)
+                self._Randomize(seed, settings, outpath, spoilerlog, filehandle, progressCallback)
                 self.WriteBat(outpath, outputMethod)
             except:
                 error(str(self.filepath))

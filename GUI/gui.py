@@ -1,56 +1,7 @@
-from tkinter import *
-from tkinter import filedialog
-from tkinter import font
-from tkinter import messagebox
 import webbrowser
-from idlelib.tooltip import Hovertip
 from BuildLibs import GetVersion
 from BuildLibs.grp import *
-
-# from https://stackoverflow.com/a/68701602
-class ScrollableFrame:
-    """
-    # How to use class
-    from tkinter import *
-    obj = ScrollableFrame(master,height=300 # Total required height of canvas,width=400 # Total width of master)
-    objframe = obj.frame
-    # use objframe as the main window to make widget
-    """
-    def __init__ (self,master,width,height,mousescroll=0):
-        self.mousescroll = mousescroll
-        self.master = master
-        self.height = height
-        self.width = width
-        self.main_frame = Frame(self.master)
-        self.main_frame.pack(fill=BOTH,expand=1)
-
-        self.scrollbar = Scrollbar(self.main_frame, orient=VERTICAL)
-        self.scrollbar.pack(side=RIGHT,fill=Y)
-
-        self.canvas = Canvas(self.main_frame,yscrollcommand=self.scrollbar.set)
-        self.canvas.pack(expand=True,fill=BOTH)
-
-        self.scrollbar.config(command=self.canvas.yview)
-
-        self.canvas.bind('<Configure>', lambda e: self.canvas.configure(scrollregion = self.canvas.bbox("all")))
-
-        self.frame = Frame(self.canvas,width=self.width,height=self.height)
-        self.frame.pack(expand=True,fill=BOTH)
-        self.canvas.create_window((0,0), window=self.frame, anchor="nw")
-
-        self.frame.bind("<Enter>", self.entered)
-        self.frame.bind("<Leave>", self.left)
-
-    def _on_mouse_wheel(self,event):
-        self.canvas.yview_scroll(-1 * int((event.delta / 120)), "units")
-
-    def entered(self,event):
-        if self.mousescroll:
-            self.canvas.bind_all("<MouseWheel>", self._on_mouse_wheel)
-
-    def left(self,event):
-        if self.mousescroll:
-            self.canvas.unbind_all("<MouseWheel>")
+from GUI import *
 
 unavail = 'Unavailable for this game'
 enabledOptions = {'Disabled': False, 'Enabled': True, unavail: False}
@@ -69,31 +20,7 @@ def OptionsList(ops:dict):
     ops.pop(unavail, None)
     return ops.keys()
 
-class RandoSettings:
-    def __init__(self):
-        self.width=480
-        self.height=500
-        self.initWindow()
-        self.ChooseFile()
-        if self.root:
-            self.root.mainloop()
-
-    def closeWindow(self):
-        self.root.destroy()
-        self.root=None
-
-    def isWindowOpen(self) -> bool:
-        return self.root!=None
-
-    def resize(self,event):
-        if event.widget == self.root:
-            try:
-                trace('resize', event.width, event.height)
-                self.width = event.width
-                self.height = event.height
-            except Exception as e:
-                error('ERROR: in resize:', e)
-
+class RandoSettings(GUIBase):
     def _ChooseFile(self):
         grppath = ''
         try:
@@ -170,7 +97,7 @@ class RandoSettings:
 
     def _Randomize(self, settings):
         seed = settings['seed']
-        self.grp.Randomize(seed, settings=settings)
+        self.grp.Randomize(seed, settings=settings, progressCallback=self.ProgressCallback)
         spoilerpath = self.grp.spoilerlogpath.absolute()
         batpath = self.grp.batpath
         dialogtext = 'All done! Seed: ' + str(seed)
@@ -183,6 +110,16 @@ class RandoSettings:
 
         messagebox.showinfo('Randomization Complete!', dialogtext)
         self.closeWindow()
+
+    def ProgressCallback(self, mapname, maps, status):
+        num = len(maps)
+        i = maps.index(mapname)
+        i += status
+        percent = int(i/num * 100)
+        text = 'Randomizing '+str(percent)+'%'
+        self.root.title(text + ': '+mapname)
+        self.randoButton['text'] = text
+        self.update()
 
     def WarnOverwrites(self, settings) -> bool:
         outputMethod = settings['outputMethod']
@@ -225,19 +162,6 @@ class RandoSettings:
                 self.randoButton["state"]='normal'
             raise
 
-
-    def newInput(self, cls, label:str, tooltip:str, row:int, *args, **kargs):
-        label = Label(self.win,text=label,width=22,height=2,font=self.font, anchor='e', justify='left')
-        label.grid(column=0,row=row, sticky='E')
-        if cls == OptionMenu:
-            entry = cls(self.win, *args, **kargs)
-        else:
-            entry = cls(self.win, *args, width=18,font=self.font, **kargs)
-        entry.grid(column=1,row=row, sticky='W')
-
-        myTip = Hovertip(label, tooltip)
-        myTip = Hovertip(entry, tooltip)
-        return entry
 
     def initWindow(self):
         self.root = Tk()
@@ -340,6 +264,8 @@ class RandoSettings:
         self.randoButton.grid(column=1,row=100, sticky='SE')
         Hovertip(self.randoButton, 'Dew it!')
 
+        self.ChooseFile()
+
     def update(self):
         self.root.update()
 
@@ -350,9 +276,3 @@ def chooseFile(root):
     filetype = (("All Supported Files",("*.grp","STUFF.DAT",'*.rff')), ("GRP Files","*.grp"), ('RFF Files','*.rff'), ('DAT Files', '*.DAT'), ("All Files","*.*"))
     target = filedialog.askopenfilename(title="Choose a GRP file",filetypes=filetype)
     return target
-
-def errordialog(title, msg, e=None):
-    if e:
-        msg += '\n' + str(e) + '\n\n' + traceback.format_exc()
-    error(title, '\n', msg)
-    messagebox.showerror(title, msg)
