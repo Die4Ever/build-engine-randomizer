@@ -22,7 +22,7 @@ from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersi
 from BuildLibs.grpbase import GrpBase
 from BuildLibs.grp import GrpZipFile, LoadGrpFile, RffCrypt, GrpOutput
 import BuildGames
-from GUI import gui, guibase, launcher
+from GUI import gui, launcher
 
 unittest.TestLoader.sortTestMethodsUsing = None
 temp:Path = Path('temp/')
