@@ -13,7 +13,7 @@ spriteVariety = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}
 rangeOptions = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}
 difficultyOptions = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}
 reorderMapsOptions = {**enabledOptions, 'Restricted': 'restricted'}
-outputMethodOptions = {'GRP File': 'grp', 'Randomizer Folder': 'folder', 'Simple': 'simple'}
+outputMethodOptions = {'GRP File': 'grp', 'Randomizer Folder': 'folder', 'Simple': 'simple', 'Full GRP File': 'grpfull'}
 
 def OptionsList(ops:dict):
     ops = ops.copy()
@@ -246,7 +246,7 @@ class RandoSettings(GUIBase):
 
         self.outputMethodVar = StringVar(self.win, 'GRP File')
         self.randomizerFolder:OptionMenu = self.newInput(OptionMenu, 'Output Method: ',
-            'GRP File: Usually the preferred method.\nRandomizer Folder: Works great with EDuke32, doesn\'t work with voidsw or Ion Fury.\nSimple: Just put the files in the game folder.\nUsually just use the default setting.',
+            'Usually just use the default setting. See the wiki on GitHub for more info.',
             row, self.outputMethodVar, *OptionsList(outputMethodOptions)
         )
         row+=1
