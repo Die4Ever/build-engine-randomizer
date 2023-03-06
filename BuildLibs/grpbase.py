@@ -244,7 +244,7 @@ class GrpBase(metaclass=abc.ABCMeta):
                 grpOut.write(conName, text.encode('iso_8859_1'))
             else:
                 out.parent.mkdir(parents=True, exist_ok=True)
-                out.touch(exist_ok=False)
+                assert not out.exists()
                 with open(out, 'wb') as f:
                     f.write(text.encode('iso_8859_1'))
 
@@ -270,7 +270,7 @@ class GrpBase(metaclass=abc.ABCMeta):
                 grpOut.write(writename, map.data)
             else:
                 out.parent.mkdir(parents=True, exist_ok=True)
-                out.touch(exist_ok=False)
+                assert not out.exists()
                 with open(out, 'wb') as f:
                     f.write(map.data)
 
@@ -335,7 +335,7 @@ class GrpBase(metaclass=abc.ABCMeta):
                 cmd += '"' + self.game.type + ' Randomizer.grp"'
             elif outputMethod == 'folder':
                 cmd += 'Randomizer'
-            bat.touch(exist_ok=False)
+            assert not bat.exists()
             with open(bat, 'w') as file:
                 file.write(cmd)
             self.batpath = bat
@@ -409,6 +409,6 @@ class GrpOutputBase(metaclass=abc.ABCMeta):
         info += '    dependency ' + str(depend) + '\n'
         info += "}\n"
         grpinfo_path.parent.mkdir(parents=True, exist_ok=True)
-        grpinfo_path.touch(exist_ok=False)
+        assert not grpinfo_path.exists()
         with open(grpinfo_path, 'wb') as i:
             i.write(info.encode('ascii'))

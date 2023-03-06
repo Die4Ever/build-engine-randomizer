@@ -191,7 +191,7 @@ class GrpOutput(GrpOutputBase):
     def open(self):
         filepath = self.outpath
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.touch(exist_ok=False)
+        assert not filepath.exists()
         self.outfile = open(filepath, 'w+b')
         self.outfile.write(b'KenSilverman')
         self.outfile.write(struct.pack('<I', self.num_files))

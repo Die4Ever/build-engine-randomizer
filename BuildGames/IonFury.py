@@ -109,8 +109,8 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
 AddGameSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128,
 commands = dict(# https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
     grp=OrderedDict(eduke32='-nosetup -g', fury='-nosetup -g'),
-    folder=OrderedDict(eduke32='-nosetup -j ', fury='-nosetup -j '),
-    simple=OrderedDict(eduke32='-nosetup', fury='-nosetup')
+    folder=OrderedDict(eduke32='-nosetup -j '),
+    simple={}
 ),
 conFiles = {
     'scripts/customize.con': [
