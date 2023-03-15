@@ -16,7 +16,7 @@ class ConFile:
             r = re.compile('^'+v['regexstr']+'$')
             v['regex'] = r
 
-    def GetVarSettings(self, name) -> Union[None,dict]:
+    def GetVarSettings(self, name) -> dict|None:
         for v in self.conSettings:
             if v['regex'].match(name):
                 return v
@@ -30,7 +30,7 @@ class ConFile:
         oldval = int(m.group(2))
         theRest = m.group(3)
 
-        var_settings:dict = self.GetVarSettings(name)
+        var_settings:dict|None = self.GetVarSettings(name)
         if var_settings is None:
             return l
         var_difficulty = var_settings.get('difficulty', 0)

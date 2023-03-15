@@ -7,7 +7,7 @@ def LoadGrpFile(filepath:Path) -> 'GrpBase':
     info(filepath)
     game:BuildGames.GameInfo = BuildGames.GetGame(filepath)
     filesize = os.path.getsize(filepath)
-    with open(filepath, 'rb') as f:
+    with open(filepath, mode='rb') as f:
         sig = f.read(12)
 
     trace(sig)

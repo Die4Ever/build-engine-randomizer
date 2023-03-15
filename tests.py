@@ -9,15 +9,15 @@ from typing import OrderedDict, Union
 from hashlib import md5
 from mmap import mmap, ACCESS_READ
 from pathlib import Path
-from typeguard import typechecked, importhook
+from typeguard import typechecked, install_import_hook
 from unittest import case
 
 profiling = False
 typechecks = not profiling
 if typechecks:
-    importhook.install_import_hook('BuildLibs')
-    importhook.install_import_hook('BuildGames')
-    importhook.install_import_hook('GUI')
+    install_import_hook('BuildLibs')
+    install_import_hook('BuildGames')
+    install_import_hook('GUI')
 from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
 from BuildLibs.grpbase import GrpBase
 from BuildLibs.grp import GrpZipFile, LoadGrpFile, RffCrypt, GrpOutput
@@ -119,7 +119,7 @@ class BERandoTestCase(unittest.TestCase):
     def test_1_extract_zipgrp(self):
         # I zipped the GRP file to save space in the repo
         # but also Ion Fury uses ZIP format anyways so we do need to test it
-        grp: GrpBase = None
+        grp: GrpBase|None = None
         with self.subTest('ExtractAll'):
             grp = LoadGrpFile(zippath)
             self.assertEqual(len(grp.files), len(original_order))
@@ -187,7 +187,7 @@ class BERandoTestCase(unittest.TestCase):
 
             with self.subTest('Open GRP File'):
                 BuildGames.AddGame('Shareware DUKE3D.GRP v1.3D',         'Duke Nukem 3D',          11035779, '983AD923', 'C03558E3A78D1C5356DC69B6134C5B55', 'A58BDBFAF28416528A0D9A4452F896F46774A806', externalFiles=True, allowOverwrite=True) # Shareware DUKE3D.GRP v1.3D
-                grp: GrpZipFile = LoadGrpFile(tempgrp)
+                grp: GrpBase = LoadGrpFile(tempgrp)
 
             with self.subTest('Read External File'):
                t = grp.getfile(extname).decode()
