@@ -51,7 +51,7 @@ def AddGame(*args, **kargs) -> GameInfo:
 
 class GameMapSettings:
     def __init__(self, gameName=None, minMapVersion=7, maxMapVersion=9, idType:str='picnum',
-            swappableItems:dict={}, swappableEnemies:dict={}, addableEnemies:list=[],
+            swappableItems:list|dict={}, swappableEnemies:list|dict={}, addableEnemies:list=[],
             triggers:dict={}, additions:dict={}, reorderMapsBlacklist:list=[], **kargs):
         self.gameName = gameName
         self.minMapVersion = minMapVersion
@@ -59,9 +59,17 @@ class GameMapSettings:
         self.idType = idType
 
         if idType == 'lowtag':
-            self.swappableItems = {v[idType]: {'picnum':k, **v} for(k,v) in swappableItems.items()}
-            self.swappableEnemies = {v[idType]: {'picnum':k, **v} for(k,v) in swappableEnemies.items()}
+            assert isinstance(swappableEnemies, list)
+            assert isinstance(swappableItems, list)
+            for v in [*swappableEnemies, *swappableItems]:
+                assert 'picnum' in v, 'picnum is in '+repr(v)
+
+            self.swappableItems = {v[idType]: v for v in swappableItems}
+            self.swappableEnemies = {v[idType]: v for v in swappableEnemies}
         elif idType == 'picnum':
+            # TODO: only dict is supported here for now, but these should all be converted to lists later
+            assert isinstance(swappableEnemies, dict)
+            assert isinstance(swappableItems, dict)
             self.swappableItems = swappableItems
             self.swappableEnemies = swappableEnemies
         else:
@@ -151,7 +159,7 @@ def GetGameSettings(game: GameInfo) -> GameSettings:
         raise KeyError('GetGameSettings cannot find game', game.type)
     return g.copy()
 
-def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0, palettes=None) -> dict:
+def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:int=0, palettes=None, picnum:int=0) -> dict:
     d = dict(name=name, category=category)
     if lowtag:
         d['lowtag'] = lowtag
@@ -160,6 +168,8 @@ def SpriteInfo(name:str, category:str='', lowtag:int=0, xrepeat:int=0, yrepeat:i
         d['yrepeat'] = yrepeat
     if palettes:
         d['palettes'] = palettes
+    if picnum:
+        d['picnum'] = picnum
     return d
 
 def SpriteRange(min:int, max:int, value:dict):
