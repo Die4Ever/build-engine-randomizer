@@ -10,7 +10,7 @@ chanceDeleteItem = {'Few': 0.4, 'Some': 0.25, 'Many': 0.15, 'Extreme': 0.1}
 chanceDupeEnemy = {'Few': 0.4, 'Some': 0.55, 'Many': 0.6, 'Impossible': 0.75}
 chanceDeleteEnemy = {'Few': 0.4, 'Some': 0.25, 'Many': 0.2, 'Impossible': 0.15}
 spriteVariety = {'Normal': 0, 'Increased': 0.2, 'Extreme': 0.5, unavail: 0}
-rangeOptions = {'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}
+rangeOptions = {'Disabled': 0, 'Low': 0.5, 'Medium': 1, 'High': 1.3, 'Extreme': 1.6, unavail: 1}
 difficultyOptions = {'Easy': 0.2, 'Medium': 0.4, 'Difficult': 0.6, 'Impossible': 0.75, unavail: 0.4}
 reorderMapsOptions = {**enabledOptions, 'Restricted': 'restricted'}
 outputMethodOptions = {'GRP File': 'grp', 'Randomizer Folder': 'folder', 'Simple': 'simple', 'Full GRP File': 'grpfull'}
@@ -208,7 +208,7 @@ class RandoSettings(GUIBase):
         # values range
         self.rangeVar = StringVar(self.win, 'Medium')
         self.range:OptionMenu = self.newInput(OptionMenu, 'Randomization Range: ',
-            'How wide the range of values can be randomized.\nThis affects the values in CON files.',
+            'How wide the range of values can be randomized.\nThis affects the values in CON files such as health and damage values.',
             row, self.rangeVar, *OptionsList(rangeOptions)
         )
         row+=1
@@ -216,7 +216,7 @@ class RandoSettings(GUIBase):
         # difficulty? values difficulty?
         self.difficultyVar = StringVar(self.win, 'Medium')
         self.difficulty:OptionMenu = self.newInput(OptionMenu, 'Difficulty: ',
-            'Increase the difficulty for more challenge.\nThis affects the values in CON files.',
+            'Increase the difficulty for more challenge.\nThis affects the values in CON files such as health and damage values.',
             row, self.difficultyVar, *OptionsList(difficultyOptions)
         )
         row+=1

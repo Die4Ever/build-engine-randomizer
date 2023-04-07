@@ -67,6 +67,8 @@ class ConFile:
         range:float = settings['conFile.range']
         scale:float = settings['conFile.scale']
         difficulty:float = settings['conFile.difficulty']
+        if range == 0 or difficulty is None:
+            return
         out = ''
         for l in self.text.splitlines():
             l = l.strip()
