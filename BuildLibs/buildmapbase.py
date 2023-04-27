@@ -265,6 +265,7 @@ class MapFileBase(metaclass=abc.ABCMeta):
         for add in self.gameSettings.additions.get(self.name.lower(), []):
             self.AddSprite(rng, add)
 
+        #self.MirrorMap()
         self.WriteData()
 
         self.spoilerlog.ListSprites('item', self.items)
@@ -394,6 +395,62 @@ class MapFileBase(metaclass=abc.ABCMeta):
         self.AppendSprite(sprite)
         spritetype = self.GetSpriteType(sprite)
         self.spoilerlog.AddSprite(spritetype, sprite)
+
+    def MirrorMap(self):
+        # TODO, need to figure out re-ordering of walls, they need to be counterclockwise
+        # probably need to compare coordinates and do some sorting
+        # actually reversing the list might be good enough, maybe the issue is with all the pointer/index dependencies?
+        self.full_rewrite = True
+        x=1
+        y=-1
+
+        self.startPos[0] *= x
+        self.startPos[1] *= y
+
+        for w in self.walls:
+            w.pos[0] *= x
+            w.pos[1] *= y
+
+        for sect in self.sectors:
+            shapes = [[]]
+            wallptr = sect.wallptr
+            numwalls = sect.wallnum
+            for i in range(wallptr, wallptr + numwalls):
+                shapes[-1].append(i)
+                if self.walls[i].next_wall != -1:
+                    shapes.append([])
+
+            for shape in shapes:
+                rev = shape.copy()
+                rev.reverse()
+                for a, b in zip(shape, rev):
+                    if a >= b:
+                        break
+                    walla:Wall = self.walls[a]
+                    wallb:Wall = self.walls[b]
+
+                    next_wall_a = walla.next_wall
+                    next_sector_wall_a = walla.next_sector_wall
+                    next_sector_a = walla.next_sector
+
+                    next_wall_b = wallb.next_wall
+                    next_sector_wall_b = wallb.next_sector_wall
+                    next_sector_b = wallb.next_sector
+
+                    walla.next_wall = next_wall_b
+                    #walla.next_sector_wall = next_sector_wall_b
+                    #walla.next_sector = next_sector_b
+
+                    wallb.next_wall = next_wall_a
+                    #wallb.next_sector_wall = next_sector_wall_a
+                    #wallb.next_sector = next_sector_a
+
+                    self.walls[a] = wallb
+                    self.walls[b] = walla
+
+        for s in self.sprites:
+            s.pos[0] *= x
+            s.pos[1] *= y
 
     def AppendSector(self, sector: Sector) -> None:
         self.sectors.append(sector)
