@@ -2,8 +2,9 @@ from BuildGames import *
 
 AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam version
 
+AddGame('Ion Fury Aftershock',                'Ion Fury Aftershock',    163939122, '2D7CAC72', 'a326052d456a9c9a80ca13cb90270d5b', '720b17e4110448e33129504918feea3dc23fe900', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam Aftershock version
 
-AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
+ion_fury_map_settings = dict(minMapVersion=7, maxMapVersion=9,
     swappableItems = {
         209: SpriteInfo('I_BATON'),
         210: SpriteInfo('I_LOVERBOY'),
@@ -45,6 +46,24 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
         9003: SpriteInfo('I_SODA'),
         9002: SpriteInfo('I_SODA_STAND'),
         320: SpriteInfo('I_AMMOCRATE'),
+
+        # Aftershock
+        # define I_BANSHEE                        16083
+        # define I_COLLECTIBLE                    17200
+        17201: SpriteInfo('I_WRECKER'),
+        17202: SpriteInfo('I_GRENADELAUNCHER_GAS'),
+        17203: SpriteInfo('I_SHOTGUN_CLUSTER'),
+        17204: SpriteInfo('I_GASGRENADE_AMMO'),
+        17205: SpriteInfo('I_CLUSTER_AMMO'),
+        17211: SpriteInfo('I_WRECKER_AMMO'),
+        17212: SpriteInfo('I_WRECKER_AMMO_SIXPACK'),
+        17206: SpriteInfo('I_BOOM_BAG'),
+        17207: SpriteInfo('I_INVULNERABILITY'),
+        17208: SpriteInfo('I_POCKET_PARASITE'),
+        17209: SpriteInfo('I_AGILITY_SURGE'),
+        17210: SpriteInfo('I_GOLDEN_GUN'),
+        17213: SpriteInfo('I_FLAMETRAP'),
+        17214: SpriteInfo('I_INFLATABLE_CHAIR'),
     },
     swappableEnemies = {
         # 7259: SpriteInfo('A_TURRET_BOTTOM'),
@@ -106,21 +125,31 @@ AddMapSettings('Ion Fury', minMapVersion=7, maxMapVersion=9,
     triggers={}
 )
 
-AddGameSettings('Ion Fury', mainScript='scripts/main.con', defName='fury.def', flags=128,
-commands = dict(# https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
-    grp=OrderedDict(eduke32='-nosetup -g', fury='-nosetup -g'),
-    folder=OrderedDict(eduke32='-nosetup -j '),
-    simple={}
-),
-conFiles = {
-    'scripts/customize.con': [
-        ConVar('.*\wHEALTH', -1, range=0.5),
-        ConVar('MEDKIT_HEALTHAMOUNT', -1, range=0.5),
-        ConVar('.*MAXAMMO', -1),
-        ConVar('.*AMOUNT', -1),
+AddMapSettings('Ion Fury', **ion_fury_map_settings)
+AddMapSettings('Ion Fury Aftershock', **ion_fury_map_settings)
 
-        ConVar('.*_DMG', 0), # not sure if this affects enemies too or just the player?
+ion_fury_game_settings = dict(
+    mainScript='scripts/main.con', defName='fury.def', flags=128,
+    commands = dict(# https://voidpoint.io/terminx/eduke32/-/blob/master/source/duke3d/src/cmdline.cpp#L39
+        grp=OrderedDict(eduke32='-nosetup -g', fury='-nosetup -g'),
+        folder=OrderedDict(eduke32='-nosetup -j '),
+        simple={}
+    ),
+    conFiles = {
+        'scripts/customize.con': [
+            ConVar('.*\wHEALTH', -1, range=0.5),
+            ConVar('MEDKIT_HEALTHAMOUNT', -1, range=0.5),
+            ConVar('.*MAXAMMO', -1),
+            ConVar('.*AMOUNT', -1),
 
-        ConVar('.*_HEALTH', 1),
-    ]
-})
+            ConVar('.*_DMG', 0), # not sure if this affects enemies too or just the player?
+
+            ConVar('.*_HEALTH', 1),
+        ]
+    }
+)
+
+aftershock_game_settings = {**ion_fury_game_settings, 'defName':'ashock.def'}
+
+AddGameSettings('Ion Fury', **ion_fury_game_settings)
+AddGameSettings('Ion Fury Aftershock', **aftershock_game_settings)

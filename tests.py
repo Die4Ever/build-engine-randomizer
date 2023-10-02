@@ -18,7 +18,7 @@ if typechecks:
     install_import_hook('BuildLibs')
     install_import_hook('BuildGames')
     install_import_hook('GUI')
-from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion
+from BuildLibs import buildmapbase, buildmap, crc32, trace, setVerbose, GetVersion, warning
 from BuildLibs.grpbase import GrpBase
 from BuildLibs.grp import GrpZipFile, LoadGrpFile, RffCrypt, GrpOutput
 import BuildGames
@@ -203,7 +203,7 @@ class BERandoTestCase(unittest.TestCase):
         try:
             mapSettings: BuildGames.GameMapSettings = BuildGames.GetGameMapSettings(game)
         except Exception as e:
-            trace(e)
+            warning(e)
             return
         for e in mapSettings.addableEnemies:
             self.assertIn(e, mapSettings.swappableEnemies)
@@ -324,6 +324,13 @@ class BERandoTestCase(unittest.TestCase):
         d2 = RffCrypt(d2, 451)
         d2 = RffCrypt(d2, 451)
         self.assertEqual(data, d2)
+
+    def test_mirror(self):
+        orig = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] # verticies are counter-clockwise, right?
+        desired = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        result = buildmapbase.MirrorList(orig)
+        self.assertListEqual(result, desired, 'mirror')
+
 
 
 def CreateGrpFile(frompath: Path, outpath: Path, filenames: list) -> None:

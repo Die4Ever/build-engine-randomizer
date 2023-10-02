@@ -255,10 +255,10 @@ class RandoSettings(GUIBase):
         #self.progressbar.grid(column=0,row=row,columnspan=2)
         #row+=1
 
-        discordLink = Label(self.win,text='discord.gg/QwjnYWhKsY',width=22,height=2,font=self.linkfont, fg="Blue", cursor="hand2")
-        discordLink.bind('<Button-1>', lambda *args: webbrowser.open_new('https://discord.gg/QwjnYWhKsY'))
-        discordLink.grid(column=0,row=100)
-        myTip = Hovertip(discordLink, 'Join our Discord!')
+        link = Label(self.win,text='Mods4Ever.com',width=22,height=2,font=self.linkfont, fg="Blue", cursor="hand2")
+        link.bind('<Button-1>', lambda *args: webbrowser.open_new('https://Mods4Ever.com'))
+        link.grid(column=0,row=100)
+        myTip = Hovertip(link, 'Check out our website and join our Discord!')
 
         self.randoButton = Button(self.win,text='Randomize!',width=18,height=2,font=self.font, command=self.Randomize)
         self.randoButton.grid(column=1,row=100, sticky='SE')

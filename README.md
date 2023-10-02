@@ -19,3 +19,5 @@ For info on where to get the games and how to run them, [check out our wiki here
 Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Ion Fury so far) it also randomizes values like maximum health and ammo values, and enemy strengths. Also supports randomizing the map order. Be warned that putting every setting to maximum will make the game nearly impossible. I suggest you start with the default settings. Also check out the Randomizer.html file that gets created in the output directory to see what's changed.
 
 [Join our Discord here!](https://discord.gg/QwjnYWhKsY)
+
+Also check out [our new website, Mods4Ever.com](https://Mods4Ever.com/)

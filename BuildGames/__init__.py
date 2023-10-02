@@ -34,6 +34,9 @@ class GameInfo():
 
 def AddGame(*args, **kargs) -> GameInfo:
     """
+        def __init__(self, name='', type='', size:int=0, crc:str='', md5:str='', sha1:str='', externalFiles:bool=False, canUseRandomizerFolder=True, canUseGrpFile=False, **kargs):
+    """
+    """
         https://wiki.eduke32.com/wiki/Frequently_Asked_Questions
         ^(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*?)$
         AddGame('$1', '', $2, '$4', '$5', '$6') # $1
@@ -130,7 +133,7 @@ def GetGame(grppath:Path) -> GameInfo:
     size = os.path.getsize(grppath)
     with open(grppath) as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
         crc:int = binascii.crc32(file)
-        g:GameInfo = gamesList.get(crc)
+        g:Union[GameInfo,None] = gamesList.get(crc)
         if g:
             if not g.size:
                 g.size = size

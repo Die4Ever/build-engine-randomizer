@@ -396,6 +396,7 @@ class MapFileBase(metaclass=abc.ABCMeta):
         spritetype = self.GetSpriteType(sprite)
         self.spoilerlog.AddSprite(spritetype, sprite)
 
+
     def MirrorMap(self):
         # TODO, need to figure out re-ordering of walls, they need to be counterclockwise
         # probably need to compare coordinates and do some sorting
@@ -421,8 +422,9 @@ class MapFileBase(metaclass=abc.ABCMeta):
                     shapes.append([])
 
             for shape in shapes:
-                rev = shape.copy()
-                rev.reverse()
+                #rev = shape.copy()
+                #rev.reverse()
+                rev = MirrorList(shape)
                 for a, b in zip(shape, rev):
                     if a >= b:
                         break
@@ -438,15 +440,17 @@ class MapFileBase(metaclass=abc.ABCMeta):
                     next_sector_b = wallb.next_sector
 
                     walla.next_wall = next_wall_b
-                    #walla.next_sector_wall = next_sector_wall_b
-                    #walla.next_sector = next_sector_b
+                    walla.next_sector_wall = next_sector_wall_b
+                    walla.next_sector = next_sector_b
 
                     wallb.next_wall = next_wall_a
-                    #wallb.next_sector_wall = next_sector_wall_a
-                    #wallb.next_sector = next_sector_a
+                    wallb.next_sector_wall = next_sector_wall_a
+                    wallb.next_sector = next_sector_a
 
                     self.walls[a] = wallb
                     self.walls[b] = walla
+
+                    # need to fix all the references to these points...
 
         for s in self.sprites:
             s.pos[0] *= x
@@ -775,3 +779,7 @@ def MapCrypt(data:bytearray, key:int) -> bytearray:
         data[i] = data[i] ^ (key & 0xff)
         key += 1
     return data
+
+def MirrorList(l):
+    # ensure proper vertex order
+    return l[0:1] + l[-1:0:-1]

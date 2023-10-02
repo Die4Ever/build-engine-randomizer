@@ -25,3 +25,5 @@ Randomizes enemies and items. For games that use CON files (Duke Nukem 3D and Io
 *
 
 [Join our Discord here!](https://discord.gg/QwjnYWhKsY)
+
+Also check out [our new website, Mods4Ever.com](https://Mods4Ever.com/)
