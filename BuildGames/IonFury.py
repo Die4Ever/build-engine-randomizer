@@ -1,8 +1,10 @@
 from BuildGames import *
 
 AddGame('Ion Fury',                           'Ion Fury',               92644120, '960B3686', 'd834055f0c9a60f8f23163b67d086546', '2cec5ab769ae27c6685d517defa766191c5e66c1', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam version
+AddGame('Ion Fury',                           'Ion Fury',               92644105, 'F3A52423', '2f2a861001ab446bd32a78667f91db40', '9b763ff2caf112d9aa9e4f5ed7a9a26c98af6eaa', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam version version v2.0.01.10459
 
 AddGame('Ion Fury Aftershock',                'Ion Fury Aftershock',    163939122, '2D7CAC72', 'a326052d456a9c9a80ca13cb90270d5b', '720b17e4110448e33129504918feea3dc23fe900', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam Aftershock version
+AddGame('Ion Fury Aftershock',                'Ion Fury Aftershock',    163948283, 'AE68B9E7', '7bfcea0b46d3afb206cbc5f4a2e3282c', '8177341cd8691b6a8667fd51d0ed9837ce74d523', canUseRandomizerFolder=False, canUseGrpFile=True) # Steam Aftershock version v3.0.03.104182
 
 ion_fury_map_settings = dict(minMapVersion=7, maxMapVersion=9,
     swappableItems = {
