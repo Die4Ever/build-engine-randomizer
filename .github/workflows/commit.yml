@@ -7,13 +7,13 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: cd ${{ github.workspace }}
 
       - uses: ./.github/run-tests
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-engine-randomizer.exe
           path: dist/build-engine-randomizer.exe
@@ -27,7 +27,7 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: cd ${{ github.workspace }}
 
       - run: sudo apt-get update -y
@@ -36,7 +36,7 @@ jobs:
       - uses: ./.github/run-tests
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-engine-randomizer-linux
           path: dist/build-engine-randomizer
@@ -51,7 +51,7 @@ jobs:
     steps:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: cd ${{ github.workspace }}
 
       - run: brew install python-tk
@@ -59,7 +59,7 @@ jobs:
       - uses: ./.github/run-tests
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-engine-randomizer-macos
           path: dist/build-engine-randomizer
